@@ -34,8 +34,8 @@ You can pass Respan tracking parameters via the `X-Data-Respan-Params` header:
 Returns a batch object with complete status information.
 
 **Key fields:**
-- `status` - Current batch status (see [create batch](/api-endpoints/develop/openai-batch/batches/create) for status values)
-- `output_file_id` - ID of the output file when batch completes (use with [retrieve file content](/api-endpoints/develop/openai-batch/files/content))
+- `status` - Current batch status (see [create batch](/apis/develop/openai-batch/batches/create) for status values)
+- `output_file_id` - ID of the output file when batch completes (use with [retrieve file content](/apis/develop/openai-batch/files/content))
 - `error_file_id` - ID of the error file if any requests failed
 - `request_counts` - Progress tracking with total, completed, and failed counts
 

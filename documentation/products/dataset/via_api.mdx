@@ -7,7 +7,7 @@ description: "A guided tutorial to create a dataset, add logs, and run evals—w
 
 A **dataset** is a curated collection of logs (inputs/outputs + metadata) that you can evaluate, annotate, and use to power Experiments.
 
-If you want the raw endpoint specs, see the [Datasets API reference](/api-endpoints/evaluate/datasets/list). This page is the **workflow**.
+If you want the raw endpoint specs, see the [Datasets API reference](/apis/evaluate/datasets/list). This page is the **workflow**.
 
 ## When to use “datasets via API”
 
@@ -17,7 +17,7 @@ If you want the raw endpoint specs, see the [Datasets API reference](/api-endpoi
 
 ## Resources
 
-- [Datasets API reference](/api-endpoints/evaluate/datasets/list)
+- [Datasets API reference](/apis/evaluate/datasets/list)
 - [Testsets & Experiments overview](/documentation/products/evaluation/experiments/overview)
 - [Add test cases from logs (UI workflow)](/documentation/products/evaluation/experiments/testsets)
 
@@ -39,7 +39,7 @@ If you’re starting from scratch, the easiest path is: **create an empty datase
 <Step title="Step 1: Create an empty dataset">
 Create an empty dataset so you can add logs manually.
 
-Reference: [Create dataset](/api-endpoints/evaluate/datasets/create)
+Reference: [Create dataset](/apis/evaluate/datasets/create)
 
 <CodeGroup>
 
@@ -80,7 +80,7 @@ You’ll use the returned `id` as `dataset_id` in the next steps.
 <Step title="Step 2: Add a dataset log (your own input/output JSON)">
 Dataset logs store end-to-end workflow I/O. Both `input` and `output` can be **any JSON**.
 
-Reference: [Create dataset log](/api-endpoints/evaluate/datasets/logs-create)
+Reference: [Create dataset log](/apis/evaluate/datasets/logs-create)
 
 <CodeGroup>
 
@@ -130,7 +130,7 @@ curl -X POST "https://api.respan.ai/api/datasets/{dataset_id}/logs/" \
 <Step title="Step 3: List dataset logs to verify">
 Fetch logs inside the dataset (paginated).
 
-Reference: [List logs (GET)](/api-endpoints/evaluate/datasets/logs-list)
+Reference: [List logs (GET)](/apis/evaluate/datasets/logs-list)
 
 <CodeGroup>
 
@@ -157,7 +157,7 @@ curl -X GET "https://api.respan.ai/api/datasets/{dataset_id}/logs/list/?page=1&p
 <Step title="Step 4: Run an eval on the dataset">
 Run one or more evaluators over all logs in the dataset.
 
-Reference: [Run eval on dataset](/api-endpoints/evaluate/datasets/eval-reports-create)
+Reference: [Run eval on dataset](/apis/evaluate/datasets/eval-reports-create)
 
 <CodeGroup>
 
@@ -188,7 +188,7 @@ curl -X POST "https://api.respan.ai/api/datasets/{dataset_id}/eval-reports/creat
 <Step title="Step 5: List eval runs for the dataset">
 Use this to check the run status and see report IDs.
 
-Reference: [List eval runs](/api-endpoints/evaluate/datasets/eval-reports-list)
+Reference: [List eval runs](/apis/evaluate/datasets/eval-reports-list)
 
 <CodeGroup>
 
@@ -223,7 +223,7 @@ If you already have request logs (from Observability), you can create a dataset 
 
 This is the most deterministic “from production” workflow when you already know which logs you want.
 
-Reference: [Create dataset with specified logs](/api-endpoints/evaluate/datasets/create-with-logs)
+Reference: [Create dataset with specified logs](/apis/evaluate/datasets/create-with-logs)
 
 <CodeGroup>
 
@@ -270,7 +270,7 @@ curl -X POST "https://api.respan.ai/api/datasets/" \
 <Step title="Step 2 (alternative): Bulk add logs by filters + time range">
 If you don’t know the exact log IDs, use the bulk endpoint to add logs matching filters over a time window.
 
-Reference: [Add logs to dataset (bulk)](/api-endpoints/evaluate/datasets/logs-add)
+Reference: [Add logs to dataset (bulk)](/apis/evaluate/datasets/logs-add)
 
 <CodeGroup>
 
@@ -322,7 +322,7 @@ This runs in the background. Use “List dataset logs” to check when logs appe
 
 Use PATCH to rename or update the description:
 
-Reference: [Update dataset (PATCH)](/api-endpoints/evaluate/datasets/patch)
+Reference: [Update dataset (PATCH)](/apis/evaluate/datasets/patch)
 
 <CodeGroup>
 
@@ -351,7 +351,7 @@ curl -X PATCH "https://api.respan.ai/api/datasets/{dataset_id}/" \
 
 ### Remove logs from a dataset (by filter or delete all)
 
-Reference: [Delete logs (filters / delete-all)](/api-endpoints/evaluate/datasets/logs-remove)
+Reference: [Delete logs (filters / delete-all)](/apis/evaluate/datasets/logs-remove)
 
 <CodeGroup>
 
@@ -380,7 +380,7 @@ curl -X DELETE "https://api.respan.ai/api/datasets/{dataset_id}/logs/delete/" \
 
 ### Delete the dataset
 
-Reference: [Delete dataset](/api-endpoints/evaluate/datasets/delete)
+Reference: [Delete dataset](/apis/evaluate/datasets/delete)
 
 <CodeGroup>
 

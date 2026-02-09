@@ -5,7 +5,7 @@ description: "Increase your LLM rate limits with our load balancing feature."
 
 Load balancing is a feature that allows you to balance the request load across different deployments. You could specify weights for each deployment based on their rate limit and your preference.
 
-_See all supported params [here](/api-endpoints/develop/gateway/chat-completions)._
+_See all supported params [here](/apis/develop/gateway/chat-completions)._
 
 
 ## Load balancing between models
@@ -130,7 +130,7 @@ In this example, requests to OpenAI models will be evenly distributed between th
 
 You could also specify the available models for load balancing. This is useful when you want to specify the models you want to load balance. For example, if you only want to use `gpt-3.5-turbo` in an OpenAI deployment, you could specify it in the `available_models` field or do it in the platform.
 
-Learn more about how to specify available models in the platform [here](/integration/providers/azure).
+Learn more about how to specify available models in the platform [here](/integrations/providers/azure).
 
 Example code:
 ```json
@@ -235,14 +235,14 @@ The `loadbalance_models` parameter is deprecated. You should use the `load_balan
 </Accordion>
 <Accordion title="Depracted params">
 <ParamField path="model" type="string" required>
-  Specify which model to balance load. See the list of models [here](/integration/overview). 
+  Specify which model to balance load. See the list of models [here](/integrations/overview). 
 </ParamField>
 <ParamField path="weight" type="integer" required>
     Specify the weight of the model (has to be a positive integer). The higher the weight, the more requests will be sent to the model.
 </ParamField>
 <ParamField path="credentials" type="list" >
 This is required for all free plan users. For team plan and above, this is optional. <br/>
-See how to add your own credentials [here](/integration/overview).
+See how to add your own credentials [here](/integrations/overview).
 </ParamField>
 </Accordion>
 </AccordionGroup>

@@ -6,7 +6,7 @@ api: PATCH https://api.respan.ai/api/request-logs/{unique_id}/
 The Update Log endpoint allows you to modify specific fields of a single log. This is useful for adding annotations, updating metadata, or correcting information.
 
 <Note>
-For updating multiple logs at once, use the [Batch Update endpoint](/api-endpoints/observe/logs/logs-update-endpoint).
+For updating multiple logs at once, use the [Batch Update endpoint](/apis/observe/logs/logs-update-endpoint).
 </Note>
 
 ## Updatable fields
@@ -24,7 +24,7 @@ Fields like `input`, `output`, `log_type`, `model`, `usage`, `cost`, `latency`, 
 ## Path parameters
 
 <ParamField path="unique_id" type="string" required>
-  The unique ID of the log to update. You can get this from the [List Logs endpoint](/api-endpoints/observe/logs/list).
+  The unique ID of the log to update. You can get this from the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint).
 </ParamField>
 
 ## Body parameters
@@ -72,7 +72,7 @@ Fields like `input`, `output`, `log_type`, `model`, `usage`, `cost`, `latency`, 
 
 ## Response
 
-Returns the complete updated log object (same structure as the [Get Log endpoint](/api-endpoints/observe/logs/get-log-endpoint)).
+Returns the complete updated log object (same structure as the [Get Log endpoint](/apis/observe/logs/get-log-endpoint)).
 
 <RequestExample>
 
@@ -344,6 +344,6 @@ curl -X PATCH "https://api.respan.ai/api/request-logs/log_abc123.../" \
 
 ## Related Endpoints
 
-- [Batch Update Logs](/api-endpoints/observe/logs/logs-update-endpoint) - Update multiple logs at once
-- [Get Log](/api-endpoints/observe/logs/get-log-endpoint) - View log details before updating
-- [List Logs](/api-endpoints/observe/logs/list) - Find logs to update using filters
+- [Batch Update Logs](/apis/observe/logs/logs-update-endpoint) - Update multiple logs at once
+- [Get Log](/apis/observe/logs/get-log-endpoint) - View log details before updating
+- [List Logs](/apis/observe/logs/logs-list-endpoint) - Find logs to update using filters

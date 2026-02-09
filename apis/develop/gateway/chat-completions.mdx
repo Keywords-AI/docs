@@ -4,7 +4,7 @@ api: POST https://api.respan.ai/api/chat/completions
 ---
 
 ## OpenAI compatible parameters 
-To use [Respan parameters](/api-endpoints/develop/gateway/chat-completions#respan-parameters), you can pass them in the `extra_body` parameter if you're using the OpenAI SDK.
+To use [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters), you can pass them in the `extra_body` parameter if you're using the OpenAI SDK.
 
 <Info>
 **Environment Switching**: Respan doesn't support an `env` parameter in API calls. To switch between environments (test/production), use different API keys - one for your test environment and another for production. You can manage these keys in your [API Keys settings](https://platform.respan.ai/platform/api/api-keys).
@@ -260,7 +260,7 @@ curl -X POST "https://api.respan.ai/api/chat/completions" \
 
 <ParamField body="model" type="string" required={true}>
   Specify which model to use. See the list of model
-  [here](/integration/overview)
+  [here](/integrations/overview)
 
 <Note> This parameter will be overridden by the `loadbalance_models` parameter.</Note>
 
@@ -408,7 +408,7 @@ response_format={
 </ParamField>
 
 ## Respan parameters
-See how to make a standard Respan API call in the [Gateway Quickstart](/get-started/quickstart/gateway) guide.
+See how to make a standard Respan API call in the [Gateway Quickstart](/documentation/getting-started/quickstart/gateway) guide.
 ### Generation parameters
 
 <ParamField body="load_balance_group" type="object">
@@ -493,7 +493,7 @@ You can pass in your customer's credentials for [supported providers](/documenta
 <ParamField body="credential_override" type="object">
 One-off credential overrides. Instead of using what is uploaded for each provider, this targets credentials for individual models. 
 
-Go to [provider page](/integration/overview) to see how to add your own credentials and override them for a specific model.
+Go to [provider page](/integrations/overview) to see how to add your own credentials and override them for a specific model.
   <Accordion title="Example">
 ```json
 "credential_override": {
@@ -655,7 +655,7 @@ This parameter allows you to control how you can override the parameters in the 
 
 <ParamField body="disable_log" type="boolean" deafault={false}>
   When set to true, only the request and [performance
-  metrics](/documentation/products/dashboard/quickstart) will be recorded, input
+  metrics](/documentation/products/dashboard/Metrics) will be recorded, input
   and output messages will be omitted from the log.
 </ParamField>
 
@@ -679,7 +679,7 @@ We understand that you may have a custom name for your Azure deployment. Respan 
   Specify the list of models for the Respan LLM router to choose between. 
   If not specified,{" "}
   <strong>all models</strong> will be used. See the list of models
-  [here](/integration/overview)
+  [here](/integrations/overview)
 
 If only one model is specified, it will be treated as if the `model` parameter is used and the router will not trigger.
 
@@ -688,14 +688,14 @@ When the `model` parameter is used, the router will not trigger, and this parame
 </ParamField>
 
 <ParamField body="exclude_providers" type="array" default={[]}>
-  The list of providers to exclude from the LLM router's selection. All models under the provider will be excluded. See the list of providers [here](/integration/overview)
+  The list of providers to exclude from the LLM router's selection. All models under the provider will be excluded. See the list of providers [here](/integrations/overview)
 
 This only excludes providers in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/products/notifications/subscribe_alerts) will still use the excluded models to catch failures.
 
 </ParamField>
 
 <ParamField body="exclude_models" type="array" default={[]}>
-The list of models to exclude from the LLM router's selection. See the list of models [here](/integration/overview)
+The list of models to exclude from the LLM router's selection. See the list of models [here](/integrations/overview)
 
 This only excludes models in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/products/notifications/subscribe_alerts) will still use the excluded models to catch failures.
 
@@ -745,7 +745,7 @@ You can use this parameter to send an extra custom tag with your request. This w
 </ParamField>
 
 <ParamField body="customer_params" type="object">
-  Pass the customer's parameters in the API call to monitor the user's data in the Respan platform. See how to get insights into your users' data [here](/api-endpoints/observe/users/user-creation-endpoint)
+  Pass the customer's parameters in the API call to monitor the user's data in the Respan platform. See how to get insights into your users' data [here](/apis/observe/users/user-creation-endpoint)
   <Accordion title="Properties">
 <ParamField body="customer_identifier" type="string" required>
 The unique identifier for the customer. It can be any string.

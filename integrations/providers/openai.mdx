@@ -21,18 +21,18 @@ Use Respan Gateway to call OpenAI models while keeping unified observability (lo
 
 <AccordionGroup>
   <Accordion title="✅ Supported Frameworks">
-    - [OpenAI SDK](/integration/development-frameworks/llm_framework/openai/openai-sdk)
-    - [LangChain SDK](/integration/development-frameworks/llm_framework/langchain) 
-    - [Vercel/OpenAI](/integration/development-frameworks/llm_framework/vercel#openai)
-    - [Vercel/Google](/integration/development-frameworks/llm_framework/vercel#google)
-    - [LlamaIndex SDK](/integration/development-frameworks/llm_framework/llama-index)
-    - [Google GenAI](/integration/development-frameworks/llm_framework/google_genai)
-    - [Respan native (Otel)](/get-started/quickstart/gateway)
+    - [OpenAI SDK](/integrations/development-frameworks/llm_framework/openai/openai-sdk)
+    - [LangChain SDK](/integrations/development-frameworks/llm_framework/langchain) 
+    - [Vercel/OpenAI](/integrations/development-frameworks/llm_framework/vercel#openai)
+    - [Vercel/Google](/integrations/development-frameworks/llm_framework/vercel#google)
+    - [LlamaIndex SDK](/integrations/development-frameworks/llm_framework/llama-index)
+    - [Google GenAI](/integrations/development-frameworks/llm_framework/google_genai)
+    - [Respan native (Otel)](/documentation/getting-started/quickstart/gateway)
   </Accordion>
   
   <Accordion title="❌ Unsupported Frameworks">
-    - [Anthropic SDK](/integration/development-frameworks/llm_framework/anthropic)
-    - [Vercel/Anthropic](/integration/development-frameworks/llm_framework/vercel#anthropic)
+    - [Anthropic SDK](/integrations/development-frameworks/llm_framework/anthropic)
+    - [Vercel/Anthropic](/integrations/development-frameworks/llm_framework/vercel#anthropic)
   </Accordion>
 </AccordionGroup>
 
@@ -59,7 +59,7 @@ There are 2 ways to add your OpenAI credentials to your requests:
 ### Via code (Per-Request)
 You can pass credentials dynamically in the request body. This is useful if you need to use your users' own API keys (BYOK).
 
-Add the `customer_credentials` parameter to your [Gateway request](/api-endpoints/develop/gateway/chat-completions):
+Add the `customer_credentials` parameter to your [Gateway request](/apis/develop/gateway/chat-completions):
 
 ```json
 {

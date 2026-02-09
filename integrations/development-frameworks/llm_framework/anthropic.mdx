@@ -19,7 +19,7 @@ This is only a pass-through integration. So with this integration, some features
 - **Use Claude's `Thinking` Feature**: You can use the `Thinking` feature from `Claude 3.7 Sonnet` or Claude 4 models.
 
 ### Cons
-- **No Direct Prompt Access**: You can't fetch prompts stored in Respan directly. You'll need to use the [Prompts API](/api-endpoints/develop/prompts/create-prompts) instead.
+- **No Direct Prompt Access**: You can't fetch prompts stored in Respan directly. You'll need to use the [Prompts API](/apis/develop/prompts/create-prompts) instead.
 - **Limited Gateway Features**: You can't use features like [user rate limits](/documentation/products/users/user_rate_limit), [fallbacks](/documentation/products/gateway/traffic_management/fallbacks) or [load balancing](/documentation/products/gateway/traffic_management/load-balancing). 
 
 
@@ -148,7 +148,7 @@ console.log(msg);
 
 ## Respan parameters
 
-To use [Respan parameters](/api-endpoints/develop/gateway/chat-completions#respan-parameters), you can pass them in the `metadata` parameter. In the above example, `customer_identifier` is a Respan parameter. These parameters will take precedence over the Anthropic parameters if they are conflicting.
+To use [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters), you can pass them in the `metadata` parameter. In the above example, `customer_identifier` is a Respan parameter. These parameters will take precedence over the Anthropic parameters if they are conflicting.
 
 ## Nested Metadata for Respan Parameters
 

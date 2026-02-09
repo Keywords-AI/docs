@@ -43,7 +43,7 @@ async def run():
     res = await b.ExtractResume("...", { "client_registry": cr })
 ```
 
-Next, you'll modify the client registry to connect to Respan, enabling observability and analytics. Learn how to create a Respan API key [here](https://docs.respan.ai/get-started/llm-inference#1-get-your-respan-api-key).
+Next, you'll modify the client registry to connect to Respan, enabling observability and analytics. Learn how to create a Respan API key [here](https://docs.respan.ai/documentation/getting-started/llm-inference#1-get-your-respan-api-key).
 
 ```python Python
 from baml_client.sync_client import b
@@ -111,7 +111,7 @@ With this setup, your BAML function calls will be routed through Respan, allowin
 **Initialize a Respan client in BAML**
 
 
-Initialize a Respan client in BAML by switching the base URL and adding the RESPAN_API_KEY in the environmental variable. Learn how to create a Respan API key [here](https://docs.respan.ai/get-started/llm-inference#create-an-api-key).   
+Initialize a Respan client in BAML by switching the base URL and adding the RESPAN_API_KEY in the environmental variable. Learn how to create a Respan API key [here](https://docs.respan.ai/documentation/getting-started/llm-inference#create-an-api-key).   
 
 ```json BAML
 client<llm> Respan {

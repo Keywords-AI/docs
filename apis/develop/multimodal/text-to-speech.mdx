@@ -127,11 +127,11 @@ The speed of the generated audio. Select a value from 0.25 to 4.0. 1.0 is the de
 
 
 ## Respan parameters
-See how to make a standard Respan API call in the [Quick Start](/get-started/quickstart/gateway) guide.
+See how to make a standard Respan API call in the [Quick Start](/documentation/getting-started/quickstart/gateway) guide.
 ### Generation parameters
 
 <ParamField path="customer_credentials" type="object">
-You can pass in your customer's credentials for [supported providers](/integration/overview) and use their credits when our proxy is calling models from those providers. <br/>See details [here](/documentation/admin/llm_provider_keys)
+You can pass in your customer's credentials for [supported providers](/integrations/overview) and use their credits when our proxy is calling models from those providers. <br/>See details [here](/documentation/admin/llm_provider_keys)
 <Accordion title="Example">
 ```json
 "customer_credentials": {
@@ -147,7 +147,7 @@ You can pass in your customer's credentials for [supported providers](/integrati
 
 <ParamField path="disable_log" type="boolean" deafault={false}>
   When set to true, only the request and [performance
-  metrics](/documentation/products/dashboard/quickstart) will be recorded, input
+  metrics](/documentation/products/dashboard/Metrics) will be recorded, input
   and output messages will be omitted from the log.
 </ParamField>
 
@@ -182,7 +182,7 @@ Contact team@respan.ai if you need extra parameter support for your use case.
 <ParamField path="customer_email" type="string">
   This is the email address of the user associated with the API call. You can add your corresponding user's email address to the request.
   
-  You could also edit customer's emails on the platform. Check the [details of user editing here.](/api-endpoints/observe/users/user-creation-endpoint)
+  You could also edit customer's emails on the platform. Check the [details of user editing here.](/apis/observe/users/user-creation-endpoint)
     <Accordion title="Example">
 ```json
 {

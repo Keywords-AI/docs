@@ -3,7 +3,7 @@ title: Haystack SDK
 description: "Use Haystack pipelines with Respan gateway for automatic logging, fallbacks, and cost optimization"
 ---
 
-<Note> This integration is for the **Respan gateway**. For workflow tracing, see [Haystack Tracing](/integration/development-frameworks/tracing/haystack). </Note>
+<Note> This integration is for the **Respan gateway**. For workflow tracing, see [Haystack Tracing](/integrations/development-frameworks/tracing/haystack). </Note>
 
 ## Overview
 
@@ -107,7 +107,7 @@ Create prompts at: [platform.respan.ai/platform/prompts](https://platform.respan
 
 ### OpenAI Parameters
 
-All [OpenAI parameters](/api-endpoints/develop/gateway/chat-completions#openai-compatible-parameters) are supported:
+All [OpenAI parameters](/apis/develop/gateway/chat-completions#openai-compatible-parameters) are supported:
 
 ```python
 pipeline.add_component("llm", RespanGenerator(
@@ -122,7 +122,7 @@ pipeline.add_component("llm", RespanGenerator(
 
 ### Respan Parameters
 
-Use [Respan parameters](/api-endpoints/develop/gateway/chat-completions#respan-parameters) for advanced features:
+Use [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters) for advanced features:
 
 ```python
 pipeline.add_component("llm", RespanGenerator(
@@ -142,6 +142,6 @@ pipeline.add_component("llm", RespanGenerator(
 
 For complete visibility of your pipeline execution, add workflow tracing to see how data flows through each component.
 
-<Card title="Haystack Tracing Integration" href="/integration/development-frameworks/tracing/haystack" icon="link">
+<Card title="Haystack Tracing Integration" href="/integrations/development-frameworks/tracing/haystack" icon="link">
   Learn how to trace your entire Haystack pipeline
 </Card>

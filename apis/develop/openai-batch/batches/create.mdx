@@ -6,7 +6,7 @@ api: POST https://api.respan.ai/api/v1/batches/
 Create a new batch job for asynchronous processing of multiple LLM requests. Batch processing offers 50% cost savings compared to synchronous API calls, with results delivered within 24 hours.
 
 <Note>
-**Prerequisites**: You must first upload an input file using the [Files API](/api-endpoints/develop/openai-batch/files/upload) before creating a batch.
+**Prerequisites**: You must first upload an input file using the [Files API](/apis/develop/openai-batch/files/upload) before creating a batch.
 </Note>
 
 <Note>
@@ -31,7 +31,7 @@ You can pass Respan tracking parameters via the `X-Data-Respan-Params` header:
 ## Request body
 
 <ParamField body="input_file_id" type="string" required>
-  ID of the uploaded JSONL file containing batch requests. Get this from the [upload file](/api-endpoints/develop/openai-batch/files/upload) endpoint.
+  ID of the uploaded JSONL file containing batch requests. Get this from the [upload file](/apis/develop/openai-batch/files/upload) endpoint.
   
   <Accordion title="Example">
   ```json

@@ -11,7 +11,7 @@ Both `GET` and `POST` methods are supported. `POST` is recommended when using co
 
 ## Query parameters
 
-Same parameters as the [List Logs endpoint](/api-endpoints/observe/logs/list):
+Same parameters as the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint):
 
 <ParamField query="start_time" type="string">
   The start time for filtering logs in ISO 8601 format. If not provided, defaults to 1 hour ago.
@@ -47,7 +47,7 @@ Same parameters as the [List Logs endpoint](/api-endpoints/observe/logs/list):
 
 ## Body parameters
 
-You can add filter parameters to the request body (same as [List Logs endpoint](/api-endpoints/observe/logs/list)):
+You can add filter parameters to the request body (same as [List Logs endpoint](/apis/observe/logs/logs-list-endpoint)):
 
 <ParamField body="filters" type="object" default={{}}>
   The filters to be applied to the logs.
@@ -55,7 +55,7 @@ You can add filter parameters to the request body (same as [List Logs endpoint](
 <Note>
 If you want to filter your custom properties, add `metadata__` + your custom property name. For example, to filter `my_custom_property`, use `metadata__my_custom_property`.
 
-For a complete list of filter operators and examples, see the [Filters API Reference](/api-endpoints/reference/filters_api_reference).
+For a complete list of filter operators and examples, see the [Filters API Reference](/apis/reference/filters_api_reference).
 </Note>
 
 <Accordion title="Example">
@@ -86,7 +86,7 @@ GET /api/request-logs/summary/?customer_identifier=user_123
 GET /api/request-logs/summary/?user_tier=premium&department=sales
 ```
 
-See the [List Logs endpoint](/api-endpoints/observe/logs/list#url-based-filtering-quick-filters) for complete URL filtering documentation.
+See the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint#url-based-filtering-quick-filters) for complete URL filtering documentation.
 
 ## Response
 

@@ -12,7 +12,7 @@ The Delete Log endpoint permanently removes a log from the system.
 ## Path parameters
 
 <ParamField path="unique_id" type="string" required>
-  The unique ID of the log to delete. You can get this from the [List Logs endpoint](/api-endpoints/observe/logs/list).
+  The unique ID of the log to delete. You can get this from the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint).
 </ParamField>
 
 ## Response
@@ -206,6 +206,6 @@ curl -X DELETE "https://api.respan.ai/api/request-logs/log_abc123.../" \
 
 ## Related Endpoints
 
-- [List Logs](/api-endpoints/observe/logs/list) - Get log IDs for deletion
-- [Get Log](/api-endpoints/observe/logs/get-log-endpoint) - Verify log contents before deletion
-- [Update Log](/api-endpoints/observe/logs/logs-update-endpoint) - Alternative: update metadata instead of deleting
+- [List Logs](/apis/observe/logs/logs-list-endpoint) - Get log IDs for deletion
+- [Get Log](/apis/observe/logs/get-log-endpoint) - Verify log contents before deletion
+- [Update Log](/apis/observe/logs/logs-update-endpoint) - Alternative: update metadata instead of deleting

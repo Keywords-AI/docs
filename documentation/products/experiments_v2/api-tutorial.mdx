@@ -21,8 +21,8 @@ This page is a tutorial. For full endpoint specs, jump to the linked API referen
 
 - [Create datasets in the UI](/documentation/products/dataset/via_ui)
 - [Create datasets via API](/documentation/products/dataset/via_api)
-- [Experiments API reference](/api-endpoints/develop/experiments-v2/create)
-- [Evaluators: Create](/api-endpoints/evaluate/evaluators/create)
+- [Experiments API reference](/apis/develop/experiments-v2/create)
+- [Evaluators: Create](/apis/evaluate/evaluators/create)
 
 ## Steps to use
 
@@ -53,7 +53,7 @@ Your dataset log `input` should be an object with keys that match your prompt ve
 <Step title="Step 2: Create a prompt + deploy a version">
 Create a prompt template, create a version (with variables), and deploy it so it can be used in experiments.
 
-Reference: [Prompts API](/api-endpoints/develop/prompts/list)
+Reference: [Prompts API](/apis/develop/prompts/get-prompts)
 
 <Accordion title="What “deployed” means (important)">
 Prompt workflows need a readonly/deployed version so the experiment run is reproducible. A common pattern is:
@@ -67,7 +67,7 @@ Prompt workflows need a readonly/deployed version so the experiment run is repro
 <Step title="Step 3: Create the experiment (type = prompt)">
 Create an experiment that references your `dataset_id` and `prompt_id`.
 
-Reference: [Create experiment](/api-endpoints/develop/experiments-v2/create)
+Reference: [Create experiment](/apis/develop/experiments-v2/create)
 
 <Accordion title="Workflow config (prompt)">
 ```json
@@ -118,7 +118,7 @@ curl -X POST "https://api.respan.ai/api/v2/experiments/" \
 <Step title="Step 4: List results and inspect the span tree">
 After the job runs, list logs for the experiment and fetch details for full span trees (workflow execution + evaluator spans).
 
-Reference: [List experiment logs](/api-endpoints/develop/experiments-v2/logs-list)
+Reference: [List experiment logs](/apis/develop/experiments-v2/logs-list)
 
 <Accordion title="What you should see in results">
 - A root workflow span for the experiment trace
@@ -153,7 +153,7 @@ Reference: [Datasets: create / add logs](/documentation/products/dataset/via_api
 <Step title="Step 2: Create the experiment (type = completion)">
 Create an experiment that runs completions automatically in the background.
 
-Reference: [Create experiment](/api-endpoints/develop/experiments-v2/create)
+Reference: [Create experiment](/apis/develop/experiments-v2/create)
 
 <Accordion title="Workflow config (completion)">
 Completion workflows execute LLM calls automatically. Common config fields include:
@@ -228,7 +228,7 @@ List experiment logs, then retrieve a single log with details to inspect:
 - evaluator spans and score outputs
 - failure information when a run fails
 
-Reference: [Retrieve experiment log](/api-endpoints/develop/experiments-v2/logs-get)
+Reference: [Retrieve experiment log](/apis/develop/experiments-v2/logs-get)
 
 <Accordion title="How chaining works (optional)">
 If you include multiple completion workflows, they run sequentially (output of workflow N becomes input to workflow N+1).
@@ -256,7 +256,7 @@ Reference: [Datasets: create / add logs](/documentation/products/dataset/via_api
 <Step title="Step 2: Create the experiment (type = custom)">
 Create an experiment with a custom workflow config.
 
-Reference: [Create experiment](/api-endpoints/develop/experiments-v2/create)
+Reference: [Create experiment](/apis/develop/experiments-v2/create)
 
 <Accordion title="Workflow config (custom)">
 ```json
@@ -278,7 +278,7 @@ Constraints:
 <Step title="Step 3: List placeholder logs (inputs)">
 List logs for the experiment to get the inputs you need to process. Placeholders start with `status: pending`.
 
-Reference: [List experiment logs](/api-endpoints/develop/experiments-v2/logs-list)
+Reference: [List experiment logs](/apis/develop/experiments-v2/logs-list)
 
 <Tip>
 If list returns empty right after creation, wait a few seconds and retry—the placeholders can be created asynchronously.
@@ -288,7 +288,7 @@ If list returns empty right after creation, wait a few seconds and retry—the p
 <Step title="Step 4: Submit your outputs (PATCH) for automatic evaluation">
 Process each input with your own code/model, then PATCH the log with your `output`. Evaluators run automatically in the background.
 
-Reference: [Update experiment log](/api-endpoints/develop/experiments-v2/logs-update)
+Reference: [Update experiment log](/apis/develop/experiments-v2/logs-update)
 
 <Tip>
 To get accurate latency metrics for your custom workflow, include execution timestamps in your payload metadata (start/end).
