@@ -1,12 +1,12 @@
 ---
 title: List logs
-api: POST https://api.respan.ai/api/request-logs/list/
+api: GET https://api.respan.ai/api/request-logs/
 ---
 
 The Logs List endpoint allows you to retrieve past logs with specified filters.
 
 <Note>
-Both `GET` and `POST` methods are supported for listing logs. `POST` is recommended when using complex filters or when URL length limits might be exceeded. The same endpoint is also available at `/api/request-logs/` (without `/list/`).
+Use the `GET` method for listing logs. Pass all filters as URL query parameters. Note that `POST /api/request-logs/` is used for [creating logs](/apis/observe/logs/request-logging-endpoint), not listing.
 </Note>
 
 ## Response fields
@@ -39,7 +39,7 @@ For other span types (embedding, workflow, etc.), type-specific fields are extra
 You can add these parameters to the **URL query string**.
 For example:
 ```
-"https://api.respan.ai/api/request-logs/list/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1"
+"https://api.respan.ai/api/request-logs/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1"
 ```
 <ParamField query="start_time" type="string" required>
   The start time for filtering logs in ISO 8601 format. If not provided, defaults to 1 hour ago.
@@ -139,7 +139,7 @@ For example:
 
 ## URL-based Filtering (Quick Filters)
 
-You can filter logs directly via URL query parameters without constructing POST body filters. This is useful for sharing filtered views, bookmarking, or building dynamic filter links.
+You can filter logs directly via URL query parameters. This is useful for sharing filtered views, bookmarking, or building dynamic filter links.
 
 ### Basic Syntax
 
@@ -193,71 +193,66 @@ These fields can be filtered directly without the `metadata__` prefix:
 <AccordionGroup>
   <Accordion title="Filter by customer identifier">
     ```bash
-    GET /api/request-logs/list/?customer_identifier=user_123
+    GET /api/request-logs/?customer_identifier=user_123
     ```
   </Accordion>
 
   <Accordion title="Filter with operator (status code not equal to 200)">
     ```bash
-    GET /api/request-logs/list/?status_code[value]=200&status_code[operator]=not
+    GET /api/request-logs/?status_code[value]=200&status_code[operator]=not
     ```
   </Accordion>
 
   <Accordion title="Filter by custom metadata (auto-detected)">
     ```bash
     # This automatically becomes: metadata__event_id = "xxx"
-    GET /api/request-logs/list/?event_id=xxx
+    GET /api/request-logs/?event_id=xxx
     ```
   </Accordion>
 
   <Accordion title="Explicit metadata filter">
     ```bash
-    GET /api/request-logs/list/?metadata__user_type=premium
+    GET /api/request-logs/?metadata__user_type=premium
     ```
   </Accordion>
 
   <Accordion title="Multiple filters with OR logic">
     ```bash
     # (status_code = 200) OR (metadata__priority != "low")
-    GET /api/request-logs/list/?status_code[value]=200&status_code[connector]=OR&priority[value]=low&priority[operator]=not&priority[connector]=OR
+    GET /api/request-logs/?status_code[value]=200&status_code[connector]=OR&priority[value]=low&priority[operator]=not&priority[connector]=OR
     ```
   </Accordion>
 
   <Accordion title="Mixed known and unknown fields">
     ```bash
     # customer_identifier = "abc" AND metadata__event_id = "xxx" AND model = "gpt-4"
-    GET /api/request-logs/list/?customer_identifier=abc&event_id=xxx&model=gpt-4
+    GET /api/request-logs/?customer_identifier=abc&event_id=xxx&model=gpt-4
     ```
   </Accordion>
 </AccordionGroup>
 
-### Combining URL and POST Body Filters
+### Combining Multiple Filters
 
-URL filters and POST body filters can be combined. When there's an overlap, URL filters take precedence.
+Multiple URL filters can be combined. All filters are joined with AND logic by default, or you can use the `[connector]` parameter for OR logic.
 
 <Accordion title="Example: Combined filters">
   ```bash
-  curl -X POST "https://api.respan.ai/api/request-logs/list/?customer_identifier=user_123" \
-    -H "Authorization: Bearer YOUR_API_KEY" \
-    -H "Content-Type: application/json" \
-    -d '{
-      "filters": {
-        "status_code": {
-          "operator": "",
-          "value": [200]
-        }
-      }
-    }'
+  # Filter by customer identifier AND status code
+  curl -X GET "https://api.respan.ai/api/request-logs/?customer_identifier=user_123&status_code=200&page_size=10" \
+    -H "Authorization: Bearer YOUR_API_KEY"
   ```
-  This applies:
-  - `customer_identifier = "user_123"` (from URL)
-  - `status_code = 200` (from POST body)
+
+  ```bash
+  # Using operator syntax for advanced filtering
+  curl -X GET "https://api.respan.ai/api/request-logs/?customer_identifier=user_123&cost[value]=0.01&cost[operator]=gte" \
+    -H "Authorization: Bearer YOUR_API_KEY"
+  ```
 </Accordion>
 
 ### Limitations
 
-- URL filters support only equality (`""`) and not-equal (`"not"`) operators
-- For complex operators (`gt`, `gte`, `lt`, `lte`, `contains`, etc.), use POST body filters
+- Simple `?field=value` syntax supports only equality (`""`) and not-equal (`"not"`) operators
+- For complex operators (`gt`, `gte`, `lt`, `lte`, `contains`, etc.), use the bracket syntax: `?field[value]=X&field[operator]=gt`
 - Each field can only have one value in URL (no arrays)
 - All URL values are treated as strings
 
@@ -285,7 +280,7 @@ Use POST body filters to filter logs by score values:
 <AccordionGroup>
   <Accordion title="Filter logs with score greater than 4.0">
     ```bash
-    curl -X POST "https://api.respan.ai/api/request-logs/list/" \
+    curl -X POST "https://api.respan.ai/api/request-logs/" \
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -301,7 +296,7 @@ Use POST body filters to filter logs by score values:
 
   <Accordion title="Filter logs with score less than or equal to 2.0">
     ```bash
-    curl -X POST "https://api.respan.ai/api/request-logs/list/" \
+    curl -X POST "https://api.respan.ai/api/request-logs/" \
       -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
@@ -329,7 +324,7 @@ Use POST body filters to filter logs by score values:
 ## Body parameters
 You can add these parameters to the **request body**:
 ```python
-url = "https://api.respan.ai/api/request-logs/list/"
+url = "https://api.respan.ai/api/request-logs/"
 headers = {
     "Authorization": f"Bearer {YOUR_RESPAN_API_KEY}",
 }
@@ -425,7 +420,7 @@ response = requests.post(url, headers=headers, json=data)
 <RequestExample>
 
 ```python Python
-url = "https://api.respan.ai/api/request-logs/list/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1"
+url = "https://api.respan.ai/api/request-logs/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1"
 
 
 from urllib.parse import urlencode
@@ -437,7 +432,7 @@ params = {
     "fetch_filters": "false",
     "page_size": 1
 }
-url = f"https://api.respan.ai/api/request-logs/list/?{urlencode(params)}"
+url = f"https://api.respan.ai/api/request-logs/?{urlencode(params)}"
 headers = {
     "Authorization": f"Bearer {YOUR_RESPAN_API_KEY}",
 }
@@ -448,7 +443,7 @@ response = requests.post(url, headers=headers, json=data)
 ```
 
 ```typescript TypeScript
-const url = 'https://api.respan.ai/api/request-logs/list/';
+const url = 'https://api.respan.ai/api/request-logs/';
 
 const params = new URLSearchParams({
     page: '1',
@@ -481,7 +476,7 @@ fetch(fullUrl, {
 })
 ```
 ```bash cURL
-curl -X POST "https://api.respan.ai/api/request-logs/list/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1" \
+curl -X POST "https://api.respan.ai/api/request-logs/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1" \
 -H "Authorization: Bearer YOUR_RESPAN_API_KEY" \
 -H "Content-Type: application/json" \
 -d '{"filters": {}}'
@@ -490,13 +485,13 @@ curl -X POST "https://api.respan.ai/api/request-logs/list/?page=1&sort_by=-id&is
 
 ```bash cURL (with URL filters)
 # Filter by customer identifier using URL parameter
-curl -X GET "https://api.respan.ai/api/request-logs/list/?customer_identifier=user_123&page_size=10" \
+curl -X GET "https://api.respan.ai/api/request-logs/?customer_identifier=user_123&page_size=10" \
 -H "Authorization: Bearer YOUR_RESPAN_API_KEY"
 ```
 
 ```bash cURL (URL filters + POST body)
 # Combine URL and POST body filters
-curl -X POST "https://api.respan.ai/api/request-logs/list/?customer_identifier=user_123&event_id=xxx" \
+curl -X POST "https://api.respan.ai/api/request-logs/?customer_identifier=user_123&event_id=xxx" \
 -H "Authorization: Bearer YOUR_RESPAN_API_KEY" \
 -H "Content-Type: application/json" \
 -d '{
@@ -511,7 +506,7 @@ curl -X POST "https://api.respan.ai/api/request-logs/list/?customer_identifier=u
 
 ```bash cURL (custom metadata via URL)
 # Filter by custom metadata fields
-curl -X GET "https://api.respan.ai/api/request-logs/list/?user_tier=premium&department=sales" \
+curl -X GET "https://api.respan.ai/api/request-logs/?user_tier=premium&department=sales" \
 -H "Authorization: Bearer YOUR_RESPAN_API_KEY"
 ```
 </RequestExample>
@@ -519,7 +514,7 @@ curl -X GET "https://api.respan.ai/api/request-logs/list/?user_tier=premium&depa
 ```json
 {
     "count": 1250,
-    "next": "https://api.respan.ai/api/request-logs/list/?page=2",
+    "next": "https://api.respan.ai/api/request-logs/?page=2",
     "previous": null,
     "results": [
        {

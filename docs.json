@@ -284,7 +284,8 @@
               "/integrations/development-frameworks/llm_framework/haystack",
               "/integrations/development-frameworks/llm_framework/vercel",
               "/integrations/development-frameworks/llm_framework/llama-index",
-              "/integrations/development-frameworks/llm_framework/google_genai"
+              "/integrations/development-frameworks/llm_framework/google_genai",
+              "/integrations/development-frameworks/llm_framework/ruby_llm"
             ]
           },
           {
