@@ -1,0 +1,125 @@
+---
+title: RubyLLM
+description: "Use RubyLLM with Respan for gateway access and observability."
+---
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## Overview
+
+[RubyLLM](https://rubyllm.com/) provides a unified Ruby interface for GPT, Claude, Gemini, and more. Since Respan is OpenAI-compatible, you can route all RubyLLM requests through the Respan gateway by pointing the OpenAI base URL to Respan.
+
+## Quickstart
+
+### Step 1: Get a Respan API key
+
+Create an API key in the [Respan dashboard](https://platform.respan.ai/platform/api/api-keys).
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/admin/kai_create_api_key_v0.png" alt="Create a Respan API key" />
+</Frame>
+
+### Step 2: Install RubyLLM
+
+```bash
+gem install ruby_llm
+```
+
+Or add it to your Gemfile:
+
+```ruby
+gem "ruby_llm"
+```
+
+### Step 3: Configure RubyLLM with Respan
+
+```ruby
+RubyLLM.configure do |config|
+  config.openai_api_key = ENV["RESPAN_API_KEY"]
+  config.openai_api_base = "https://api.respan.ai/api"
+end
+```
+
+### Step 4: Make your first request
+
+```ruby
+chat = RubyLLM.chat(model: "gpt-4o-mini")
+response = chat.ask("Hello, world!")
+puts response.content
+```
+
+All requests now go through the Respan gateway and are automatically logged.
+
+## Switch models
+
+Since Respan supports 250+ models from all major providers, you can switch models by changing the model name. For OpenAI models, it works out of the box. For non-OpenAI models (Claude, Gemini, etc.), add `provider: :openai` and `assume_model_exists: true` to route them through the Respan gateway:
+
+```ruby
+# OpenAI models — works directly
+chat = RubyLLM.chat(model: "gpt-4o")
+
+# Non-OpenAI models — add provider and assume_model_exists
+chat = RubyLLM.chat(model: "claude-3-5-haiku-20241022", provider: :openai, assume_model_exists: true)
+chat = RubyLLM.chat(model: "gemini-2.0-flash", provider: :openai, assume_model_exists: true)
+
+response = chat.ask("Tell me about artificial intelligence")
+puts response.content
+```
+
+<Note>
+For non-OpenAI models, `provider: :openai` doesn't mean the model is from OpenAI — it tells RubyLLM to **use the OpenAI API protocol** to send the request. Without it, RubyLLM would try to call the provider (e.g. Anthropic) directly, bypassing Respan. `assume_model_exists: true` skips RubyLLM's local model registry check.
+
+See the [full model list](https://platform.respan.ai/platform/models) for all available models.
+</Note>
+
+## Streaming
+
+```ruby
+chat = RubyLLM.chat(model: "gpt-4o-mini")
+chat.ask("Explain quantum computing") do |chunk|
+  print chunk.content
+end
+```
+
+## Multi-tenancy with contexts
+
+Use RubyLLM contexts to isolate per-tenant configuration:
+
+```ruby
+tenant_ctx = RubyLLM.context do |config|
+  config.openai_api_key = tenant.respan_api_key
+  config.openai_api_base = "https://api.respan.ai/api"
+end
+
+chat = tenant_ctx.chat(model: "gpt-4o-mini")
+response = chat.ask("Hello!")
+```
+
+## Rails integration
+
+RubyLLM works with Rails via `acts_as_chat`. Set your Respan config in an initializer:
+
+```ruby
+# config/initializers/ruby_llm.rb
+RubyLLM.configure do |config|
+  config.openai_api_key = ENV["RESPAN_API_KEY"]
+  config.openai_api_base = "https://api.respan.ai/api"
+end
+```
+
+Then use `acts_as_chat` as normal — all LLM calls will be routed through Respan.
+
+<Card title="View your analytics" href="https://platform.respan.ai/platform/dashboard">
+  Access your Respan dashboard to see detailed analytics
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="User Management" href="/documentation/features/observability/customer-identifier">
+  Track user behavior and patterns
+</Card>
+<Card title="Prompt Management" href="/documentation/features/prompt-management/quickstart">
+  Manage and version your prompts
+</Card>
+</CardGroup>

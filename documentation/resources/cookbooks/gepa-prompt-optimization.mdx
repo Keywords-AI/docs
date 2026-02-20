@@ -1,0 +1,209 @@
+---
+title: "GEPA: self-improving prompt optimization"
+description: "A Generate-Evaluate-Promote-Analyze loop for systematically improving prompts with data."
+---
+
+## Overview
+
+GEPA (Generate, Evaluate, Promote, Analyze) is a self-improving workflow for prompt optimization. Instead of guessing which prompt changes will work, you run a structured loop that uses evaluation data to drive improvements.
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│  Generate    │────▶│  Evaluate    │────▶│  Promote     │────▶│  Analyze     │
+│  candidates  │     │  with data   │     │  the winner  │     │  failures    │
+└─────────────┘     └─────────────┘     └─────────────┘     └──────┬──────┘
+       ▲                                                           │
+       └───────────────────────────────────────────────────────────┘
+                              Next iteration
+```
+
+Each cycle produces a measurably better prompt. Over multiple iterations, you converge on an optimized prompt backed by evidence.
+
+## The GEPA loop
+
+### 1. Generate — Create prompt candidates
+
+Start with your current prompt and create variants. Variations can target:
+
+- **Instructions**: Rewrite the system message with different framing
+- **Examples**: Add, remove, or change few-shot examples
+- **Constraints**: Add guardrails, output format rules, or tone guidelines
+- **Models**: Test the same prompt on different models
+
+Create these as prompt versions in Respan:
+
+1. Go to [Prompts](https://platform.respan.ai/platform/prompts)
+2. Open your prompt
+3. Create new versions with your variations
+
+**Example**: For a support chatbot prompt, you might create:
+- **v1** (baseline): Simple instructions
+- **v2**: Added few-shot examples of good responses
+- **v3**: Added explicit constraints ("never say I don't know")
+- **v4**: Restructured as step-by-step reasoning
+
+### 2. Evaluate — Test with data
+
+Run all candidates against the same dataset using experiments:
+
+1. Go to **Experiments** > **+ New experiment**
+2. Select your prompt and check all versions to compare
+3. Load your testset (curated from production logs or manually created)
+4. Run the experiment
+5. Run your evaluator(s) on all outputs
+
+**Key evaluators to set up:**
+
+| Evaluator | What it measures | Score type |
+|-----------|-----------------|------------|
+| **Task accuracy** | Does the output correctly complete the task? | Numerical (1-5) |
+| **Instruction following** | Does it follow all prompt constraints? | Boolean |
+| **Tone** | Is the tone appropriate for the use case? | Numerical (1-5) |
+
+<Note>
+Use at least 20-30 test cases per experiment. Fewer than that and your results may not be statistically meaningful.
+</Note>
+
+### 3. Promote — Deploy the winner
+
+Compare experiment results across all versions:
+
+- **Average scores** per evaluator per version
+- **Pass rate** for boolean evaluators
+- **Cost and latency** differences between versions/models
+
+If a candidate clearly outperforms the baseline:
+
+1. Set it as the **active version** in the Prompts page
+2. Your production code automatically picks up the new version (if using the Prompts API)
+3. Monitor with [online evaluation](/documentation/features/automations/quickstart_online_eval) to confirm the improvement holds in production
+
+If no candidate is clearly better, move to the Analyze step.
+
+### 4. Analyze — Learn from failures
+
+Look at the test cases where the promoted version still scored poorly:
+
+1. Filter experiment results for low-scoring rows
+2. Read the inputs, outputs, and evaluator reasoning
+3. Identify patterns:
+   - Are there specific question types the prompt handles poorly?
+   - Are there edge cases not covered by the instructions?
+   - Is the model struggling with certain reasoning tasks?
+
+These insights feed the next **Generate** step. Each pattern you identify becomes a targeted improvement in your next prompt candidate.
+
+## Implementing GEPA with Respan
+
+Here's a practical implementation using Respan's features:
+
+### Setup (one-time)
+
+```python
+from openai import OpenAI
+import requests
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+headers = {"Authorization": "Bearer YOUR_RESPAN_API_KEY"}
+
+
+def get_prompt(name, version=None):
+    params = {"prompt_name": name}
+    if version:
+        params["version"] = version
+    resp = requests.get(
+        "https://api.respan.ai/api/prompts/",
+        headers=headers,
+        params=params,
+    )
+    return resp.json()
+```
+
+### Run the loop
+
+```python
+def gepa_iteration(prompt_name: str, test_cases: list[dict]):
+    """One GEPA iteration."""
+
+    # 1. GENERATE — Fetch all versions
+    # (Create versions manually in the platform first)
+    versions = [1, 2, 3]  # Your prompt versions to compare
+
+    # 2. EVALUATE — Test each version
+    results = {}
+    for version in versions:
+        prompt = get_prompt(prompt_name, version=version)
+        version_results = []
+
+        for case in test_cases:
+            response = client.chat.completions.create(
+                model=prompt["model"],
+                messages=[
+                    {"role": "system", "content": prompt["messages"][0]["content"]},
+                    {"role": "user", "content": case["input"]},
+                ],
+                extra_body={
+                    "metadata": {
+                        "gepa_iteration": "1",
+                        "prompt_version": f"v{version}",
+                    },
+                },
+            )
+            version_results.append({
+                "input": case["input"],
+                "output": response.choices[0].message.content,
+                "ideal": case.get("ideal_output", ""),
+            })
+
+        results[version] = version_results
+
+    # 3. PROMOTE — Compare scores on the platform
+    # View experiment results in the Respan dashboard
+
+    # 4. ANALYZE — Review failures
+    # Filter for low-scoring outputs, identify patterns
+    # Use patterns to create v4, v5... for next iteration
+
+    return results
+```
+
+### Automate the monitoring
+
+After promoting a version, set up continuous monitoring:
+
+1. **Online evaluation**: Automatically score 10-20% of production traffic
+2. **Alert on regression**: Set up an automation that alerts when average scores drop below your threshold
+3. **Collect new failures**: Periodically export low-scoring production logs to add to your test dataset
+
+## Example: 3 iterations of GEPA
+
+| Iteration | Change | Avg score | Improvement |
+|-----------|--------|-----------|-------------|
+| Baseline (v1) | Simple instructions | 3.2 / 5 | — |
+| Iteration 1 (v2) | Added few-shot examples | 3.8 / 5 | +19% |
+| Iteration 2 (v4) | Added edge case handling from failure analysis | 4.1 / 5 | +8% |
+| Iteration 3 (v6) | Switched to step-by-step reasoning for complex questions | 4.4 / 5 | +7% |
+
+Each iteration is small, measurable, and evidence-based.
+
+## Tips
+
+- **Keep a changelog**: Document what changed in each version and why
+- **Don't change too much at once**: Isolate variables so you know what caused the improvement
+- **Grow your dataset**: Add production failures after every iteration
+- **Set a target**: Define what score counts as "good enough" so you know when to stop optimizing
+- **Automate what you can**: Use online evals and automations to reduce manual review work
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Experiments" icon="flask" href="/documentation/features/evals/experiments/experiments">
+  Run and compare prompt versions
+</Card>
+<Card title="Eval pipeline from logs" icon="arrows-rotate" href="/documentation/resources/cookbooks/eval-pipeline-from-logs">
+  Build evaluation datasets from production data
+</Card>
+</CardGroup>

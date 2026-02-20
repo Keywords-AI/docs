@@ -1,0 +1,144 @@
+---
+title: "Manual ingestion"
+description: "Send traces to Respan via the OTLP endpoint or the JSON ingestion API."
+---
+
+Use manual ingestion when you have existing log data, custom telemetry pipelines, or OpenTelemetry setups that need to send traces to Respan without using a framework SDK.
+
+---
+
+## OTLP endpoint
+
+If you have an existing OpenTelemetry setup, send traces directly to Respan's OTLP-compatible endpoint. Configure your OTel exporter to point at Respan:
+
+```
+Endpoint: https://api.respan.ai/v1/traces
+Authorization: Bearer {RESPAN_API_KEY}
+```
+
+This works with any OpenTelemetry SDK or collector. Respan automatically parses OTel spans and maps them to the Respan data model.
+
+---
+
+## Ingest API
+
+<Tip>Example project: <a href="https://github.com/Respan/respan-example-projects/tree/main/example_scripts/python/basic/logs_to_trace" target="_blank" rel="noopener noreferrer">Ingest traces example</a></Tip>
+
+Construct traces by posting spans as JSON. Every span is a JSON object. Spans with the same `trace_unique_id` are grouped into a single trace. Parent-child relationships are defined via `span_parent_id`.
+
+### Endpoint
+
+```
+POST {RESPAN_BASE_URL}/v1/traces/ingest
+Authorization: Bearer {RESPAN_API_KEY}
+```
+
+### Span fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `trace_unique_id` | string | Yes | Groups spans into a single trace |
+| `span_unique_id` | string | Yes | Unique ID for the span |
+| `span_parent_id` | string | | Parent span ID; omit or `null` for root spans |
+| `span_name` | string | | Name of the span (e.g. `"openai.chat"`) |
+| `start_time` | string | | Span start time (RFC3339 UTC) |
+| `timestamp` | string | | Span end time (RFC3339 UTC) |
+| `model` | string | | Model used |
+| `input` | string / object | | Span input data |
+| `output` | string / object | | Span output data |
+| `metadata` | object | | Custom key-value pairs |
+
+For the full list, see [Span fields reference](/documentation/resources/reference/span-fields).
+
+### Example
+
+<CodeGroup>
+```bash Bash
+curl -X POST "$RESPAN_BASE_URL/v1/traces/ingest" \
+  -H "Authorization: Bearer $RESPAN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '[
+    {
+      "trace_unique_id": "a-trace-id",
+      "span_unique_id": "root-span-id",
+      "span_name": "workflow.start",
+      "span_parent_id": null,
+      "timestamp": "2025-09-08T07:46:14.007279Z",
+      "start_time": "2025-09-08T07:46:14.007279Z"
+    },
+    {
+      "trace_unique_id": "a-trace-id",
+      "span_unique_id": "child-span-id",
+      "span_name": "openai.chat",
+      "span_parent_id": "root-span-id",
+      "timestamp": "2025-09-08T07:46:19.041835Z",
+      "start_time": "2025-09-08T07:46:18.037942Z"
+    }
+  ]'
+```
+```python Python
+import os
+import requests
+
+BASE_URL = os.getenv("RESPAN_BASE_URL")
+API_KEY = os.getenv("RESPAN_API_KEY")
+
+payload = [
+    {
+        "trace_unique_id": "a-trace-id",
+        "span_unique_id": "root-span-id",
+        "span_name": "workflow.start",
+        "span_parent_id": None,
+        "timestamp": "2025-09-08T07:46:14.007279Z",
+        "start_time": "2025-09-08T07:46:14.007279Z",
+    },
+    {
+        "trace_unique_id": "a-trace-id",
+        "span_unique_id": "child-span-id",
+        "span_name": "openai.chat",
+        "span_parent_id": "root-span-id",
+        "timestamp": "2025-09-08T07:46:19.041835Z",
+        "start_time": "2025-09-08T07:46:18.037942Z",
+    },
+]
+
+resp = requests.post(
+    f"{BASE_URL}/v1/traces/ingest",
+    json=payload,
+    headers={"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"},
+)
+print("Status:", resp.status_code)
+print("Body:", resp.text)
+```
+```typescript TypeScript
+const URL = `${process.env.RESPAN_BASE_URL}/v1/traces/ingest`;
+const headers = {
+  Authorization: `Bearer ${process.env.RESPAN_API_KEY}`,
+  "Content-Type": "application/json",
+};
+
+const payload = [
+  {
+    trace_unique_id: "a-trace-id",
+    span_unique_id: "root-span-id",
+    span_name: "workflow.start",
+    span_parent_id: null,
+    timestamp: "2025-09-08T07:46:14.007279Z",
+    start_time: "2025-09-08T07:46:14.007279Z",
+  },
+  {
+    trace_unique_id: "a-trace-id",
+    span_unique_id: "child-span-id",
+    span_name: "openai.chat",
+    span_parent_id: "root-span-id",
+    timestamp: "2025-09-08T07:46:19.041835Z",
+    start_time: "2025-09-08T07:46:18.037942Z",
+  },
+];
+
+fetch(URL, { method: "POST", headers, body: JSON.stringify(payload) })
+  .then((r) => r.json())
+  .then((d) => console.log(d))
+  .catch((e) => console.error(e));
+```
+</CodeGroup>

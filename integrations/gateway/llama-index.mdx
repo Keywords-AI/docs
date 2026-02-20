@@ -1,0 +1,115 @@
+---
+title: LlamaIndex
+description: "Use LlamaIndex through Respan"
+---
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## Overview
+
+LlamaIndex provides a powerful framework for building LLM applications with data. You can seamlessly integrate Respan with LlamaIndex's `OpenAI` LLM with minimal code changes.
+
+## Quickstart
+
+### Step 1: Install LlamaIndex
+
+<CodeGroup>
+```bash Python
+pip install llama-index-llms-openai
+```
+</CodeGroup>
+
+### Step 2: Initialize LlamaIndex with Respan
+
+<CodeGroup>
+```python Python
+from llama_index.llms.openai import OpenAI
+
+llm = OpenAI(
+    api_base="https://api.respan.ai/api/",
+    api_key="<Your Respan API Key>",
+    model="gpt-3.5-turbo"
+)
+```
+</CodeGroup>
+
+### Step 3: Make Your First Request
+
+<CodeGroup>
+```python Python
+response = llm.complete("Hello, world!")
+print(response)
+```
+</CodeGroup>
+
+## Switch models
+
+<CodeGroup>
+```python Python
+# OpenAI GPT models
+model = "gpt-4o"
+# model = "claude-3-5-sonnet-20241022"
+# model = "gemini-1.5-pro"
+
+llm = OpenAI(
+    api_base="https://api.respan.ai/api/",
+    api_key="<Your Respan API Key>",
+    model=model
+)
+```
+</CodeGroup>
+
+<Note>
+See the [full model list](https://platform.respan.ai/platform/models) for all available models.
+</Note>
+
+## Supported parameters
+
+### OpenAI parameters
+
+We support all the [OpenAI parameters](/apis/develop/gateway/chat-completions#openai-compatible-parameters). You can pass them directly in the LlamaIndex configuration.
+
+<CodeGroup>
+```python Python
+llm = OpenAI(
+    api_base="https://api.respan.ai/api/",
+    api_key="<Your Respan API Key>",
+    model="gpt-4o-mini",
+    temperature=0.7,          # Control randomness
+    max_tokens=1000,          # Limit response length
+)
+```
+</CodeGroup>
+
+### Respan Parameters
+
+[Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters) can be passed using `extra_body` for better handling and customization.
+
+<CodeGroup>
+```python Python
+response = llm.complete(
+    "Tell me a story",
+    extra_body={
+        "customer_identifier": "user_123",           # Track specific users
+        "fallback_models": ["gpt-3.5-turbo"],       # Automatic fallbacks
+        "metadata": {"session_id": "abc123"},        # Custom metadata
+        "thread_identifier": "conversation_456",     # Group related messages
+        "group_identifier": "team_alpha",           # Organize by groups
+    }
+)
+```
+</CodeGroup>
+
+<Card title="View your analytics" href="https://platform.respan.ai/platform/dashboard">
+  Access your Respan dashboard to see detailed analytics
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Advanced settings" href="/documentation/features/observability/customer-identifier">
+  Track user behavior and patterns
+</Card>
+<Card title="Prompt Management" href="/documentation/features/prompt-management/quickstart">
+  Manage and version your prompts
+</Card>
+</CardGroup>

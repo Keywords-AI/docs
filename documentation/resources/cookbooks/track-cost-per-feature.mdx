@@ -1,0 +1,181 @@
+---
+title: "Track cost per feature"
+description: "Use metadata and customer identifiers to build per-feature and per-user cost breakdowns."
+---
+
+## Overview
+
+"How much does our summarization feature cost?" "Which users are the most expensive?" These questions are hard to answer when all your LLM calls look the same in billing.
+
+This cookbook shows how to tag requests with metadata so you can break down costs by feature, user, team, or any dimension you care about.
+
+## Tag requests with metadata
+
+Add `metadata` and `customer_identifier` to every LLM call:
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Summarize this document..."}],
+    extra_body={
+        "customer_identifier": "user_456",
+        "metadata": {
+            "feature": "summarization",
+            "team": "content",
+            "environment": "production",
+        },
+    },
+)
+```
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+    baseURL: "https://api.respan.ai/api/",
+    apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: "Summarize this document..." }],
+    // @ts-ignore
+    customer_identifier: "user_456",
+    metadata: {
+        feature: "summarization",
+        team: "content",
+        environment: "production",
+    },
+});
+```
+</CodeGroup>
+
+## Recommended metadata schema
+
+Be consistent across your codebase. Here's a practical schema:
+
+| Key | Purpose | Examples |
+|-----|---------|----------|
+| `feature` | Which product feature made the call | `"summarization"`, `"chat"`, `"search"` |
+| `team` | Which team owns this feature | `"content"`, `"support"`, `"product"` |
+| `environment` | Deployment environment | `"production"`, `"staging"` |
+| `version` | Feature or prompt version | `"v2"`, `"2024-01"` |
+
+## Create a helper function
+
+Centralize your metadata tagging so it's consistent:
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+def llm_call(messages, model="gpt-4o-mini", feature="unknown", customer_id=None, **kwargs):
+    """Wrapper that ensures every call is tagged."""
+    extra_body = {
+        "metadata": {
+            "feature": feature,
+            "environment": "production",
+        },
+    }
+    if customer_id:
+        extra_body["customer_identifier"] = customer_id
+
+    return client.chat.completions.create(
+        model=model,
+        messages=messages,
+        extra_body=extra_body,
+        **kwargs,
+    )
+
+# Usage
+response = llm_call(
+    messages=[{"role": "user", "content": "Summarize..."}],
+    feature="summarization",
+    customer_id="user_456",
+)
+```
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+    baseURL: "https://api.respan.ai/api/",
+    apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+async function llmCall(
+    messages: OpenAI.ChatCompletionMessageParam[],
+    options: { model?: string; feature?: string; customerId?: string } = {}
+) {
+    const { model = "gpt-4o-mini", feature = "unknown", customerId } = options;
+
+    return client.chat.completions.create({
+        model,
+        messages,
+        // @ts-ignore
+        customer_identifier: customerId,
+        metadata: {
+            feature,
+            environment: "production",
+        },
+    });
+}
+
+// Usage
+const response = await llmCall(
+    [{ role: "user", content: "Summarize..." }],
+    { feature: "summarization", customerId: "user_456" }
+);
+```
+</CodeGroup>
+
+## Analyze costs on the dashboard
+
+Once your requests are tagged, go to the [Dashboard](https://platform.respan.ai/platform/dashboard):
+
+1. **Cost by feature**: Filter by `metadata.feature` to see cost per feature over time
+2. **Cost by user**: Go to [Users](https://platform.respan.ai/platform/users) to see total cost per customer
+3. **Cost by model**: Use model breakdown to see which models drive the most spend
+4. **Custom views**: Create [saved views](/documentation/features/observability/views) with preset filters for recurring cost analysis
+
+## Set user budgets
+
+For per-user cost control, set budgets on individual customers:
+
+```python
+import requests
+
+requests.post(
+    "https://api.respan.ai/api/users/create/",
+    headers={"Authorization": "Bearer YOUR_RESPAN_API_KEY"},
+    json={
+        "customer_identifier": "user_456",
+        "period_budget": 10.00,        # $10 per period
+        "budget_duration": "monthly",   # Reset monthly
+    },
+)
+```
+
+When a user exceeds their budget, Respan blocks further requests and returns a `429` status. See [User budgets](/documentation/features/observability/customer-identifier#budgets) for details.
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Customer identifier" icon="user" href="/documentation/features/observability/customer-identifier">
+  Track users, set budgets and rate limits
+</Card>
+<Card title="Dashboard" icon="chart-line" href="/documentation/features/observability/metrics">
+  Monitor metrics and trends
+</Card>
+</CardGroup>

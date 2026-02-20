@@ -1,0 +1,150 @@
+---
+title: "Experiments"
+description: "Test prompts across multiple test cases in a spreadsheet-style editor."
+---
+
+A spreadsheet-style editor for running prompts and models across multiple test cases. Import testsets to easily test, evaluate, and optimize your LLM outputs.
+
+---
+
+## Prerequisites
+
+- At least one prompt created in Respan. See [Manage prompts](/documentation/features/prompt-management/manage-prompts).
+- Variables added to your prompt. See [Variables & Jinja](/documentation/features/prompt-management/manage-prompts#variables--jinja-templates).
+
+---
+
+## Run an experiment
+
+<Steps>
+
+<Step title="Create a prompt with variables">
+Use `{{variable}}` to define variables in your prompt. Configure parameters in the side panel, then commit the version.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-prompt-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-prompt-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Step>
+
+<Step title="Create a testset">
+
+<AccordionGroup>
+<Accordion title="Import a CSV file">
+Every column in the CSV maps to a variable in your prompt. Add an `ideal_output` column for expected outputs.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-csv.jpg" />
+</Frame>
+
+Click **Import from CSV** to import your testset.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-testsets-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-testsets-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Accordion>
+
+<Accordion title="Create a blank testset">
+Click **Create empty**, then add rows with the **+ Add row** button.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-testsets-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-testsets-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Accordion>
+</AccordionGroup>
+</Step>
+
+<Step title="Create the experiment">
+Click **+ NEW experiment**, select the prompt and versions to test, then import a testset or add test cases manually.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-create-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-create-dark.jpg" className="hidden dark:block" />
+</Frame>
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-import-testset-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-import-testset-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Step>
+
+<Step title="Compare results">
+Scroll down to compare results across prompt versions.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-runs-results-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-runs-results-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Step>
+
+<Step title="Evaluate with LLM">
+Run [LLM evaluators](/documentation/features/evals/evaluators) to automatically score results.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-evals-light.jpg" className="block dark:hidden" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-evals-dark.jpg" className="hidden dark:block" />
+</Frame>
+</Step>
+
+</Steps>
+
+---
+
+## Experiments with images
+
+Run experiments using image-based datasets to test visual prompts.
+
+<Frame>
+<video
+  controls
+  className="w-full aspect-video"
+  src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-image.mp4"
+></video>
+</Frame>
+
+<Steps>
+
+<Step title="Create a dataset with images">
+
+<AccordionGroup>
+<Accordion title="Upload a CSV with image references">
+Prepare a CSV where column headers match your prompt variables. Include image URLs in the image column.
+
+After uploading, change the image column's data type to **Image**.
+
+<Frame>
+<video
+  controls
+  className="w-full aspect-video"
+  src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/testsets-upload-csv-images.mp4"
+></video>
+</Frame>
+</Accordion>
+
+<Accordion title="Create directly in Testsets">
+Add test cases, set a column type to **Image**, then input image URLs or upload directly.
+
+<Frame>
+<video
+  controls
+  className="w-full aspect-video"
+  src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/testsets-create-images.mp4"
+></video>
+</Frame>
+</Accordion>
+</AccordionGroup>
+
+</Step>
+
+<Step title="Configure and run">
+Attach your image testset to the experiment. Ensure variable names in your prompt match the testset column headers exactly.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-with-images-light.jpg" className="block dark:hidden" alt="Experiments with images"/>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/experiments/experiments-with-images-dark.jpg" className="hidden dark:block" alt="Experiments with images"/>
+</Frame>
+</Step>
+
+</Steps>

@@ -1,0 +1,136 @@
+---
+title: LiteLLM
+description: "Use LiteLLM with Respan for logging and gateway access."
+---
+
+<Note> This integration supports **LiteLLM callbacks** (logging) and the **Respan gateway**. </Note>
+
+## Overview
+
+LiteLLM provides a unified interface for calling many LLM providers. With Respan, you can either:
+- Export logs via LiteLLM callbacks
+- Route requests through the Respan gateway
+
+## Quickstart
+
+### Step 1: Get a Respan API key
+
+Create an API key in the [Respan dashboard](https://platform.respan.ai/platform/api/api-keys).
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/admin/kai_create_api_key_v0.png" alt="Create a Respan API key" />
+</Frame>
+
+### Step 2: Install packages
+
+<CodeGroup>
+```bash Python
+pip install litellm respan-exporter-litellm
+```
+</CodeGroup>
+
+### Examples
+
+Choose one of the two ways to use the LiteLLM integration:
+
+#### Callback mode (logging)
+
+Register the Respan callback to send logs automatically.
+
+<CodeGroup>
+```python Python
+import litellm
+from respan_exporter_litellm import RespanLiteLLMCallback
+
+callback = RespanLiteLLMCallback(api_key="YOUR_RESPAN_API_KEY")
+callback.register_litellm_callbacks()
+
+response = litellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+</CodeGroup>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/LiteLLM/callback_log.png" alt="LiteLLM callback logging in Respan" />
+</Frame>
+
+#### Gateway mode
+
+Route LiteLLM requests through the Respan gateway.
+
+<CodeGroup>
+```python Python
+import litellm
+
+response = litellm.completion(
+    api_key="YOUR_RESPAN_API_KEY",
+    api_base="https://api.respan.ai/api",
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+</CodeGroup>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/LiteLLM/proxy_log.png" alt="LiteLLM gateway logging in Respan" />
+</Frame>
+## Respan parameters
+
+### Callback mode (metadata)
+
+Pass Respan parameters inside `metadata.respan_params`.
+
+<CodeGroup>
+```python Python
+response = litellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    metadata={
+        "respan_params": {
+            "workflow_name": "simple_logging",
+            "span_name": "single_log",
+            "customer_identifier": "user-123",
+        }
+    },
+)
+```
+</CodeGroup>
+
+### Gateway mode (extra_body)
+
+Pass Respan parameters using `extra_body` when routing through the gateway.
+
+<CodeGroup>
+```python Python
+response = litellm.completion(
+    api_key="YOUR_RESPAN_API_KEY",
+    api_base="https://api.respan.ai/api",
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+    extra_body={
+        "span_workflow_name": "simple_logging",
+        "span_name": "single_log",
+        "customer_identifier": "user-123",
+    },
+)
+```
+</CodeGroup>
+
+<Card title="View your analytics" href="https://platform.respan.ai/platform/dashboard">
+  Access your Respan dashboard to see detailed analytics
+</Card>
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Advanced settings" href="/documentation/features/observability/customer-identifier">
+  Track user behavior and patterns
+</Card>
+<Card title="Prompt Management" href="/documentation/features/prompt-management/quickstart">
+  Manage and version your prompts
+</Card>
+</CardGroup>

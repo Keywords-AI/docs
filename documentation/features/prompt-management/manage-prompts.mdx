@@ -1,0 +1,376 @@
+---
+title: "Manage prompts"
+description: "Create, configure, version, and deploy prompt templates on Respan."
+---
+
+Prompts are reusable templates that guide LLM responses. Create them on Respan to version, share, deploy, and monitor your prompt templates.
+
+---
+
+## Quick start
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Create a new prompt">
+Go to the [Prompts page](https://platform.respan.ai/platform/prompts) and click **Create new prompt**. Name your prompt and add a description.
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/create-new-prompt.png" alt="Create new prompt" />
+</Step>
+<Step title="Configure the prompt">
+In the **Editor** tab, set parameters like model, temperature, max tokens, and top P in the right sidebar. You can also add function calls and fallback models.
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/configure-prompt.png" alt="Configure prompt" />
+</Step>
+<Step title="Write the content">
+Click **+ Add message** to add messages. Change the role to `user` or `assistant` by clicking the role name.
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/write-prompt.png" alt="Write prompt content" />
+</Step>
+<Step title="Test and commit">
+1. Add values for each variable in the **Variables** tab.
+2. Click **Run** to test your prompt.
+3. Click **Commit** and write a commit message to save this version.
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/prompt-commit.png" alt="Commit prompt" />
+</Step>
+<Step title="Deploy to production">
+Go to the **Deployments** tab and click **Deploy** to make this version live.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-deploy.jpg" alt="Deploy prompt" />
+</Frame>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+**1. Create a prompt**
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://api.respan.ai/api/prompts/"
+data = {
+    "name": "Your Prompt Name",
+    "description": "Your Prompt Description"
+}
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+```typescript TypeScript
+fetch('https://api.respan.ai/api/prompts/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+  },
+  body: JSON.stringify({
+    name: "Your Prompt Name",
+    description: "Your Prompt Description"
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+**2. Create a version**
+
+Use the prompt ID from the response to create a version:
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://api.respan.ai/api/prompts/<prompt_id>/versions/"
+data = {
+    "description": "A description of the prompt version",
+    "messages": [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Hello, how are you?"}
+    ],
+    "model": "gpt-4o-mini",
+    "temperature": 0.7,
+    "max_tokens": 256,
+}
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+```typescript TypeScript
+fetch('https://api.respan.ai/api/prompts/<prompt_id>/versions/', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+  },
+  body: JSON.stringify({
+    description: "A description of the prompt version",
+    messages: [
+      {role: "system", content: "You are a helpful assistant."},
+      {role: "user", content: "Hello, how are you?"}
+    ],
+    model: "gpt-4o-mini",
+    temperature: 0.7,
+    max_tokens: 256,
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+See the [Prompts API reference](/apis/develop/prompts/create-prompts) for full details.
+
+</Tab>
+</Tabs>
+
+---
+
+## Variables & Jinja templates
+
+Variables use `{{variable_name}}` syntax. Respan also supports [Jinja templates](https://jinja.palletsprojects.com/en/stable/templates/) for advanced logic.
+
+<Tabs>
+<Tab title="Via UI">
+
+Add variables directly in the prompt editor using `{{variable_name}}`:
+
+```
+Please develop an optimized Python function to {{task_description}},
+utilizing {{specific_library}}, include error handling, and write unit tests.
+```
+
+<Note>
+Variable names must use underscores: `{{task_description}}` not `{{task description}}`.
+</Note>
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/prompt-variables.png" alt="Prompt variables" />
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/jinja-in-prompts.png" alt="Jinja support" />
+</Frame>
+
+**Jinja features:**
+
+| Feature | Syntax | Example |
+|---------|--------|---------|
+| Conditionals | `{% if %}...{% endif %}` | `{% if condition %}{{ variable_name }}{% endif %}` |
+| JSON inputs | `{{ input.key }}` | `{{ input.name }}` |
+| Filters | `{{ var \| filter }}` | `{{ variable_name \| filter_name }}` |
+| Comments | `{# ... #}` | `{# This is a comment #}` |
+
+See the [Filters in Jinja templates](/documentation/resources/cookbooks/filters-in-jinja) guide for details.
+
+</Tab>
+<Tab title="Via API">
+
+Include `{{variable_name}}` in your message content when creating a version. Pass variable defaults in the `variables` field:
+
+<CodeGroup>
+```python Python
+data = {
+    "messages": [
+        {"role": "system", "content": "You are a helpful {{role}}."},
+        {"role": "user", "content": "Help me with {{task_description}} using {{specific_library}}."}
+    ],
+    "model": "gpt-4o-mini",
+    "variables": {
+        "role": "assistant",
+        "task_description": "sorting an array",
+        "specific_library": "numpy"
+    },
+}
+```
+```typescript TypeScript
+const data = {
+    messages: [
+        {role: "system", content: "You are a helpful {{role}}."},
+        {role: "user", content: "Help me with {{task_description}} using {{specific_library}}."}
+    ],
+    model: "gpt-4o-mini",
+    variables: {
+        role: "assistant",
+        task_description: "sorting an array",
+        specific_library: "numpy"
+    },
+};
+```
+</CodeGroup>
+
+Jinja conditionals, filters, and JSON inputs work the same in API-created prompts.
+
+</Tab>
+</Tabs>
+
+---
+
+## JSON schema
+
+Define structured output using JSON schema. This ensures AI responses follow a specific format, following the [OpenAI Structured Outputs specification](https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses).
+
+<Tabs>
+<Tab title="Via UI">
+
+You can set up JSON schema in the **prompt editor** or the **playground**:
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup1_prompt.png" alt="JSON schema in prompt editor" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup2_playground.png" alt="JSON schema in playground" />
+</Frame>
+
+You can generate schemas using the AI generator or browse examples in the editor.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/generateai.png" alt="AI schema generator" />
+</Frame>
+
+</Tab>
+<Tab title="Via API">
+
+Pass `response_format` when creating a prompt version:
+
+<CodeGroup>
+```python Python
+data = {
+    "messages": [
+        {"role": "system", "content": "Extract the information."},
+        {"role": "user", "content": "{{input_text}}"}
+    ],
+    "model": "gpt-4o-mini",
+    "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "extraction",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "date": {"type": "string"},
+                    "customer_id": {"type": "integer"}
+                },
+                "required": ["date", "customer_id"],
+                "additionalProperties": False
+            }
+        }
+    }
+}
+```
+```typescript TypeScript
+const data = {
+    messages: [
+        {role: "system", content: "Extract the information."},
+        {role: "user", content: "{{input_text}}"}
+    ],
+    model: "gpt-4o-mini",
+    response_format: {
+        type: "json_schema",
+        json_schema: {
+            name: "extraction",
+            strict: true,
+            schema: {
+                type: "object",
+                properties: {
+                    date: {type: "string"},
+                    customer_id: {type: "integer"}
+                },
+                required: ["date", "customer_id"],
+                additionalProperties: false
+            }
+        }
+    }
+};
+```
+</CodeGroup>
+
+</Tab>
+</Tabs>
+
+---
+
+## Playground
+
+Test and iterate on prompts in the [Prompt Playground](https://platform.respan.ai/platform/playground).
+
+<Frame>
+<video controls className="w-full aspect-video" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground.mp4"></video>
+</Frame>
+
+From the prompt editor, enter variable values and click **Playground** in the top bar to test. Click **Commit** to save changes back to your prompt library.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-to-playground.png" alt="Bring prompt to playground" />
+</Frame>
+
+You can also debug production logs by clicking **Open in Playground** on any log entry.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/logs-to-playground.png" alt="Debug from logs" />
+</Frame>
+
+Set the number of variants in the side panel to generate multiple responses and compare them in the **Variants** tab.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground-set-variants.jpg" alt="Set variants" />
+</Frame>
+
+---
+
+## Streaming
+
+Enable streaming in the prompt settings sidebar. After enabling, **commit and deploy** the prompt.
+
+<Frame>
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-stream-light.jpg" alt="Streaming" />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-stream-dark.jpg" alt="Streaming" />
+</Frame>
+
+<Note>
+Streaming is controlled in the prompt settings UI, not through code.
+</Note>
+
+---
+
+## Version control
+
+Track changes, roll back to earlier versions, and collaborate with your team.
+
+View version history in the **Overview** panel, or click **Version** in the Editor for detailed diffs.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-activity-history.jpg" alt="Version history" />
+</Frame>
+
+Click on each version to see the diff of changes.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/track-change.jpg" alt="Track changes" />
+</Frame>
+
+---
+
+## Team collaboration
+
+- **Share** — click the **Link** button in the Editor to share a prompt
+- **Comments** — add comments to discuss changes
+- **Labels** — categorize and organize prompts
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-share.png" alt="Share prompt" />
+</Frame>

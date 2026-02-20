@@ -1,0 +1,348 @@
+---
+title: "Experiments V2 (Beta)"
+description: "Run repeatable evaluations over a dataset using Prompt, Completion, or Custom workflows."
+---
+
+Experiments lets you run repeatable evaluations over a dataset and inspect outputs, evaluator scores, and run status. Choose a workflow type based on your use case.
+
+---
+
+## Prompt workflow
+
+Render a saved prompt template with dataset variables, then run LLM calls automatically.
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Click New experiment">
+Go to **Experiments** and click **New experiment**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/create_prompt.png" alt="New experiment" />
+</Frame>
+</Step>
+
+<Step title="Select a dataset">
+Choose the dataset you want to run on.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_dataset.png" alt="Select dataset" />
+</Frame>
+</Step>
+
+<Step title="Select task = Prompt">
+Pick **Prompt** as the task type, then choose the prompt and version.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_task.png" alt="Select task" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_prompt.png" alt="Select prompt" />
+</Frame>
+</Step>
+
+<Step title="Select evaluators and create">
+Select evaluators to score outputs, then click **Create**. Inspect outputs and scores once the run finishes.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_evaluators.png" alt="Select evaluators" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/see_experiment_output.png" alt="Experiment output" />
+</Frame>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+Dataset entries must include the variables your prompt template expects.
+
+<Accordion title="Dataset format">
+```json
+{
+  "input": {
+    "name": "John Doe",
+    "issue": "Damaged product",
+    "order_id": "ORD-12345"
+  }
+}
+```
+</Accordion>
+
+Create a prompt, deploy a version, then create the experiment:
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+url = "https://api.respan.ai/api/v2/experiments/"
+
+payload = {
+  "name": "Prompt Workflow Experiment",
+  "dataset_id": "YOUR_DATASET_ID",
+  "workflows": [{"type": "prompt", "config": {"prompt_id": "YOUR_PROMPT_ID"}}],
+  "evaluator_slugs": ["your_evaluator_slug"]
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/v2/experiments/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Prompt Workflow Experiment",
+    "dataset_id": "YOUR_DATASET_ID",
+    "workflows": [{"type":"prompt","config":{"prompt_id":"YOUR_PROMPT_ID"}}],
+    "evaluator_slugs": ["your_evaluator_slug"]
+  }'
+```
+</CodeGroup>
+
+List results with [List experiment logs](/apis/develop/experiments-v2/logs-list). Each result includes a span tree with prompt rendering, LLM call, and evaluator spans.
+
+</Tab>
+</Tabs>
+
+---
+
+## Completion workflow
+
+Run direct LLM completions on dataset messages automatically — no prompt templates needed.
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Click New experiment">
+Go to **Experiments** and click **New experiment**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/create-completion.png" alt="New experiment" />
+</Frame>
+</Step>
+
+<Step title="Select a dataset">
+Choose the dataset you want to run on.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/dataset-completion.png" alt="Select dataset" />
+</Frame>
+</Step>
+
+<Step title="Select task = LLM generation">
+Pick **LLM generation (chat completion)**, then configure the model and parameters (temperature, max tokens).
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/set_model_2.png" alt="Select task" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/set_model.png" alt="Configure model" />
+</Frame>
+</Step>
+
+<Step title="Select evaluators and create">
+Select evaluators, then click **Create**. Inspect outputs and scores once the run finishes.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select-evaluator-completion.png" alt="Select evaluators" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/see_experiment_output.png" alt="Experiment output" />
+</Frame>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+Dataset entries should have `input` as an OpenAI-style messages array.
+
+<Accordion title="Dataset format">
+```json
+{
+  "input": [
+    { "role": "system", "content": "You are a helpful assistant." },
+    { "role": "user", "content": "What is AI?" }
+  ]
+}
+```
+</Accordion>
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+url = "https://api.respan.ai/api/v2/experiments/"
+
+payload = {
+  "name": "Completion Workflow Experiment",
+  "dataset_id": "YOUR_DATASET_ID",
+  "workflows": [{
+    "type": "completion",
+    "config": {
+      "model": "gpt-4o-mini",
+      "temperature": 0.7,
+      "max_tokens": 200
+    }
+  }],
+  "evaluator_slugs": ["your_evaluator_slug"]
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/v2/experiments/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":"Completion Workflow Experiment",
+    "dataset_id":"YOUR_DATASET_ID",
+    "workflows":[{"type":"completion","config":{"model":"gpt-4o-mini","temperature":0.7,"max_tokens":200}}],
+    "evaluator_slugs":["your_evaluator_slug"]
+  }'
+```
+</CodeGroup>
+
+List results with [List experiment logs](/apis/develop/experiments-v2/logs-list). Multiple completion workflows run sequentially (output of workflow N becomes input to workflow N+1).
+
+</Tab>
+</Tabs>
+
+---
+
+## Custom workflow
+
+Fetch inputs, run your own code/model, then submit outputs back for automatic evaluation.
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Click New experiment">
+Go to **Experiments** and click **New experiment**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/create-custom.png" alt="New experiment" />
+</Frame>
+</Step>
+
+<Step title="Select a dataset">
+Choose the dataset you want to run on.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select-dataset-custom.png" alt="Select dataset" />
+</Frame>
+</Step>
+
+<Step title="Select task = Custom">
+Pick **Custom** as the task type, select evaluators, then click **Create**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/add-custom-task.png" alt="Custom task" />
+</Frame>
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select-evaluators-custom.png" alt="Select evaluators" />
+</Frame>
+</Step>
+
+<Step title="Submit outputs via API">
+The system creates placeholder rows. Use the API to submit outputs — evaluators run automatically.
+
+<Tip>
+The UI is used to monitor progress and review results. Outputs are submitted via API.
+</Tip>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+Custom workflow accepts any JSON-serializable `input`/`output`.
+
+<Accordion title="How it works">
+```
+1. Create experiment → 2. List placeholders → 3. Process externally → 4. Submit output → 5. Evaluators run
+```
+</Accordion>
+
+**Create the experiment:**
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+url = "https://api.respan.ai/api/v2/experiments/"
+
+payload = {
+  "name": "Custom Workflow Experiment",
+  "dataset_id": "YOUR_DATASET_ID",
+  "workflows": [{
+    "type": "custom",
+    "config": {
+      "allow_submission": True,
+      "timeout_hours": 24
+    }
+  }],
+  "evaluator_slugs": ["your_evaluator_slug"]
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/v2/experiments/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":"Custom Workflow Experiment",
+    "dataset_id":"YOUR_DATASET_ID",
+    "workflows":[{"type":"custom","config":{"allow_submission":true,"timeout_hours":24}}],
+    "evaluator_slugs":["your_evaluator_slug"]
+  }'
+```
+</CodeGroup>
+
+**List placeholders**, then **PATCH each log** with your output. Evaluators run automatically.
+
+Reference: [List logs](/apis/develop/experiments-v2/logs-list) | [Update log](/apis/develop/experiments-v2/logs-update)
+
+<Note>
+Custom and built-in workflows are mutually exclusive. Only one custom workflow per experiment.
+</Note>
+
+</Tab>
+</Tabs>
+
+---
+
+## Troubleshooting
+
+<AccordionGroup>
+<Accordion title="Logs list is empty after creation">
+The experiment may still be processing — wait 5–10 seconds and retry. Also check that your dataset is not empty.
+</Accordion>
+
+<Accordion title="Evaluator spans never appear">
+Confirm the evaluator slug exists and is accessible. Evaluators run asynchronously — poll the log detail endpoint after submission.
+</Accordion>
+
+<Accordion title="Inputs/outputs look truncated">
+Use the detail endpoint to retrieve the full span tree and untruncated fields.
+</Accordion>
+</AccordionGroup>

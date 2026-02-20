@@ -1,0 +1,243 @@
+---
+title: "Monitor an AI agent in production"
+description: "Trace a multi-step agent, set up online evaluation, and alert on quality drops."
+---
+
+## Overview
+
+AI agents make multiple LLM calls, use tools, and branch based on intermediate results. When something goes wrong, it's hard to debug without visibility into each step. This cookbook shows how to:
+
+1. Trace an agent's full execution
+2. Evaluate agent responses automatically
+3. Alert when quality drops
+
+## 1. Trace the agent
+
+Use the Respan tracing SDK to instrument your agent. Each step becomes a span in the trace tree.
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+from respan_tracing.decorators import workflow, task, agent, tool
+from respan_tracing.main import RespanTelemetry
+from respan_tracing.contexts.span import respan_span_attributes
+import json
+
+k_tl = RespanTelemetry()
+client = OpenAI()
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_docs",
+            "description": "Search the knowledge base",
+            "parameters": {
+                "type": "object",
+                "properties": {"query": {"type": "string"}},
+                "required": ["query"],
+            },
+        },
+    }
+]
+
+
+@tool(name="search_docs")
+def search_docs(query: str) -> str:
+    """Simulated knowledge base search."""
+    return f"Found 3 results for '{query}': [doc1, doc2, doc3]"
+
+
+@task(name="plan")
+def plan(user_message: str):
+    """Agent decides what to do."""
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant. Use tools when needed."},
+            {"role": "user", "content": user_message},
+        ],
+        tools=TOOLS,
+    )
+    return completion.choices[0].message
+
+
+@task(name="synthesize")
+def synthesize(user_message: str, tool_results: list[str]):
+    """Generate final answer from tool results."""
+    context = "\n".join(tool_results)
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": f"Answer using this context:\n{context}"},
+            {"role": "user", "content": user_message},
+        ],
+    )
+    return completion.choices[0].message.content
+
+
+@workflow(name="support_agent")
+def support_agent(user_message: str, customer_id: str):
+    with respan_span_attributes(
+        respan_params={
+            "customer_identifier": customer_id,
+            "metadata": {"agent": "support", "version": "v1"},
+        }
+    ):
+        # Step 1: Plan
+        plan_result = plan(user_message)
+
+        # Step 2: Execute tools
+        tool_results = []
+        if plan_result.tool_calls:
+            for tool_call in plan_result.tool_calls:
+                args = json.loads(tool_call.function.arguments)
+                result = search_docs(**args)
+                tool_results.append(result)
+
+        # Step 3: Synthesize
+        if tool_results:
+            answer = synthesize(user_message, tool_results)
+        else:
+            answer = plan_result.content
+
+    return answer
+
+
+# Run it
+result = support_agent("How do I set up tracing?", customer_id="user_789")
+print(result)
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'support-agent'
+});
+const openai = new OpenAI();
+
+async function supportAgent(userMessage: string, customerId: string) {
+    return await respanAi.withWorkflow(
+        { name: 'support_agent' },
+        async () => {
+            return await respanAi.withRespanSpanAttributes(
+                async () => {
+                    // Step 1: Plan
+                    const planResult = await respanAi.withTask(
+                        { name: 'plan' },
+                        async () => {
+                            const completion = await openai.chat.completions.create({
+                                model: 'gpt-4o-mini',
+                                messages: [
+                                    { role: 'system', content: 'You are a helpful assistant.' },
+                                    { role: 'user', content: userMessage },
+                                ],
+                            });
+                            return completion.choices[0].message;
+                        }
+                    );
+
+                    // Step 2: Synthesize
+                    const answer = await respanAi.withTask(
+                        { name: 'synthesize' },
+                        async () => {
+                            const completion = await openai.chat.completions.create({
+                                model: 'gpt-4o-mini',
+                                messages: [
+                                    { role: 'system', content: 'Provide a helpful answer.' },
+                                    { role: 'user', content: userMessage },
+                                ],
+                            });
+                            return completion.choices[0].message.content;
+                        }
+                    );
+
+                    return answer;
+                },
+                {
+                    customer_identifier: customerId,
+                    metadata: { agent: "support", version: "v1" },
+                }
+            );
+        }
+    );
+}
+
+supportAgent("How do I set up tracing?", "user_789").then(console.log);
+```
+</CodeGroup>
+
+### What you'll see in Respan
+
+```
+support_agent (workflow)
+├── plan (task)
+│   └── gpt-4o-mini (LLM call)
+├── search_docs (tool)
+└── synthesize (task)
+    └── gpt-4o-mini (LLM call)
+```
+
+Each span shows input, output, latency, and cost. You can see exactly what the agent decided, what tools it called, and what it returned.
+
+## 2. Set up online evaluation
+
+Create an automation that evaluates agent responses in real-time:
+
+### Create an evaluator
+
+Go to **Evaluation** > **Evaluators** > **+ New evaluator**:
+
+| Field | Value |
+|-------|-------|
+| **Name** | Agent Response Quality |
+| **Type** | LLM |
+| **Model** | gpt-4o |
+| **Score type** | Numerical (1-5) |
+| **Definition** | Rate the agent's response quality. Consider: (1) Did it answer the question? (2) Is the answer accurate? (3) Did it use tools appropriately? Score 1 = poor, 5 = excellent. |
+
+### Create a condition
+
+Go to **Conditions** and create a condition:
+- **Type**: Single log
+- **Filter**: `metadata.agent = "support"`
+
+### Create an automation
+
+Go to **Automations** > **+ New automation**:
+1. Select **Online evals** as the type
+2. Select your condition
+3. Select the evaluator
+4. Set sampling rate (start with `0.1` for 10% of traffic)
+
+## 3. Set up alerts
+
+Use [webhook notifications](/documentation/features/notifications/webhooks) to get alerted when quality drops:
+
+1. Go to **Automations** > **+ New automation**
+2. Select **Alert** as the type
+3. Create a condition based on aggregated metrics (e.g., average evaluation score < 3 over last hour)
+4. Configure your webhook URL (Slack, PagerDuty, email)
+
+## Debugging workflow
+
+When you get an alert:
+
+1. **Check the dashboard** — Look for spikes in errors or latency
+2. **Filter traces** — Use `metadata.agent = "support"` to find recent agent traces
+3. **Inspect spans** — Open a failing trace and walk through each step
+4. **Identify the issue** — Bad retrieval? Wrong tool call? Poor synthesis?
+5. **Fix and test** — Update prompts or logic, run [offline experiments](/documentation/features/evals/experiments/experiments) to verify
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Tracing quickstart" icon="sitemap" href="/documentation/getting-started/quickstart/tracing">
+  Set up tracing for your framework
+</Card>
+<Card title="Automations" icon="bolt" href="/documentation/features/automations/quickstart">
+  Configure automations and alerts
+</Card>
+</CardGroup>

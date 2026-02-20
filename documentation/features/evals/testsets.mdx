@@ -1,0 +1,43 @@
+---
+title: "Testsets"
+description: "Create and manage test cases for evaluating prompts."
+---
+
+Testsets are collections of test cases for evaluating prompts. Each row maps to your prompt variables.
+
+---
+
+## Create a testset
+
+<Tabs>
+<Tab title="Via UI">
+
+**Upload a CSV** — create a CSV with column headers matching your prompt variable names (without `{{}}`). Include an `ideal_output` column for expected outputs.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/testsets-csv.png" />
+</Frame>
+
+Import the CSV and edit it like a spreadsheet — add, delete, or modify rows.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/testset-create.png" />
+</Frame>
+
+**Add test cases from logs** — if your logs contain [prompt variables](/documentation/features/prompt-management/use-prompt), you can add them directly to a testset. Click a log with variables, then click the **+** button to add it to a testset.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/logs-variables.png" />
+</Frame>
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/log-to-testsets.png" />
+</Frame>
+
+</Tab>
+<Tab title="Via API">
+
+See the [Testsets API reference](/apis/develop/testsets/create) for creating and managing testsets programmatically — including creating testsets, listing, updating, and managing individual rows.
+
+</Tab>
+</Tabs>

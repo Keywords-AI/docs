@@ -1,0 +1,249 @@
+---
+title: "Users"
+description: "Track per-user metrics, set budgets, and apply rate limits to your LLM users."
+---
+
+Respan's [Users page](https://platform.respan.ai/platform/users) lets you track per-user LLM usage, set budgets, and apply rate limits. Pass a `customer_identifier` with your logs or traces to enable user analytics.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/user-monitoring.png" alt="Users Page"/>
+</Frame>
+
+---
+
+## Enable user analytics
+
+Pass `customer_params` to associate logs and traces with a user.
+
+<Tabs>
+<Tab title="Logging">
+
+```python
+import requests
+
+url = "https://api.respan.ai/api/request-logs/"
+payload = {
+    "model": "gpt-4o-mini",
+    "input": [{"role": "user", "content": "Hi"}],
+    "output": {"role": "assistant", "content": "Hello!"},
+    "customer_params": {
+        "customer_identifier": "customer_1",
+        "name": "Hendrix Liu",
+        "email": "hendrix@respan.ai"
+    }
+}
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+response = requests.post(url, headers=headers, json=payload)
+```
+
+See [Log fields & parameters](/documentation/features/observability/logs/log-parameters) for all available fields.
+
+</Tab>
+<Tab title="Tracing">
+
+<CodeGroup>
+```python Respan tracing SDK
+from respan_tracing.decorators import workflow
+from respan_tracing.contexts.span import respan_span_attributes
+
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "customer_params": {
+                "customer_identifier": "customer_1",
+                "name": "Hendrix Liu",
+                "email": "hendrix@respan.ai"
+            }
+        }
+    ):
+        # your code here
+        pass
+```
+```typescript OpenAI Agents SDK
+await withTrace("My Trace", async () => {
+  const response = await run(agent, "Hello!");
+}, {
+  metadata: {
+    customer_id: "customer_1"
+  }
+});
+```
+```typescript Vercel AI SDK
+const result = streamText({
+    model: openai("gpt-4o"),
+    messages,
+    experimental_telemetry: {
+        isEnabled: true,
+        metadata: {
+            customer_identifier: "customer_1",
+        },
+    },
+});
+```
+</CodeGroup>
+
+See [Tracing parameters](/documentation/features/observability/traces/span-parameters) for all available fields. For framework setup, see [Integration frameworks](/documentation/features/observability/traces/integration-frameworks).
+
+</Tab>
+<Tab title="Gateway">
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Tell me a story"}],
+    extra_body={
+        "customer_params": {
+            "customer_identifier": "customer_1",
+            "name": "Hendrix Liu",
+            "email": "hendrix@respan.ai"
+        }
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions.create({
+    messages: [{ role: "user", content: "Tell me a story" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    customer_params: {
+        customer_identifier: "customer_1",
+        name: "Hendrix Liu",
+        email: "hendrix@respan.ai"
+    }
+});
+```
+</CodeGroup>
+
+See [Gateway quickstart](/documentation/getting-started/quickstart/gateway) for full setup.
+
+</Tab>
+</Tabs>
+
+### See user data on the platform
+
+After you pass `customer_identifier`, user data appears in 3 places:
+
+**1. [Users page](https://platform.respan.ai/platform/users)** — per-user detail and LLM usage.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/users-page.png" alt="Users Page"/>
+</Frame>
+
+**2. [Dashboard](https://platform.respan.ai/platform/dashboard)** — top users, daily active users, cost by user.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/dashboard-users.png" alt="Dashboard user metrics"/>
+</Frame>
+
+**3. [Logs page](https://platform.respan.ai/platform/requests)** — filter logs by user identifier.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/logs-users.png" alt="Logs user filter"/>
+</Frame>
+
+You can also create users via the [User Creation endpoint](/apis/observe/users/user-creation-endpoint) without sending a log.
+
+---
+
+## Rate limits
+
+<Note>
+This feature is only available for AI gateway users.
+</Note>
+
+Set a per-user rate limit (requests per minute) to prevent abuse. Pass `rate_limit` inside `customer_params`:
+
+<CodeGroup>
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+    extra_body={
+        "customer_params": {
+            "customer_identifier": "customer_1",
+            "rate_limit": 100  # requests per minute
+        }
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions.create({
+    messages: [{ role: "user", content: "Hello" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    customer_params: {
+        customer_identifier: "customer_1",
+        rate_limit: 100  // requests per minute
+    }
+});
+```
+</CodeGroup>
+
+---
+
+## Budgets
+
+<Note>
+Only available for users using the [LLM Gateway](/documentation/getting-started/quickstart/gateway).
+</Note>
+
+Set spending limits per user by passing budget parameters inside `customer_params`:
+
+<CodeGroup>
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+    extra_body={
+        "customer_params": {
+            "customer_identifier": "customer_1",
+            "budget_duration": "monthly",
+            "period_budget": 1000,
+            "total_budget": 10000
+        }
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions.create({
+    messages: [{ role: "user", content: "Hello" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    customer_params: {
+        customer_identifier: "customer_1",
+        budget_duration: "monthly",
+        period_budget: 1000,
+        total_budget: 10000
+    }
+});
+```
+</CodeGroup>
+
+### Budget parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `budget_duration` | string | `yearly`, `monthly`, `weekly`, or `daily` |
+| `period_budget` | float | Budget limit for the current period (USD) |
+| `total_budget` | float | Lifetime budget limit (USD) |
+| `period_start` | string | Custom period start (`YYYY-MM-DD`). Defaults to today. |
+| `period_end` | string | Custom period end (`YYYY-MM-DD`). Auto-calculated from `budget_duration` if omitted. |
+| `markup_percentage` | float | Markup percentage applied to usage reports for this user |
+
+<Tip>
+You can use `period_start` and `period_end` instead of `budget_duration` for custom budget periods.
+</Tip>
+
+You can also set budgets via the [User Update endpoint](/apis/observe/users/user-update-endpoint) or the [User Creation endpoint](/apis/observe/users/user-creation-endpoint).

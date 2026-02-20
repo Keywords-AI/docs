@@ -1,0 +1,389 @@
+---
+title: "Tracing parameters"
+description: "Attach metadata, customer identifiers, and other parameters to your spans — same fields as log parameters, passed through your tracing setup."
+---
+
+Every span is a [log](/documentation/features/observability/logs/quickstart) with hierarchical context. All fields available on [log fields & parameters](/documentation/features/observability/logs/log-parameters) are also available on spans. This page covers the most important trace-specific fields. For the complete list, see the [Span fields reference](/documentation/resources/reference/span-fields).
+
+---
+
+## How to setup
+
+Pass fields to spans using `respan_span_attributes` (Respan OTel), `withTrace` metadata (OpenAI Agents SDK), or `experimental_telemetry` (Vercel AI SDK). Here's a quick example:
+
+<Tabs>
+<Tab title="Respan (OTel)">
+```python
+from respan_tracing.decorators import workflow
+from respan_tracing.contexts.span import respan_span_attributes
+from openai import OpenAI
+
+client = OpenAI()
+
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "customer_identifier": "user_123",
+            "metadata": {"env": "production"},
+            "thread_identifier": "thread_001",
+            "trace_group_identifier": "pipeline_run_001"
+        }
+    ):
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": "Hello!"}],
+        )
+    return response
+```
+</Tab>
+<Tab title="OpenAI Agents SDK (JS)">
+```typescript
+await withTrace("My Trace", async () => {
+  const response = await run(agent, "Hello!");
+  console.log(response.finalOutput);
+}, {
+  metadata: {
+    customer_id: "user_123",
+    env: "production"
+  }
+});
+```
+<Note>
+The Python OpenAI Agents SDK does not currently support passing custom metadata to Respan.
+</Note>
+</Tab>
+<Tab title="Vercel AI SDK">
+```typescript
+const result = streamText({
+    model: openai("gpt-4o"),
+    messages,
+    experimental_telemetry: {
+        isEnabled: true,
+        metadata: {
+            customer_identifier: "user_123",
+        },
+    },
+});
+```
+</Tab>
+</Tabs>
+
+| Framework | Method | Supported params |
+| --------- | ------ | ---------------- |
+| **Respan (OTel)** | `respan_span_attributes(...)` | All parameters |
+| **OpenAI Agents SDK** | `withTrace("...", fn, { metadata })` | `metadata` only (JS/TS) |
+| **Vercel AI SDK** | `experimental_telemetry.metadata` | `customer_identifier`, `metadata`, custom pricing |
+
+---
+
+## Key fields
+
+### customer_identifier
+
+`string` — Unique user or customer ID. Applies to all spans in the trace. Use this to track per-user metrics, set [budgets](/documentation/features/observability/customer-identifier#budgets), and apply [rate limits](/documentation/features/observability/customer-identifier#rate-limits).
+
+<Tabs>
+<Tab title="Respan (OTel)">
+```python
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "customer_params": {
+                "customer_identifier": "user_123",
+                "name": "John Doe",
+                "email": "john@example.com"
+            }
+        }
+    ):
+        # your code here
+        pass
+```
+</Tab>
+<Tab title="OpenAI Agents SDK (JS)">
+```typescript
+await withTrace("My Trace", async () => {
+  const response = await run(agent, "Hello!");
+}, {
+  metadata: {
+    customer_id: "user_123"
+  }
+});
+```
+</Tab>
+<Tab title="Vercel AI SDK">
+```typescript
+const result = streamText({
+    model: openai("gpt-4o"),
+    messages,
+    experimental_telemetry: {
+        isEnabled: true,
+        metadata: {
+            customer_identifier: "user_123",
+        },
+    },
+});
+```
+</Tab>
+</Tabs>
+
+See [Customer identifier](/documentation/features/observability/customer-identifier) for more.
+
+### metadata
+
+`object` — Custom key-value pairs for tagging, analytics, and filtering. Metadata appears as custom properties on the trace and its spans.
+
+<Tabs>
+<Tab title="Respan (OTel)">
+```python
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "metadata": {
+                "env": "production",
+                "language": "en",
+                "feature": "chat_support"
+            }
+        }
+    ):
+        # your code here
+        pass
+```
+</Tab>
+<Tab title="OpenAI Agents SDK (JS)">
+```typescript
+await withTrace("My Trace", async () => {
+  const response = await run(agent, "Hello!");
+}, {
+  metadata: {
+    env: "production",
+    feature: "chat_support"
+  }
+});
+```
+</Tab>
+<Tab title="Vercel AI SDK">
+```typescript
+const result = streamText({
+    model: openai("gpt-4o"),
+    messages,
+    experimental_telemetry: {
+        isEnabled: true,
+        metadata: {
+            prompt_unit_price: 100000,
+        },
+        headers: {
+            "X-Data-Respan-Params": Buffer.from(
+                JSON.stringify({ prompt_unit_price: 100000 })
+            ).toString("base64"),
+        },
+    },
+});
+```
+</Tab>
+</Tabs>
+
+### trace_group_identifier
+
+`string` — Groups related **traces** together, even across different sessions or systems. Useful for complex workflows that span multiple traces.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/traces/trace-group.png" alt="Group traces" />
+</Frame>
+
+Add the same `trace_group_identifier` to multiple workflows:
+
+<CodeGroup>
+```python Python
+@workflow(name="workflow_a")
+def workflow_a():
+    with respan_span_attributes(
+        respan_params={
+            "trace_group_identifier": "pipeline_run_001"
+        }
+    ):
+        pass  # First workflow
+
+@workflow(name="workflow_b")
+def workflow_b():
+    with respan_span_attributes(
+        respan_params={
+            "trace_group_identifier": "pipeline_run_001"  # same ID groups them
+        }
+    ):
+        pass  # Second workflow
+```
+```typescript JavaScript
+async function workflowA() {
+    return await respanAI.withWorkflow({ name: "workflow_a" },
+        async () => {
+            return await respanAI.withRespanSpanAttributes(
+                async () => { /* First workflow */ },
+                { trace_group_identifier: "pipeline_run_001" }
+            );
+        }
+    );
+}
+
+async function workflowB() {
+    return await respanAI.withWorkflow({ name: "workflow_b" },
+        async () => {
+            return await respanAI.withRespanSpanAttributes(
+                async () => { /* Second workflow */ },
+                { trace_group_identifier: "pipeline_run_001" }  // same ID
+            );
+        }
+    );
+}
+```
+</CodeGroup>
+
+### thread_identifier
+
+`string` — Conversation thread identifier. All spans with the same `thread_identifier` are grouped into the same thread.
+
+```python
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "thread_identifier": "thread_001"
+        }
+    ):
+        # your code here
+        pass
+```
+
+### group_identifier
+
+`string` — Group identifier for related spans/logs. Use this to batch related requests together for analysis.
+
+```python
+@workflow(name="my_workflow")
+def my_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "group_identifier": "group_123"
+        }
+    ):
+        # your code here
+        pass
+```
+
+---
+
+## Other fields
+
+Beyond the key fields above, every span also supports all [span fields](/documentation/resources/reference/span-fields):
+
+| Category | Fields |
+|----------|--------|
+| **Trace hierarchy** | `trace_unique_id`, `span_unique_id`, `span_parent_id`, `span_name`, `span_workflow_name`, `span_path` |
+| **Content** | `input`, `output`, `model`, `log_type` |
+| **Metrics** | `latency`, `cost`, `usage`, `start_time`, `timestamp` |
+| **Identity** | `custom_identifier`, `environment`, `provider_id` |
+
+See the full [Span fields reference](/documentation/resources/reference/span-fields) for descriptions of every field.
+
+---
+
+## Complete example
+
+A full tracing setup with all key parameters:
+
+<CodeGroup>
+```python Python
+from respan_tracing.decorators import workflow, task
+from respan_tracing.contexts.span import respan_span_attributes
+from respan_tracing.main import RespanTelemetry
+from openai import OpenAI
+
+k_tl = RespanTelemetry()
+client = OpenAI()
+
+@task(name="joke_creation")
+def create_joke():
+    completion = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": "Tell me a joke about opentelemetry"}],
+    )
+    return completion.choices[0].message.content
+
+@workflow(name="joke_workflow")
+def joke_workflow():
+    with respan_span_attributes(
+        respan_params={
+            "customer_params": {
+                "customer_identifier": "user_123",
+                "name": "John Doe",
+                "email": "john@example.com"
+            },
+            "metadata": {
+                "env": "production",
+                "language": "en",
+                "feature": "chat_support"
+            },
+            "custom_identifier": "ticket_789",
+            "thread_identifier": "thread_abc",
+            "group_identifier": "group_001",
+            "trace_group_identifier": "workflow_group_456"
+        }
+    ):
+        joke = create_joke()
+    return joke
+
+result = joke_workflow()
+print(result)
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAI = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'my-app'
+});
+const openai = new OpenAI();
+
+async function jokeWorkflow() {
+    return await respanAI.withWorkflow({ name: "joke_workflow" },
+        async () => {
+            return await respanAI.withRespanSpanAttributes(
+                async () => {
+                    return await respanAI.withTask(
+                        { name: 'joke_creation' },
+                        async () => {
+                            const completion = await openai.chat.completions.create({
+                                model: 'gpt-4o',
+                                messages: [{ role: 'user', content: 'Tell me a joke about opentelemetry' }]
+                            });
+                            return completion.choices[0].message.content;
+                        }
+                    );
+                },
+                {
+                    customer_params: {
+                        customer_identifier: "user_123",
+                        name: "John Doe",
+                        email: "john@example.com"
+                    },
+                    metadata: {
+                        env: "production",
+                        language: "en",
+                        feature: "chat_support"
+                    },
+                    custom_identifier: "ticket_789",
+                    thread_identifier: "thread_abc",
+                    group_identifier: "group_001",
+                    trace_group_identifier: "workflow_group_456"
+                }
+            );
+        }
+    );
+}
+
+jokeWorkflow().then(console.log);
+```
+</CodeGroup>

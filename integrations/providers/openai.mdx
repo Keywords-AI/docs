@@ -21,18 +21,18 @@ Use Respan Gateway to call OpenAI models while keeping unified observability (lo
 
 <AccordionGroup>
   <Accordion title="✅ Supported Frameworks">
-    - [OpenAI SDK](/integrations/development-frameworks/llm_framework/openai/openai-sdk)
-    - [LangChain SDK](/integrations/development-frameworks/llm_framework/langchain) 
-    - [Vercel/OpenAI](/integrations/development-frameworks/llm_framework/vercel#openai)
-    - [Vercel/Google](/integrations/development-frameworks/llm_framework/vercel#google)
-    - [LlamaIndex SDK](/integrations/development-frameworks/llm_framework/llama-index)
-    - [Google GenAI](/integrations/development-frameworks/llm_framework/google_genai)
+    - [OpenAI SDK](/integrations/gateway/openai/openai-sdk)
+    - [LangChain SDK](/integrations/gateway/langchain) 
+    - [Vercel/OpenAI](/integrations/gateway/vercel#openai)
+    - [Vercel/Google](/integrations/gateway/vercel#google)
+    - [LlamaIndex SDK](/integrations/gateway/llama-index)
+    - [Google GenAI](/integrations/gateway/google_genai)
     - [Respan native (Otel)](/documentation/getting-started/quickstart/gateway)
   </Accordion>
   
   <Accordion title="❌ Unsupported Frameworks">
-    - [Anthropic SDK](/integrations/development-frameworks/llm_framework/anthropic)
-    - [Vercel/Anthropic](/integrations/development-frameworks/llm_framework/vercel#anthropic)
+    - [Anthropic SDK](/integrations/gateway/anthropic)
+    - [Vercel/Anthropic](/integrations/gateway/vercel#anthropic)
   </Accordion>
 </AccordionGroup>
 
@@ -105,6 +105,6 @@ headers = {
 
 response = requests.post(url, headers=headers, json=payload)
 ```
-<Card title="Get Started with Logging" icon="rocket" href="/documentation/products/logs/quickstart">
+<Card title="Get Started with Logging" icon="rocket" href="/documentation/features/observability/logs/quickstart">
   View the full guide on setting up comprehensive logging for your LLM stack.
 </Card>

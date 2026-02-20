@@ -413,7 +413,7 @@ See how to make a standard Respan API call in the [Gateway Quickstart](/document
 
 <ParamField body="load_balance_group" type="object">
   Balance the load of your requests between different models. See the [details of load balancing
-  here.](/documentation/products/gateway/traffic_management/load-balancing)
+  here.](/documentation/features/llm-gateway/advanced-configuration#load-balancing)
 <Note> The proxy will pick one model from the group and override the `model` parameter </Note>
   <Accordion title="Example">
 ```json
@@ -461,7 +461,7 @@ See how to make a standard Respan API call in the [Gateway Quickstart](/document
 <ParamField body="fallback_models" type="array">
   Specify the list of backup models (ranked by priority) to respond in case of a
   failure in the primary model. See the [details of fallback models
-  here.](/documentation/products/gateway/traffic_management/fallbacks)
+  here.](/documentation/features/llm-gateway/advanced-configuration#fallback-models)
     <Accordion title="Example">
   ```json
 {
@@ -508,7 +508,7 @@ Go to [provider page](/integrations/overview) to see how to add your own credent
 </ParamField>
 
 <ParamField body="cache_enabled" type="boolean">
-Enable or disable caches. Check the [details of caches here.](/documentation/products/gateway/performance_optimization/caches)
+Enable or disable caches. Check the [details of caches here.](/documentation/features/llm-gateway/advanced-configuration#caches)
 <Accordion title="Example">
 ```json
 {
@@ -551,7 +551,7 @@ This parameter specifies the cache options. Currently we support `cache_by_custo
 
 
 <ParamField body="prompt" type="object">
-  The prompt template to use for the completion. You can build and deploy prompts in the [Prompt Management](/documentation/products/prompt_management/quickstart).
+  The prompt template to use for the completion. You can build and deploy prompts in the [Prompt Management](/documentation/features/prompt-management/manage-prompts).
 <AccordionGroup>
   <Accordion title="Properties">
     <ParamField body="prompt_id" type="string" required={true}>
@@ -639,7 +639,7 @@ This parameter allows you to control how you can override the parameters in the 
 </ParamField>
 
 <ParamField body="retry_params" type="object">
-    Enable or disable retries and set the number of retries and the time to wait before retrying. Check the [details of retries here.](/documentation/products/gateway/traffic_management/retries)
+    Enable or disable retries and set the number of retries and the time to wait before retrying. Check the [details of retries here.](/documentation/features/llm-gateway/advanced-configuration#retries)
   <Accordion title="Properties">
     <ParamField body="retry_enabled" type="boolean" required>
         Enable or disable retries.
@@ -655,7 +655,7 @@ This parameter allows you to control how you can override the parameters in the 
 
 <ParamField body="disable_log" type="boolean" deafault={false}>
   When set to true, only the request and [performance
-  metrics](/documentation/products/dashboard/Metrics) will be recorded, input
+  metrics](/documentation/features/observability/metrics) will be recorded, input
   and output messages will be omitted from the log.
 </ParamField>
 
@@ -690,21 +690,21 @@ When the `model` parameter is used, the router will not trigger, and this parame
 <ParamField body="exclude_providers" type="array" default={[]}>
   The list of providers to exclude from the LLM router's selection. All models under the provider will be excluded. See the list of providers [here](/integrations/overview)
 
-This only excludes providers in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/products/notifications/subscribe_alerts) will still use the excluded models to catch failures.
+This only excludes providers in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/features/notifications/subscribe_alerts) will still use the excluded models to catch failures.
 
 </ParamField>
 
 <ParamField body="exclude_models" type="array" default={[]}>
 The list of models to exclude from the LLM router's selection. See the list of models [here](/integrations/overview)
 
-This only excludes models in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/products/notifications/subscribe_alerts) will still use the excluded models to catch failures.
+This only excludes models in the LLM router, if `model` parameter takes precedence over this parameter, and`fallback_models` and [safety net](/documentation/features/notifications/subscribe_alerts) will still use the excluded models to catch failures.
 
 </ParamField>
 
 ### Observability parameters
 
 <ParamField body="metadata" type="dict">
-You can add any key-value pair to this metadata field for your reference. Check the [details of metadata here.](/documentation/products/logs/configuration/custom_properties)
+You can add any key-value pair to this metadata field for your reference. Check the [details of metadata here.](/documentation/features/observability/logs/log-parameters#custom-properties)
 
 Contact team@respan.ai if you need extra parameter support for your use case.
 
@@ -733,7 +733,7 @@ You can use this parameter to send an extra custom tag with your request. This w
 </ParamField>
 
 <ParamField body="customer_identifier" type="string">
-  Use this as a tag to identify the user associated with the API call. See the [details of customer identifier here.](/documentation/products/users/customer-identifier)
+  Use this as a tag to identify the user associated with the API call. See the [details of customer identifier here.](/documentation/features/observability/customer-identifier)
   <Accordion title="Example">
 ```json
 {
@@ -921,7 +921,7 @@ You can pass in a dictionary of your customer's API keys for specific models. If
 
 <ParamField body="loadbalance_models" type="array">
   Balance the load of your requests between different models. See the [details of load balancing
-  here.](/documentation/products/gateway/traffic_management/load-balancing)
+  here.](/documentation/features/llm-gateway/advanced-configuration#load-balancing)
 <Note> This parameter will override the `model` parameter. </Note>
   <Accordion title="Example">
   ```json

@@ -38,7 +38,8 @@
                   "/documentation/getting-started/quickstart/evaluation"
                 ]
               },
-              "/documentation/getting-started/observability_data_model"
+              "/documentation/getting-started/workflow",
+              "/documentation/getting-started/data_model"
             ]
           },
           {
@@ -47,153 +48,78 @@
               {
                 "group": "Observability",
                 "pages": [
-                  "/documentation/products/dashboard/metrics",
-                  "/documentation/products/dashboard/views",
+                  "/documentation/features/observability/metrics",
+                  "/documentation/features/observability/views",
                   {
                     "group": "Logs",
                     "pages": [
-                      "/documentation/products/logs/quickstart",
-                      "/documentation/products/logs/configuration/pass_respan_parameters",
-                      "/documentation/products/logs/configuration/custom_properties",
-                      "/documentation/products/logs/log_variables",
-                      "/documentation/products/logs/log_tool_calls",
-                      "/documentation/products/logs/log_images",
-                      "/documentation/products/logs/log_thinking",
-                      "/documentation/products/logs/embedding_logging",
-                      "/documentation/products/logs/save_log_to_prompt",
-                      "/documentation/products/logs/configuration/threads",
-                      "/documentation/products/logs/export_logs",
-                      "/documentation/products/logs/configuration/group_logs",
-                      "/documentation/products/logs/custom_model",
-                      "/documentation/products/logs/sharing"
+                      "/documentation/features/observability/logs/quickstart",
+                      "/documentation/features/observability/logs/log-content-types",
+                      "/documentation/features/observability/logs/log-parameters",
+                      "/documentation/features/observability/logs/save_log_to_prompt",
+                      "/documentation/features/observability/logs/export_logs",
+                      "/documentation/features/observability/logs/custom_model"
                     ]
                   },
                   {
                     "group": "Traces",
                     "pages": [
-                      "/documentation/products/traces/quickstart",
-                      "/documentation/products/traces/decorators",
-                      "/documentation/products/traces/configuration/pass_respan_parameters",
-                      "/documentation/products/traces/configuration/group_traces",
-                      "/documentation/products/traces/configuration/customer_identifier",
-                      "/documentation/products/traces/override-span-input-output",
-                      "/documentation/products/traces/logs_to_trace"
+                      "/documentation/features/observability/traces/quickstart",
+                      "/documentation/features/observability/traces/integration-frameworks",
+                      "/documentation/features/observability/traces/tracing-sdk",
+                      "/documentation/features/observability/traces/manual-ingestion",
+                      "/documentation/features/observability/traces/span-parameters"
                     ]
                   },
-                  {
-                    "group": "Users",
-                    "pages": [
-                      "/documentation/products/users/customer-identifier",
-                      "/documentation/products/users/user_rate_limit",
-                      "/documentation/products/users/user-budget"
-                    ]
-                  }
+                  "/documentation/features/observability/customer-identifier"
                 ]
               },
               {
                 "group": "Prompt management",
                 "pages": [
-                  "/documentation/products/prompt_management/quickstart",
-                  "/documentation/products/prompt_management/model_playground",
-                  {
-                    "group": "Create prompts",
-                    "pages": [
-                      "/documentation/products/prompt_management/creating_prompts/create_prompt",
-                      "/documentation/products/prompt_management/creating_prompts/json_schema",
-                      "/documentation/products/prompt_management/creating_prompts/streaming",
-                      "/documentation/products/prompt_management/creating_prompts/jinja_support",
-                      "/documentation/products/prompt_management/creating_prompts/manage_prompt_api"
-                    ]
-                  },
-                  "/documentation/products/prompt_management/management_collaboration/version_control",
-                  {
-                    "group": "Use prompt in code",
-                    "pages": [
-                      "/documentation/products/prompt_management/use_prompt_in_code/use_prompt_in_llms",
-                      "/documentation/products/prompt_management/use_prompt_in_code/prompt_logging"
-                    ]
-                  },
-                  "/documentation/products/prompt_management/management_collaboration/team_collaboration"
+                  "/documentation/features/prompt-management/quickstart",
+                  "/documentation/features/prompt-management/manage-prompts",
+                  "/documentation/features/prompt-management/use-prompt"
                 ]
               },
               {
                 "group": "Evals",
                 "pages": [
-                  {
-                    "group": "Evaluators",
-                    "pages": [
-                      "/documentation/products/evaluation/llm-evals/llm-evaluator",
-                      "/documentation/products/evaluation/llm-evals/run-evaluator-code",
-                      "/documentation/products/evaluation/llm-evals/run-evaluator-ui",
-                      "/documentation/products/evaluation/human-evals/human-evals-setup",
-                      "/documentation/products/evaluation/human-evals/human-annotation"
-                    ]
-                  },
-                  {
-                    "group": "Datasets",
-                    "pages": [
-                      "/documentation/products/dataset/via_api",
-                      "/documentation/products/dataset/via_ui"
-                    ]
-                  },
-                  {
-                    "group": "Testsets",
-                    "pages": [
-                      "/documentation/products/evaluation/experiments/testsets",
-                      "/documentation/products/evaluation/experiments/upload-testsets"
-                    ]
-                  },
-                  {
-                    "group": "Experiments",
-                    "pages": [
-                      "/documentation/products/evaluation/experiments/experiments",
-                      "/documentation/products/evaluation/experiments/experiments-images"
-                    ]
-                  },
-                  {
-                    "group": "Experiments V2 (Beta)",
-                    "pages": [
-                      "/documentation/products/experiments_v2/via_ui",
-                      "/documentation/products/experiments_v2/api-tutorial"
-                    ]
-                  }
+                  "/documentation/features/evals/quickstart",
+                  "/documentation/features/evals/evaluators",
+                  "/documentation/features/evals/dataset",
+                  "/documentation/features/evals/testsets",
+                  "/documentation/features/evals/experiments",
+                  "/documentation/features/evals/experiments-v2"
                 ]
               },
               {
                 "group": "LLM Gateway",
                 "pages": [
-                  "/documentation/getting-started/quickstart/gateway",
-                  "/documentation/products/gateway/configuration/models",
-                  "/documentation/products/gateway/traffic_management/load-balancing",
-                  "/documentation/products/gateway/traffic_management/retries",
-                  "/documentation/products/gateway/traffic_management/fallbacks",
-                  "/documentation/products/gateway/traffic_management/rate_limit",
-                  {
-                    "group": "Caches",
-                    "pages": [
-                      "/documentation/products/gateway/performance_optimization/caches",
-                      "/documentation/products/gateway/performance_optimization/prompt-caching"
-                    ]
-                  },
-                  "/documentation/products/gateway/advanced_features/function_calling",
-                  "/documentation/products/gateway/advanced_features/thinking",
-                  "/documentation/products/gateway/advanced_features/upload_pdf",
-                  "/documentation/products/gateway/advanced_features/upload_image",
-                  "/documentation/products/gateway/monitoring_analysis/disable_logging"
+                  "/documentation/features/llm-gateway/quickstart",
+                  "/documentation/features/llm-gateway/setup",
+                  "/documentation/features/llm-gateway/advanced-configuration"
                 ]
               },
               {
                 "group": "Notifications",
                 "pages": [
-                  "/documentation/products/notifications/subscribe_alerts",
-                  "/documentation/products/notifications/webhooks"
+                  "/documentation/features/notifications/subscribe_alerts",
+                  "/documentation/features/notifications/webhooks"
                 ]
               },
               {
                 "group": "Automations (Beta)",
                 "pages": [
-                  "/documentation/products/automation/quickstart",
-                  "/documentation/products/automation/quickstart_online_eval"
+                  "/documentation/features/automations/quickstart",
+                  "/documentation/features/automations/quickstart_online_eval"
+                ]
+              },
+              {
+                "group": "MCP",
+                "pages": [
+                  "/documentation/features/mcp/docs-mcp",
+                  "/documentation/features/mcp/platform-mcp"
                 ]
               }
             ]
@@ -225,12 +151,29 @@
           {
             "group": "Resources",
             "pages": [
-              "/documentation/resources/mcp",
-              "/documentation/resources/what-is-llm-observability-and-monitoring",
-              "/documentation/resources/automatic-retries",
-              "/documentation/resources/streaming",
-              "/documentation/resources/error-handling",
-              "/documentation/resources/api-rate-limits"
+              {
+                "group": "Cookbooks",
+                "pages": [
+                  "/documentation/resources/cookbooks/end-to-end-production",
+                  "/documentation/resources/cookbooks/trace-rag-pipeline",
+                  "/documentation/resources/cookbooks/monitor-ai-agent",
+                  "/documentation/resources/cookbooks/eval-pipeline-from-logs",
+                  "/documentation/resources/cookbooks/ab-test-prompts",
+                  "/documentation/resources/cookbooks/migrate-to-multi-model",
+                  "/documentation/resources/cookbooks/track-cost-per-feature",
+                  "/documentation/resources/cookbooks/gepa-prompt-optimization",
+                  "/documentation/resources/cookbooks/anthropic-structure-output",
+                  "/documentation/resources/cookbooks/filters-in-jinja"
+                ]
+              },
+              {
+                "group": "Reference",
+                "pages": [
+                  "/documentation/resources/reference/span-fields",
+                  "/documentation/resources/reference/error-handling",
+                  "/documentation/resources/reference/api-rate-limits"
+                ]
+              }
             ]
           },
           {
@@ -253,46 +196,47 @@
             ]
           },
           {
-            "group": "Tracing integration",
-            "pages": [
-              {
-                "group": "OpenAI Agents SDK",
-                "pages": [
-                  "/integrations/development-frameworks/tracing/openai-agents-sdk",
-                  "/integrations/development-frameworks/tracing/openai-agents-sdk-js"
-                ]
-              },
-              "/integrations/tracing/vercel-tracing",
-              "/integrations/development-frameworks/tracing/mastra",
-              "/integrations/development-frameworks/tracing/langgraph",
-              "/integrations/development-frameworks/tracing/langfuse",
-              "/integrations/development-frameworks/tracing/haystack",
-              "/integrations/development-frameworks/tracing/baml",
-              "/integrations/development-frameworks/tracing/instructor"
-            ]
-          },
-          {
-            "group": "Gateway integration",
+            "group": "Gateway",
             "pages": [
               {
                 "group": "OpenAI SDK",
                 "pages": [
-                  "/integrations/development-frameworks/llm_framework/openai/openai-sdk",
-                  "/integrations/development-frameworks/llm_framework/openai/openai-responses"
+                  "/integrations/gateway/openai/openai-sdk",
+                  "/integrations/gateway/openai/openai-responses"
                 ]
               },
-              "/integrations/development-frameworks/llm_framework/anthropic",
-              "/integrations/development-frameworks/llm_framework/langchain",
-              "/integrations/development-frameworks/llm_framework/litellm",
-              "/integrations/development-frameworks/llm_framework/haystack",
-              "/integrations/development-frameworks/llm_framework/vercel",
-              "/integrations/development-frameworks/llm_framework/llama-index",
-              "/integrations/development-frameworks/llm_framework/google_genai",
-              "/integrations/development-frameworks/llm_framework/ruby_llm"
+              "/integrations/gateway/anthropic",
+              "/integrations/gateway/langchain",
+              "/integrations/gateway/litellm",
+              "/integrations/gateway/haystack",
+              "/integrations/gateway/vercel",
+              "/integrations/gateway/llama-index",
+              "/integrations/gateway/google_genai",
+              "/integrations/gateway/ruby_llm"
             ]
           },
           {
-            "group": "LLM providers",
+            "group": "Tracing",
+            "pages": [
+              "/integrations/tracing/respan-native",
+              {
+                "group": "OpenAI Agents",
+                "pages": [
+                  "/integrations/tracing/openai-agents-sdk",
+                  "/integrations/tracing/openai-agents-sdk-js"
+                ]
+              },
+              "/integrations/tracing/vercel-tracing",
+              "/integrations/tracing/mastra",
+              "/integrations/tracing/langgraph",
+              "/integrations/tracing/langfuse",
+              "/integrations/tracing/haystack",
+              "/integrations/tracing/baml",
+              "/integrations/tracing/instructor"
+            ]
+          },
+          {
+            "group": "Providers",
             "pages": [
               "/integrations/providers/openai",
               "/integrations/providers/anthropic",
@@ -332,16 +276,17 @@
           {
             "group": "Memory",
             "pages": [
-              "/integrations/development-frameworks/mem0",
-              "/integrations/others/cognee"
+              "/integrations/memory/mem0",
+              "/integrations/memory/cognee"
             ]
           },
           {
             "group": "Others",
             "pages": [
-              "/integrations/providers/assemblyai",
-              "/integrations/development-frameworks/baml",
-              "/integrations/analytics/posthog"
+              "/integrations/others/assemblyai",
+              "/integrations/others/baml",
+              "/integrations/others/posthog",
+              "/integrations/others/zapier"
             ]
           }
         ]
@@ -827,19 +772,591 @@
   "redirects": [
     {
       "source": "/integrations/development-frameworks/openai-agent",
-      "destination": "/integrations/development-frameworks/tracing/openai-agents-sdk"
+      "destination": "/integrations/tracing/openai-agents-sdk"
     },
     {
       "source": "/integrations/development-frameworks/openai-agents-sdk-js",
-      "destination": "/integrations/development-frameworks/tracing/openai-agents-sdk-js"
+      "destination": "/integrations/tracing/openai-agents-sdk-js"
     },
     {
       "source": "/integrations/development-frameworks/openai-sdk",
-      "destination": "/integrations/development-frameworks/llm_framework/openai/openai-sdk"
+      "destination": "/integrations/gateway/openai/openai-sdk"
     },
     {
       "source": "/documentation/getting-started/llm-inference",
       "destination": "/documentation/getting-started/overview"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/openai/openai-sdk",
+      "destination": "/integrations/gateway/openai/openai-sdk"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/openai/openai-responses",
+      "destination": "/integrations/gateway/openai/openai-responses"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/anthropic",
+      "destination": "/integrations/gateway/anthropic"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/langchain",
+      "destination": "/integrations/gateway/langchain"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/litellm",
+      "destination": "/integrations/gateway/litellm"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/haystack",
+      "destination": "/integrations/gateway/haystack"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/vercel",
+      "destination": "/integrations/gateway/vercel"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/llama-index",
+      "destination": "/integrations/gateway/llama-index"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/google_genai",
+      "destination": "/integrations/gateway/google_genai"
+    },
+    {
+      "source": "/integrations/development-frameworks/llm_framework/ruby_llm",
+      "destination": "/integrations/gateway/ruby_llm"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/openai-agents-sdk",
+      "destination": "/integrations/tracing/openai-agents-sdk"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/openai-agents-sdk-js",
+      "destination": "/integrations/tracing/openai-agents-sdk-js"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/mastra",
+      "destination": "/integrations/tracing/mastra"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/langgraph",
+      "destination": "/integrations/tracing/langgraph"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/langfuse",
+      "destination": "/integrations/tracing/langfuse"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/haystack",
+      "destination": "/integrations/tracing/haystack"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/baml",
+      "destination": "/integrations/tracing/baml"
+    },
+    {
+      "source": "/integrations/development-frameworks/tracing/instructor",
+      "destination": "/integrations/tracing/instructor"
+    },
+    {
+      "source": "/integrations/development-frameworks/mem0",
+      "destination": "/integrations/memory/mem0"
+    },
+    {
+      "source": "/integrations/others/cognee",
+      "destination": "/integrations/memory/cognee"
+    },
+    {
+      "source": "/integrations/providers/assemblyai",
+      "destination": "/integrations/others/assemblyai"
+    },
+    {
+      "source": "/integrations/development-frameworks/baml",
+      "destination": "/integrations/others/baml"
+    },
+    {
+      "source": "/integrations/analytics/posthog",
+      "destination": "/integrations/others/posthog"
+    },
+    {
+      "source": "/documentation/resources/mcp",
+      "destination": "/documentation/features/mcp/platform-mcp"
+    },
+    {
+      "source": "/cookbooks/anthropic-structure-output",
+      "destination": "/documentation/resources/cookbooks/anthropic-structure-output"
+    },
+    {
+      "source": "/cookbooks/filters-in-jinja",
+      "destination": "/documentation/resources/cookbooks/filters-in-jinja"
+    },
+    {
+      "source": "/documentation/resources/anthropic-structure-output",
+      "destination": "/documentation/resources/cookbooks/anthropic-structure-output"
+    },
+    {
+      "source": "/documentation/resources/filters-in-jinja",
+      "destination": "/documentation/resources/cookbooks/filters-in-jinja"
+    },
+    {
+      "source": "/documentation/resources/what-is-llm-observability-and-monitoring",
+      "destination": "/documentation/resources/reference/what-is-llm-observability-and-monitoring"
+    },
+    {
+      "source": "/documentation/resources/automatic-retries",
+      "destination": "/documentation/resources/reference/automatic-retries"
+    },
+    {
+      "source": "/documentation/resources/streaming",
+      "destination": "/documentation/resources/reference/streaming"
+    },
+    {
+      "source": "/documentation/resources/error-handling",
+      "destination": "/documentation/resources/reference/error-handling"
+    },
+    {
+      "source": "/documentation/resources/api-rate-limits",
+      "destination": "/documentation/resources/reference/api-rate-limits"
+    },
+    {
+      "source": "/documentation/products/dashboard/metrics",
+      "destination": "/documentation/features/observability/metrics"
+    },
+    {
+      "source": "/documentation/products/dashboard/views",
+      "destination": "/documentation/features/observability/views"
+    },
+    {
+      "source": "/documentation/products/logs/quickstart",
+      "destination": "/documentation/features/observability/logs/quickstart"
+    },
+    {
+      "source": "/documentation/products/logs/configuration/pass_respan_parameters",
+      "destination": "/documentation/features/observability/logs/log-parameters#passing-parameters"
+    },
+    {
+      "source": "/documentation/products/logs/configuration/custom_properties",
+      "destination": "/documentation/features/observability/logs/log-parameters#custom-properties"
+    },
+    {
+      "source": "/documentation/products/logs/log_variables",
+      "destination": "/documentation/features/observability/logs/log-content-types#prompt-variables"
+    },
+    {
+      "source": "/documentation/products/logs/log_tool_calls",
+      "destination": "/documentation/features/observability/logs/log-content-types#tool-calls"
+    },
+    {
+      "source": "/documentation/products/logs/log_images",
+      "destination": "/documentation/features/observability/logs/log-content-types#images"
+    },
+    {
+      "source": "/documentation/products/logs/log_thinking",
+      "destination": "/documentation/features/observability/logs/log-content-types#thinking-blocks"
+    },
+    {
+      "source": "/documentation/products/logs/embedding_logging",
+      "destination": "/documentation/features/observability/logs/log-content-types#embedding"
+    },
+    {
+      "source": "/documentation/products/logs/save_log_to_prompt",
+      "destination": "/documentation/features/observability/logs/save_log_to_prompt"
+    },
+    {
+      "source": "/documentation/products/logs/configuration/threads",
+      "destination": "/documentation/features/observability/logs/log-parameters#threads"
+    },
+    {
+      "source": "/documentation/products/logs/export_logs",
+      "destination": "/documentation/features/observability/logs/export_logs"
+    },
+    {
+      "source": "/documentation/products/logs/configuration/group_logs",
+      "destination": "/documentation/features/observability/logs/log-parameters#group-logs"
+    },
+    {
+      "source": "/documentation/products/logs/custom_model",
+      "destination": "/documentation/features/observability/logs/custom_model"
+    },
+    {
+      "source": "/documentation/products/logs/sharing",
+      "destination": "/documentation/features/observability/logs/quickstart"
+    },
+    {
+      "source": "/documentation/features/observability/logs/sharing",
+      "destination": "/documentation/features/observability/logs/quickstart"
+    },
+    {
+      "source": "/documentation/features/observability/logs/configuration/pass_respan_parameters",
+      "destination": "/documentation/features/observability/logs/log-parameters#passing-parameters"
+    },
+    {
+      "source": "/documentation/features/observability/logs/configuration/custom_properties",
+      "destination": "/documentation/features/observability/logs/log-parameters#custom-properties"
+    },
+    {
+      "source": "/documentation/features/observability/logs/configuration/threads",
+      "destination": "/documentation/features/observability/logs/log-parameters#threads"
+    },
+    {
+      "source": "/documentation/features/observability/logs/configuration/group_logs",
+      "destination": "/documentation/features/observability/logs/log-parameters#group-logs"
+    },
+    {
+      "source": "/documentation/features/observability/logs/log_variables",
+      "destination": "/documentation/features/observability/logs/log-content-types#prompt-variables"
+    },
+    {
+      "source": "/documentation/features/observability/logs/log_tool_calls",
+      "destination": "/documentation/features/observability/logs/log-content-types#tool-calls"
+    },
+    {
+      "source": "/documentation/features/observability/logs/log_images",
+      "destination": "/documentation/features/observability/logs/log-content-types#images"
+    },
+    {
+      "source": "/documentation/features/observability/logs/log_thinking",
+      "destination": "/documentation/features/observability/logs/log-content-types#thinking-blocks"
+    },
+    {
+      "source": "/documentation/features/observability/logs/embedding_logging",
+      "destination": "/documentation/features/observability/logs/log-content-types#embedding"
+    },
+    {
+      "source": "/documentation/products/traces/quickstart",
+      "destination": "/documentation/features/observability/traces/quickstart"
+    },
+    {
+      "source": "/documentation/products/traces/decorators",
+      "destination": "/documentation/features/observability/traces/tracing-sdk"
+    },
+    {
+      "source": "/documentation/features/observability/traces/decorators",
+      "destination": "/documentation/features/observability/traces/tracing-sdk"
+    },
+    {
+      "source": "/documentation/products/traces/configuration/pass_respan_parameters",
+      "destination": "/documentation/features/observability/traces/span-parameters"
+    },
+    {
+      "source": "/documentation/features/observability/traces/configuration/pass_respan_parameters",
+      "destination": "/documentation/features/observability/traces/span-parameters"
+    },
+    {
+      "source": "/documentation/products/traces/configuration/group_traces",
+      "destination": "/documentation/features/observability/traces/span-parameters#group-traces"
+    },
+    {
+      "source": "/documentation/features/observability/traces/configuration/group_traces",
+      "destination": "/documentation/features/observability/traces/span-parameters#group-traces"
+    },
+    {
+      "source": "/documentation/products/traces/configuration/customer_identifier",
+      "destination": "/documentation/features/observability/traces/span-parameters#customer-identifier"
+    },
+    {
+      "source": "/documentation/features/observability/traces/configuration/customer_identifier",
+      "destination": "/documentation/features/observability/traces/span-parameters#customer-identifier"
+    },
+    {
+      "source": "/documentation/products/traces/override-span-input-output",
+      "destination": "/documentation/features/observability/traces/tracing-sdk#override-span-input--output"
+    },
+    {
+      "source": "/documentation/features/observability/traces/override-span-input-output",
+      "destination": "/documentation/features/observability/traces/tracing-sdk#override-span-input--output"
+    },
+    {
+      "source": "/documentation/products/traces/logs_to_trace",
+      "destination": "/documentation/features/observability/traces/manual-ingestion"
+    },
+    {
+      "source": "/documentation/features/observability/traces/logs_to_trace",
+      "destination": "/documentation/features/observability/traces/manual-ingestion"
+    },
+    {
+      "source": "/documentation/features/observability/traces/ingest-traces",
+      "destination": "/documentation/features/observability/traces/manual-ingestion"
+    },
+    {
+      "source": "/documentation/products/users/customer-identifier",
+      "destination": "/documentation/features/observability/customer-identifier"
+    },
+    {
+      "source": "/documentation/products/users/user_rate_limit",
+      "destination": "/documentation/features/observability/customer-identifier#rate-limits"
+    },
+    {
+      "source": "/documentation/features/observability/users/user_rate_limit",
+      "destination": "/documentation/features/observability/customer-identifier#rate-limits"
+    },
+    {
+      "source": "/documentation/products/users/user-budget",
+      "destination": "/documentation/features/observability/customer-identifier#budgets"
+    },
+    {
+      "source": "/documentation/features/observability/users/user-budget",
+      "destination": "/documentation/features/observability/customer-identifier#budgets"
+    },
+    {
+      "source": "/documentation/products/prompt_management/quickstart",
+      "destination": "/documentation/features/prompt-management/manage-prompts"
+    },
+    {
+      "source": "/documentation/products/prompt_management/model_playground",
+      "destination": "/documentation/features/prompt-management/manage-prompts#playground"
+    },
+    {
+      "source": "/documentation/products/prompt_management/creating_prompts/create_prompt",
+      "destination": "/documentation/features/prompt-management/manage-prompts"
+    },
+    {
+      "source": "/documentation/products/prompt_management/creating_prompts/json_schema",
+      "destination": "/documentation/features/prompt-management/manage-prompts#json-schema"
+    },
+    {
+      "source": "/documentation/products/prompt_management/creating_prompts/streaming",
+      "destination": "/documentation/features/prompt-management/manage-prompts#streaming"
+    },
+    {
+      "source": "/documentation/products/prompt_management/creating_prompts/jinja_support",
+      "destination": "/documentation/features/prompt-management/manage-prompts#variables--jinja-templates"
+    },
+    {
+      "source": "/documentation/products/prompt_management/creating_prompts/manage_prompt_api",
+      "destination": "/documentation/features/prompt-management/manage-prompts#create-via-api"
+    },
+    {
+      "source": "/documentation/products/prompt_management/management_collaboration/version_control",
+      "destination": "/documentation/features/prompt-management/manage-prompts#version-control"
+    },
+    {
+      "source": "/documentation/products/prompt_management/use_prompt_in_code/use_prompt_in_llms",
+      "destination": "/documentation/features/prompt-management/use-prompt"
+    },
+    {
+      "source": "/documentation/products/prompt_management/use_prompt_in_code/prompt_logging",
+      "destination": "/documentation/features/prompt-management/use-prompt#use-prompt-in-logging"
+    },
+    {
+      "source": "/documentation/products/prompt_management/management_collaboration/team_collaboration",
+      "destination": "/documentation/features/prompt-management/manage-prompts#team-collaboration"
+    },
+    {
+      "source": "/documentation/features/prompt-management/quickstart",
+      "destination": "/documentation/features/prompt-management/manage-prompts"
+    },
+    {
+      "source": "/documentation/features/prompt-management/model_playground",
+      "destination": "/documentation/features/prompt-management/manage-prompts#playground"
+    },
+    {
+      "source": "/documentation/features/prompt-management/creating_prompts/create_prompt",
+      "destination": "/documentation/features/prompt-management/manage-prompts"
+    },
+    {
+      "source": "/documentation/features/prompt-management/creating_prompts/json_schema",
+      "destination": "/documentation/features/prompt-management/manage-prompts#json-schema"
+    },
+    {
+      "source": "/documentation/features/prompt-management/creating_prompts/streaming",
+      "destination": "/documentation/features/prompt-management/manage-prompts#streaming"
+    },
+    {
+      "source": "/documentation/features/prompt-management/creating_prompts/jinja_support",
+      "destination": "/documentation/features/prompt-management/manage-prompts#variables--jinja-templates"
+    },
+    {
+      "source": "/documentation/features/prompt-management/creating_prompts/manage_prompt_api",
+      "destination": "/documentation/features/prompt-management/manage-prompts#create-via-api"
+    },
+    {
+      "source": "/documentation/features/prompt-management/management_collaboration/version_control",
+      "destination": "/documentation/features/prompt-management/manage-prompts#version-control"
+    },
+    {
+      "source": "/documentation/features/prompt-management/use_prompt_in_code/use_prompt_in_llms",
+      "destination": "/documentation/features/prompt-management/use-prompt"
+    },
+    {
+      "source": "/documentation/features/prompt-management/use_prompt_in_code/prompt_logging",
+      "destination": "/documentation/features/prompt-management/use-prompt#use-prompt-in-logging"
+    },
+    {
+      "source": "/documentation/features/prompt-management/management_collaboration/team_collaboration",
+      "destination": "/documentation/features/prompt-management/manage-prompts#team-collaboration"
+    },
+    {
+      "source": "/documentation/products/evaluation/llm-evals/llm-evaluator",
+      "destination": "/documentation/features/evals/evaluators"
+    },
+    {
+      "source": "/documentation/products/evaluation/llm-evals/run-evaluator-code",
+      "destination": "/documentation/features/evals/evaluators"
+    },
+    {
+      "source": "/documentation/products/evaluation/llm-evals/run-evaluator-ui",
+      "destination": "/documentation/features/evals/evaluators"
+    },
+    {
+      "source": "/documentation/products/evaluation/human-evals/human-evals-setup",
+      "destination": "/documentation/features/evals/evaluators"
+    },
+    {
+      "source": "/documentation/products/evaluation/human-evals/human-annotation",
+      "destination": "/documentation/features/evals/evaluators"
+    },
+    {
+      "source": "/documentation/products/dataset/via_api",
+      "destination": "/documentation/features/evals/dataset"
+    },
+    {
+      "source": "/documentation/products/dataset/via_ui",
+      "destination": "/documentation/features/evals/dataset"
+    },
+    {
+      "source": "/documentation/products/evaluation/experiments/testsets",
+      "destination": "/documentation/features/evals/dataset"
+    },
+    {
+      "source": "/documentation/products/evaluation/experiments/upload-testsets",
+      "destination": "/documentation/features/evals/dataset"
+    },
+    {
+      "source": "/documentation/products/evaluation/experiments/experiments",
+      "destination": "/documentation/features/evals/experiments"
+    },
+    {
+      "source": "/documentation/products/evaluation/experiments/experiments-images",
+      "destination": "/documentation/features/evals/experiments-images"
+    },
+    {
+      "source": "/documentation/products/experiments_v2/via_ui",
+      "destination": "/documentation/features/evals/experiments-v2"
+    },
+    {
+      "source": "/documentation/products/experiments_v2/api-tutorial",
+      "destination": "/documentation/features/evals/experiments_v2/api-tutorial"
+    },
+    {
+      "source": "/documentation/products/gateway/configuration/models",
+      "destination": "/documentation/features/llm-gateway/setup"
+    },
+    {
+      "source": "/documentation/products/gateway/traffic_management/load-balancing",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#load-balancing"
+    },
+    {
+      "source": "/documentation/products/gateway/traffic_management/retries",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#retries"
+    },
+    {
+      "source": "/documentation/products/gateway/traffic_management/fallbacks",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#fallback-models"
+    },
+    {
+      "source": "/documentation/products/gateway/traffic_management/rate_limit",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#rate-limit"
+    },
+    {
+      "source": "/documentation/products/gateway/performance_optimization/caches",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#caches"
+    },
+    {
+      "source": "/documentation/products/gateway/performance_optimization/prompt-caching",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#prompt-caching"
+    },
+    {
+      "source": "/documentation/products/gateway/advanced_features/function_calling",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#function-calling"
+    },
+    {
+      "source": "/documentation/products/gateway/advanced_features/thinking",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#enable-thinking"
+    },
+    {
+      "source": "/documentation/products/gateway/advanced_features/upload_pdf",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#upload-pdf"
+    },
+    {
+      "source": "/documentation/products/gateway/advanced_features/upload_image",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#upload-image"
+    },
+    {
+      "source": "/documentation/products/gateway/monitoring_analysis/disable_logging",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#disable-logging"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/configuration/models",
+      "destination": "/documentation/features/llm-gateway/setup"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/traffic_management/load-balancing",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#load-balancing"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/traffic_management/retries",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#retries"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/traffic_management/fallbacks",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#fallback-models"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/traffic_management/rate_limit",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#rate-limit"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/performance_optimization/caches",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#caches"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/performance_optimization/prompt-caching",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#prompt-caching"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/advanced_features/function_calling",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#function-calling"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/advanced_features/thinking",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#enable-thinking"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/advanced_features/upload_pdf",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#upload-pdf"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/advanced_features/upload_image",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#upload-image"
+    },
+    {
+      "source": "/documentation/features/llm-gateway/monitoring_analysis/disable_logging",
+      "destination": "/documentation/features/llm-gateway/advanced-configuration#disable-logging"
+    },
+    {
+      "source": "/documentation/products/notifications/subscribe_alerts",
+      "destination": "/documentation/features/notifications/subscribe_alerts"
+    },
+    {
+      "source": "/documentation/products/notifications/webhooks",
+      "destination": "/documentation/features/notifications/webhooks"
+    },
+    {
+      "source": "/documentation/products/automation/quickstart",
+      "destination": "/documentation/features/automations/quickstart"
+    },
+    {
+      "source": "/documentation/products/automation/quickstart_online_eval",
+      "destination": "/documentation/features/automations/quickstart_online_eval"
+    },
+    {
+      "source": "/documentation/products/mcp/docs-mcp",
+      "destination": "/documentation/features/mcp/docs-mcp"
+    },
+    {
+      "source": "/documentation/products/mcp/platform-mcp",
+      "destination": "/documentation/features/mcp/platform-mcp"
     }
   ]
 }

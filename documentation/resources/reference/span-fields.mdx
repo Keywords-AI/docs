@@ -1,0 +1,279 @@
+---
+title: "Span fields"
+description: "Complete reference of every field available on a span record."
+---
+
+Every span contains these fields regardless of [log type](/documentation/features/observability/logs/log-content-types). Fields are automatically populated when using the [LLM Gateway](/documentation/features/llm-gateway/setup), or you can set them manually via the [logging endpoint](/apis/observe/logs/request-logging-endpoint).
+
+For usage guides, see [Log fields & parameters](/documentation/features/observability/logs/log-parameters) and [Tracing parameters](/documentation/features/observability/traces/span-parameters).
+
+## Input & Output
+
+<AccordionGroup>
+<Accordion title="input">
+`string / object / array` — Universal input to the model. **Required.** Format depends on the [log type](/documentation/features/observability/logs/log-content-types).
+</Accordion>
+
+<Accordion title="output">
+`string / object / array` — Model's response. **Required.** Format depends on the [log type](/documentation/features/observability/logs/log-content-types).
+</Accordion>
+
+<Accordion title="prompt_messages">
+`array` — (Legacy) Messages sent to the model. Use `input` instead.
+</Accordion>
+
+<Accordion title="completion_message">
+`object` — (Legacy) Final assistant message. Use `output` instead.
+</Accordion>
+
+<Accordion title="full_request">
+`object` — Complete request payload sent to the provider. Tool calls and function definitions are auto-extracted.
+</Accordion>
+
+<Accordion title="full_response">
+`object` — Full response object from the provider.
+</Accordion>
+</AccordionGroup>
+
+## Metrics
+
+<AccordionGroup>
+<Accordion title="start_time">
+`string` — Request start time in RFC3339 format (e.g. `"2025-09-08T07:46:14.007279Z"`).
+</Accordion>
+
+<Accordion title="timestamp">
+`string` — Request end time in RFC3339 format.
+</Accordion>
+
+<Accordion title="latency">
+`number` — Total request latency in seconds.
+</Accordion>
+
+<Accordion title="time_to_first_token">
+`number` — Time to first token in seconds. Useful for measuring streaming responsiveness.
+</Accordion>
+
+<Accordion title="tokens_per_second">
+`number` — Output token throughput (tokens per second).
+</Accordion>
+
+<Accordion title="cost">
+`number` — Total request cost in USD. Auto-calculated from model and token counts if omitted.
+</Accordion>
+
+<Accordion title="usage">
+`object` — Token usage breakdown.
+
+| Sub-field | Type | Description |
+|-----------|------|-------------|
+| `prompt_tokens` | integer | Tokens in the prompt/input |
+| `completion_tokens` | integer | Tokens in the model output |
+| `total_tokens` | integer | Sum of prompt and completion tokens |
+| `prompt_tokens_details` | object | Granular token breakdown (e.g., cached tokens) |
+</Accordion>
+
+<Accordion title="prompt_cache_hit_tokens">
+`integer` — Number of tokens served from cache.
+</Accordion>
+
+<Accordion title="prompt_cache_creation_tokens">
+`integer` — Number of tokens added to cache.
+</Accordion>
+
+<Accordion title="prompt_unit_price">
+`number` — Custom price per 1M prompt tokens. Use for self-hosted or fine-tuned models.
+</Accordion>
+
+<Accordion title="completion_unit_price">
+`number` — Custom price per 1M completion tokens.
+</Accordion>
+</AccordionGroup>
+
+## Identifiers & metadata
+
+<AccordionGroup>
+<Accordion title="unique_id">
+`string` — Unique identifier for the log. Auto-generated if not provided.
+</Accordion>
+
+<Accordion title="model">
+`string` — Model name (e.g. `"gpt-4o"`, `"claude-3-5-sonnet-20240620"`). **Required.**
+</Accordion>
+
+<Accordion title="log_type">
+`string` — Type of log. Defaults to `"chat"`. See [Log types](/documentation/features/observability/logs/log-content-types).
+</Accordion>
+
+<Accordion title="provider_id">
+`string` — Provider identifier (e.g. `"openai"`, `"anthropic"`).
+</Accordion>
+
+<Accordion title="environment">
+`string` — Runtime environment (e.g. `"test"`, `"prod"`). Used to separate test and production data.
+</Accordion>
+
+<Accordion title="customer_identifier">
+`string` — User or customer-level identifier. See [Customer identifier](/documentation/features/observability/customer-identifier).
+</Accordion>
+
+<Accordion title="customer_params">
+`object` — Extended customer info: `customer_identifier`, `name`, `email`.
+</Accordion>
+
+<Accordion title="metadata">
+`object` — Custom key-value pairs for tagging, analytics, and filtering.
+</Accordion>
+
+<Accordion title="custom_identifier">
+`string` — Indexed custom identifier for fast querying.
+</Accordion>
+
+<Accordion title="thread_identifier">
+`string` — Conversation thread identifier. Logs with the same value are grouped into a thread.
+</Accordion>
+
+<Accordion title="group_identifier">
+`string` — Group identifier for related logs.
+</Accordion>
+
+<Accordion title="prompt_id">
+`string` — Prompt template identifier. Auto-set when using [prompt management](/documentation/features/prompt-management/manage-prompts).
+</Accordion>
+
+<Accordion title="prompt_name">
+`string` — Prompt template name.
+</Accordion>
+
+<Accordion title="prompt_version_number">
+`integer` — Prompt version number.
+</Accordion>
+
+<Accordion title="deployment_name">
+`string` — Deployment name.
+</Accordion>
+
+<Accordion title="organization_key_id">
+`string` — API key identifier used for the request.
+</Accordion>
+</AccordionGroup>
+
+## Tracing
+
+<AccordionGroup>
+<Accordion title="trace_unique_id">
+`string` — **Required.** Groups all spans into a single trace. All spans sharing this ID form one trace.
+</Accordion>
+
+<Accordion title="span_unique_id">
+`string` — **Required.** Unique identifier for this span within the trace.
+</Accordion>
+
+<Accordion title="span_parent_id">
+`string` — Parent span ID. Creates the hierarchical tree structure. Omit or set to `null` for root spans.
+</Accordion>
+
+<Accordion title="span_name">
+`string` — Descriptive name for the operation (e.g. `"openai.chat"`, `"retrieval.search"`).
+</Accordion>
+
+<Accordion title="span_workflow_name">
+`string` — The nearest workflow this span belongs to. Used to label the root-level workflow in trace views.
+</Accordion>
+
+<Accordion title="span_path">
+`string` — Nested path within the workflow hierarchy.
+</Accordion>
+
+<Accordion title="trace_group_identifier">
+`string` — Groups related traces together, even across different sessions or systems.
+</Accordion>
+
+<Accordion title="respan_params">
+`object` — Additional Respan parameters passed via the tracing SDK.
+</Accordion>
+</AccordionGroup>
+
+## Status & errors
+
+<AccordionGroup>
+<Accordion title="status_code">
+`integer` — HTTP status code. Defaults to `200`.
+</Accordion>
+
+<Accordion title="status">
+`string` — Semantic status: `"success"` or `"error"`.
+</Accordion>
+
+<Accordion title="error_message">
+`string` — Error description if the request failed.
+</Accordion>
+
+<Accordion title="warnings">
+`string / object` — Non-fatal issues encountered during the request.
+</Accordion>
+</AccordionGroup>
+
+## LLM configuration
+
+<AccordionGroup>
+<Accordion title="temperature">
+`number` — Randomness control (0–2).
+</Accordion>
+
+<Accordion title="max_tokens">
+`integer` — Maximum number of tokens to generate.
+</Accordion>
+
+<Accordion title="top_p">
+`number` — Nucleus sampling parameter (0–1).
+</Accordion>
+
+<Accordion title="frequency_penalty">
+`number` — Penalizes tokens based on frequency (0–2).
+</Accordion>
+
+<Accordion title="presence_penalty">
+`number` — Penalizes tokens already present (0–2).
+</Accordion>
+
+<Accordion title="stop">
+`array` — Sequences that halt generation.
+</Accordion>
+
+<Accordion title="n">
+`integer` — Number of completions to generate.
+</Accordion>
+
+<Accordion title="stream">
+`boolean` — Whether the response was streamed.
+</Accordion>
+
+<Accordion title="response_format">
+`object` — Output format: `text`, `json_schema`, or `json_object`.
+</Accordion>
+
+<Accordion title="tools">
+`array` — Available tool/function definitions.
+</Accordion>
+
+<Accordion title="tool_choice">
+`string / object` — Controls tool selection: `"none"`, `"auto"`, or specific tool.
+</Accordion>
+</AccordionGroup>
+
+## Other
+
+<AccordionGroup>
+<Accordion title="positive_feedback">
+`boolean` — User sentiment. `true` = positive, `false` = negative.
+</Accordion>
+
+<Accordion title="keywordsai_api_controls">
+`object` — Logging behavior controls.
+
+| Sub-field | Type | Description |
+|-----------|------|-------------|
+| `block` | boolean | If `false`, server returns immediately without awaiting log completion |
+</Accordion>
+</AccordionGroup>

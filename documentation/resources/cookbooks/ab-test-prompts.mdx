@@ -1,0 +1,164 @@
+---
+title: "A/B test prompts in production"
+description: "Use prompt versioning and customer segmentation to compare prompt performance on live traffic."
+---
+
+## Overview
+
+Prompt changes can have unpredictable effects on output quality. Instead of deploying a new prompt version to all users at once, you can A/B test it: route a percentage of traffic to the new version, compare evaluation scores, and promote the winner.
+
+This cookbook walks through:
+1. Creating two prompt versions
+2. Routing traffic by customer segment
+3. Comparing results with evaluators
+
+## 1. Create prompt versions
+
+In the [Prompts page](https://platform.respan.ai/platform/prompts), create a prompt with two versions:
+
+- **v1 (current)**: Your existing production prompt
+- **v2 (candidate)**: The new prompt you want to test
+
+Each version can have different system instructions, templates, models, or parameters. See [Version control](/documentation/features/prompt-management/management_collaboration/version_control) for details.
+
+## 2. Fetch prompts in code
+
+Use the Respan SDK to fetch prompt versions at runtime:
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+import requests
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+def get_prompt(prompt_name, version=None):
+    """Fetch a prompt from Respan."""
+    headers = {"Authorization": "Bearer YOUR_RESPAN_API_KEY"}
+    params = {"prompt_name": prompt_name}
+    if version:
+        params["version"] = version
+    resp = requests.get(
+        "https://api.respan.ai/api/prompts/",
+        headers=headers,
+        params=params,
+    )
+    return resp.json()
+```
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+    baseURL: "https://api.respan.ai/api/",
+    apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+async function getPrompt(promptName: string, version?: number) {
+    const params = new URLSearchParams({ prompt_name: promptName });
+    if (version) params.set("version", String(version));
+
+    const resp = await fetch(
+        `https://api.respan.ai/api/prompts/?${params}`,
+        { headers: { Authorization: "Bearer YOUR_RESPAN_API_KEY" } }
+    );
+    return resp.json();
+}
+```
+</CodeGroup>
+
+## 3. Route traffic by segment
+
+Split users between prompt versions using `customer_identifier` or any segmentation logic:
+
+<CodeGroup>
+```python Python
+import hashlib
+
+def get_variant(customer_id: str, rollout_pct: int = 50) -> int:
+    """Deterministic assignment: same user always gets the same variant."""
+    hash_val = int(hashlib.md5(customer_id.encode()).hexdigest(), 16)
+    return 2 if (hash_val % 100) < rollout_pct else 1
+
+def call_with_ab_test(customer_id: str, user_message: str):
+    variant = get_variant(customer_id, rollout_pct=20)  # 20% get v2
+    prompt = get_prompt("support_agent", version=variant)
+
+    response = client.chat.completions.create(
+        model=prompt["model"],
+        messages=[
+            {"role": "system", "content": prompt["messages"][0]["content"]},
+            {"role": "user", "content": user_message},
+        ],
+        extra_body={
+            "customer_identifier": customer_id,
+            "metadata": {
+                "prompt_version": f"v{variant}",
+                "experiment": "support_prompt_ab_test",
+            },
+        },
+    )
+    return response
+```
+```typescript TypeScript
+import { createHash } from "crypto";
+
+function getVariant(customerId: string, rolloutPct = 50): number {
+    const hash = createHash("md5").update(customerId).digest("hex");
+    const val = parseInt(hash.slice(0, 8), 16);
+    return (val % 100) < rolloutPct ? 2 : 1;
+}
+
+async function callWithAbTest(customerId: string, userMessage: string) {
+    const variant = getVariant(customerId, 20); // 20% get v2
+    const prompt = await getPrompt("support_agent", variant);
+
+    const response = await client.chat.completions.create({
+        model: prompt.model,
+        messages: [
+            { role: "system", content: prompt.messages[0].content },
+            { role: "user", content: userMessage },
+        ],
+        // @ts-ignore
+        customer_identifier: customerId,
+        metadata: {
+            prompt_version: `v${variant}`,
+            experiment: "support_prompt_ab_test",
+        },
+    });
+    return response;
+}
+```
+</CodeGroup>
+
+## 4. Evaluate both variants
+
+Set up an [online evaluation automation](/documentation/features/automations/quickstart_online_eval) to score both variants automatically:
+
+1. **Create an evaluator** that scores response quality (e.g., helpfulness, accuracy)
+2. **Create a condition** that matches logs with `metadata.experiment = "support_prompt_ab_test"`
+3. **Create an automation** that runs the evaluator on matched logs
+
+## 5. Compare results
+
+Filter the [Dashboard](https://platform.respan.ai/platform/dashboard) by `metadata.prompt_version` to compare:
+
+- Average evaluation scores per variant
+- Cost per variant
+- Latency per variant
+- User feedback per variant
+
+Once you have enough data, promote the winning version and update your rollout to 100%.
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Prompt management" icon="wand-magic-sparkles" href="/documentation/features/prompt-management/quickstart">
+  Create and version prompts
+</Card>
+<Card title="Online evaluation" icon="gauge" href="/documentation/features/automations/quickstart_online_eval">
+  Set up automated scoring on live traffic
+</Card>
+</CardGroup>

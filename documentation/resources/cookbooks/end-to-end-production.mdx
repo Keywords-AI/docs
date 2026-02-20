@@ -1,0 +1,208 @@
+---
+title: "End-to-end: from first API call to production monitoring"
+description: "Full walkthrough combining gateway, tracing, evaluation, and automation with real code."
+---
+
+## Overview
+
+This cookbook walks through the complete Respan workflow with a real example: a customer support chatbot. By the end, you'll have:
+
+- LLM calls routed through the gateway
+- Prompts managed in the platform
+- Full tracing for every conversation
+- Automated evaluation on production traffic
+
+## Step 1: Set up the gateway
+
+Point your OpenAI SDK to Respan:
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+```
+
+Test that it works:
+
+```python
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+
+## Step 2: Create a prompt template
+
+Go to [Prompts](https://platform.respan.ai/platform/prompts) and create a prompt:
+
+- **Name**: `support_chatbot`
+- **System message**:
+```
+You are a helpful customer support agent for Acme Corp.
+Answer the customer's question based on our knowledge base.
+Be concise, friendly, and accurate.
+If you don't know the answer, say so honestly.
+```
+- **Model**: `gpt-4o-mini`
+
+## Step 3: Use the prompt in code
+
+Fetch the prompt at runtime so you can update it without redeploying:
+
+```python
+import requests
+
+def get_prompt(prompt_name):
+    headers = {"Authorization": "Bearer YOUR_RESPAN_API_KEY"}
+    resp = requests.get(
+        "https://api.respan.ai/api/prompts/",
+        headers=headers,
+        params={"prompt_name": prompt_name},
+    )
+    return resp.json()
+
+prompt = get_prompt("support_chatbot")
+
+response = client.chat.completions.create(
+    model=prompt["model"],
+    messages=[
+        {"role": "system", "content": prompt["messages"][0]["content"]},
+        {"role": "user", "content": "How do I reset my password?"},
+    ],
+    extra_body={
+        "customer_identifier": "user_123",
+        "thread_identifier": "conv_abc",
+        "metadata": {"feature": "support_chat"},
+    },
+)
+```
+
+## Step 4: Add tracing
+
+Wrap the chatbot logic with tracing to see the full execution flow:
+
+```python
+from respan_tracing.decorators import workflow, task
+from respan_tracing.main import RespanTelemetry
+from respan_tracing.contexts.span import respan_span_attributes
+
+k_tl = RespanTelemetry()
+
+
+@task(name="fetch_prompt")
+def fetch_prompt():
+    return get_prompt("support_chatbot")
+
+
+@task(name="generate_response")
+def generate_response(prompt, user_message):
+    response = client.chat.completions.create(
+        model=prompt["model"],
+        messages=[
+            {"role": "system", "content": prompt["messages"][0]["content"]},
+            {"role": "user", "content": user_message},
+        ],
+    )
+    return response.choices[0].message.content
+
+
+@workflow(name="support_chatbot")
+def support_chatbot(user_message: str, customer_id: str, thread_id: str):
+    with respan_span_attributes(
+        respan_params={
+            "customer_identifier": customer_id,
+            "thread_identifier": thread_id,
+            "metadata": {"feature": "support_chat"},
+        }
+    ):
+        prompt = fetch_prompt()
+        answer = generate_response(prompt, user_message)
+    return answer
+
+
+# Run it
+result = support_chatbot(
+    "How do I reset my password?",
+    customer_id="user_123",
+    thread_id="conv_abc",
+)
+print(result)
+```
+
+You'll see this trace in Respan:
+
+```
+support_chatbot (workflow)
+├── fetch_prompt (task)
+└── generate_response (task)
+    └── gpt-4o-mini (LLM call)
+```
+
+## Step 5: Create an evaluator
+
+Go to **Evaluation** > **Evaluators** > **+ New evaluator**:
+
+| Field | Value |
+|-------|-------|
+| **Name** | Support Quality |
+| **Type** | LLM |
+| **Model** | gpt-4o |
+| **Score type** | Numerical (1-5) |
+| **Passing score** | 3 |
+| **Definition** | Rate this customer support response. Consider: (1) Does it answer the question? (2) Is the tone friendly and professional? (3) Is the information accurate? Score: 1=poor, 3=acceptable, 5=excellent. |
+
+## Step 6: Run an offline experiment
+
+Before going to production, test your prompt against sample questions:
+
+1. Go to **Experiments** > **+ New experiment**
+2. Select the `support_chatbot` prompt
+3. Add test cases:
+
+| user_message | ideal_output |
+|---|---|
+| How do I reset my password? | Go to Settings > Security > Reset Password... |
+| What's your refund policy? | We offer full refunds within 30 days... |
+| My order hasn't arrived | Let me check your order status... |
+
+4. Run the experiment and evaluate with the "Support Quality" evaluator
+5. If scores are good, proceed to production
+
+## Step 7: Set up online evaluation
+
+Create an automation to continuously evaluate production traffic:
+
+1. **Condition**: `metadata.feature = "support_chat"`
+2. **Evaluator**: Support Quality
+3. **Sampling rate**: `0.2` (evaluate 20% of traffic)
+
+Now every 5th support conversation is automatically scored.
+
+## Step 8: Monitor and iterate
+
+Your production monitoring is now running. Here's your ongoing workflow:
+
+1. **Check the dashboard daily** — Watch cost, latency, and evaluation scores
+2. **Review low-scoring logs** — Filter for conversations that scored below 3
+3. **Add failures to your test dataset** — Growing your dataset makes evaluations more robust
+4. **Iterate on the prompt** — Edit in the Respan playground, test with experiments
+5. **Deploy updates** — Update the active prompt version, monitor the impact
+
+<Note>
+The complete workflow is now a loop: production data feeds evaluation, which feeds prompt improvements, which deploy back to production.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Workflow overview" icon="arrows-rotate" href="/documentation/getting-started/workflow">
+  See the full Respan workflow
+</Card>
+<Card title="A/B test prompts" icon="vials" href="/documentation/resources/cookbooks/ab-test-prompts">
+  Test prompt changes on a subset of users first
+</Card>
+</CardGroup>

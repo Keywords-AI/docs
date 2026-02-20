@@ -1,0 +1,138 @@
+---
+title: "Workflow"
+description: "A step-by-step guide to building reliable AI products with Respan."
+---
+
+Building AI products is an iterative process. Respan gives you the tools for each stage — from your first API call to production-grade evaluation and optimization.
+
+1. **Build** — Connect to LLMs and manage prompts
+2. **Observe** — Monitor logs, traces, and user behavior
+3. **Evaluate** — Test quality offline and online
+4. **Iterate** — Optimize based on data and ship improvements
+
+---
+
+## 1. Build
+
+Start by connecting your application to LLMs and setting up prompt management.
+
+### Gateway + Prompt management
+
+Use the Respan gateway to call 250+ models through a single API, then manage your prompts in the platform for version control, team collaboration, and A/B testing.
+
+**What you'll do:**
+- Point your OpenAI SDK to the Respan gateway (2 lines of code)
+- Create prompt templates in the Respan platform
+- Use prompts in your code with the Prompts API
+- Iterate on prompts in the playground without redeploying
+
+**Outcome:** Your LLM calls go through Respan, and your prompts are versioned and deployable from the platform.
+
+<CardGroup cols={2}>
+  <Card title="Gateway quickstart" icon="route" href="/documentation/getting-started/quickstart/gateway">
+    Connect to 250+ models via one API
+  </Card>
+  <Card title="Prompt management quickstart" icon="wand-magic-sparkles" href="/documentation/getting-started/quickstart/prompt_management">
+    Create and deploy prompt templates
+  </Card>
+</CardGroup>
+
+---
+
+## 2. Observe
+
+Once your application is running, add observability to understand what's happening in production.
+
+### Logging or tracing
+
+Choose based on your application complexity:
+- **Logging** — For simple LLM calls. Send request/response data to Respan for monitoring.
+- **Tracing** — For multi-step agents and workflows. See the full execution tree with parent-child relationships.
+
+**What you'll do:**
+- Instrument your LLM calls with logging or tracing
+- Monitor cost, latency, errors, and token usage on the dashboard
+- Track users with `customer_identifier`
+- Filter and search logs by metadata, model, status, and more
+
+**Outcome:** Full visibility into every LLM interaction — who called what, how long it took, how much it cost, and whether it succeeded.
+
+<CardGroup cols={2}>
+  <Card title="Logging quickstart" icon="file-lines" href="/documentation/getting-started/quickstart/logging">
+    Send LLM calls to Respan for observability
+  </Card>
+  <Card title="Tracing quickstart" icon="sitemap" href="/documentation/getting-started/quickstart/tracing">
+    Monitor agent workflows step-by-step
+  </Card>
+</CardGroup>
+
+---
+
+## 3. Evaluate
+
+With observability data flowing, set up evaluations to systematically measure and improve quality.
+
+### 3.1 Offline evaluation
+
+Test prompts and models before deploying to production. Run experiments over datasets to compare performance.
+
+**What you'll do:**
+1. **Set up a dataset** — Curate test cases with inputs and expected outputs
+2. **Set up evaluators** — Define how to score responses (LLM judge, code-based, or human review)
+3. **Run experiments** — Test prompt versions, models, or agent configurations against your dataset and compare scores side-by-side
+
+**Outcome:** Confidence that changes improve quality before they reach users.
+
+<CardGroup cols={2}>
+  <Card title="Evaluation quickstart" icon="chart-simple" href="/documentation/getting-started/quickstart/evaluation">
+    Set up datasets, evaluators, and experiments
+  </Card>
+  <Card title="Experiments" icon="flask" href="/documentation/features/evals/experiments/experiments">
+    Run and compare experiments
+  </Card>
+</CardGroup>
+
+### 3.2 Online evaluation
+
+Monitor production quality continuously with automations that evaluate live traffic.
+
+**What you'll do:**
+1. **Set up automations** — Configure rules that trigger evaluators on incoming logs
+2. **Monitor scores** — Track evaluation results on the dashboard in real time
+3. **Set alerts** — Get notified when quality drops below thresholds
+
+**Outcome:** Continuous quality monitoring in production — catch regressions as they happen, not after users complain.
+
+<CardGroup cols={2}>
+  <Card title="Automations quickstart" icon="bolt" href="/documentation/features/automations/quickstart">
+    Set up automated evaluation pipelines
+  </Card>
+  <Card title="Online evaluation" icon="gauge" href="/documentation/features/automations/quickstart_online_eval">
+    Run evaluators on live traffic
+  </Card>
+</CardGroup>
+
+---
+
+## 4. Iterate
+
+Use the data from observation and evaluation to continuously improve your AI product.
+
+**The loop:**
+- Review production logs and scores to identify failure modes
+- Curate failing examples into your evaluation dataset
+- Adjust prompts in the playground and test with experiments
+- Deploy improved versions and monitor with automations
+
+<Note>
+This is a continuous cycle. Each deployment generates new observability data, which feeds back into evaluation and optimization. The goal is to make each iteration faster and more data-driven.
+</Note>
+
+<CardGroup cols={2}>
+  <Card title="Prompt playground" icon="play" href="/documentation/features/prompt-management/model_playground">
+    Test and iterate on prompts
+  </Card>
+  <Card title="Dashboard" icon="chart-line" href="/documentation/features/observability/metrics">
+    Monitor metrics and trends
+  </Card>
+</CardGroup>

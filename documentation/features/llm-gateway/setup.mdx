@@ -1,0 +1,87 @@
+---
+title: "Setup"
+description: "Choose a model and integrate the Respan LLM Gateway with your preferred SDK."
+---
+
+## Supported models
+
+After you integrate the LLM proxy, you can choose a model from the [Models page](https://platform.respan.ai/platform/models). You can see each model's description, pricing, and other metrics.
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/models.png"/>
+</Frame>
+
+### Model family
+Click an exact model to see its model family — a group of models hosted by different LLM providers.
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/model-details.png"/>
+</Frame>
+
+### Integration code
+Click the `Code` button to copy the integration code with the language you are using.
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/model-code.png"/>
+</Frame>
+
+## Call models in different frameworks
+<Tabs>
+<Tab title="OpenAI Python SDK">
+```python {9}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="claude-3-5-haiku-20241022",
+    messages=[
+        {"role": "user", "content": "Tell me a long story"}
+    ]
+)
+```
+</Tab>
+<Tab title="OpenAI TypeScript SDK">
+```typescript {11}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "claude-3-5-sonnet-20241022"
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</Tab>
+<Tab title="Standard API">
+```python  {3}
+import requests
+def demo_call(input,
+              model="groq/llama-3.3-70b-specdec",
+              token="YOUR_RESPAN_API_KEY",
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+</Tab>
+</Tabs>

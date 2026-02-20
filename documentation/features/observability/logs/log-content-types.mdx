@@ -1,0 +1,341 @@
+---
+title: "Log types"
+description: "How to log different types of LLM interactions — chat completions, embeddings, tool calls, audio, and more."
+---
+
+## Overview
+
+Every log has a `log_type` field that determines its input/output format. The most common type is `chat`, but Respan supports logging embeddings, audio, tool calls, and workflow spans.
+
+All log types use universal `input` and `output` fields and are sent to the same [logging endpoint](/apis/observe/logs/request-logging-endpoint). For the complete field reference, see [Log fields & parameters](/documentation/features/observability/logs/log-parameters).
+
+### All log types
+
+<Tabs>
+<Tab title="LLM inference">
+| Log type | Description | Input | Output |
+|----------|-------------|-------|--------|
+| `chat` | Chat completions (default) | Messages array | Assistant message |
+| `completion` | Legacy completion format | Prompt string | Completion string |
+| `response` | Response API calls | Request object | Response object |
+| `embedding` | Vector embeddings | Text string | Embeddings array |
+| `transcription` | Speech-to-text | Audio metadata | Transcribed text |
+| `speech` | Text-to-speech | Text string | Audio metadata |
+</Tab>
+
+<Tab title="Workflow & agent">
+| Log type | Description |
+|----------|-------------|
+| `workflow` | Root-level workflow orchestration |
+| `task` | Individual task within a workflow |
+| `tool` | Tool or function execution |
+| `agent` | AI agent operation |
+| `handoff` | Agent-to-agent transfer |
+| `guardrail` | Safety and validation check |
+| `function` | Standalone function execution |
+</Tab>
+
+<Tab title="Other">
+| Log type | Description |
+|----------|-------------|
+| `custom` | User-defined custom operations |
+| `generation` | Detailed generation process tracking |
+| `unknown` | Fallback for unrecognized types |
+</Tab>
+</Tabs>
+
+---
+
+## Chat
+
+The default log type. Input is an array of messages, output is the assistant's response.
+
+```json
+{
+  "model": "gpt-4o",
+  "input": [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is machine learning?"}
+  ],
+  "output": {
+    "role": "assistant",
+    "content": "Machine learning is a subset of artificial intelligence..."
+  }
+}
+```
+
+### Images
+
+Include images in your messages using the `image_url` content type. This follows the same format as the OpenAI vision API.
+
+```json
+{
+  "model": "gpt-4-vision-preview",
+  "input": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "What do you see in this image?"
+        },
+        {
+          "type": "image_url",
+          "image_url": {
+            "url": "https://example.com/image.png",
+            "detail": "auto"
+          }
+        }
+      ]
+    }
+  ],
+  "output": {
+    "role": "assistant",
+    "content": "This image shows..."
+  }
+}
+```
+
+The `detail` parameter can be `auto`, `low`, or `high`.
+
+### Thinking blocks
+
+When using models with thinking capabilities (e.g. Claude with extended thinking), the response includes additional reasoning fields that are automatically captured.
+
+**Request:**
+
+```json
+{
+  "model": "claude-sonnet-4-20250514",
+  "max_tokens": 16000,
+  "thinking": {
+    "type": "enabled",
+    "budget_tokens": 10000
+  },
+  "messages": [
+    {"role": "user", "content": "Prove there are infinitely many primes p where p mod 4 = 3."}
+  ]
+}
+```
+
+**Response fields:**
+
+```json
+{
+  "role": "assistant",
+  "content": "Yes, there are infinitely many such primes...",
+  "reasoning_content": "This is asking about primes congruent to 3 modulo 4...",
+  "thinking_blocks": [
+    {
+      "type": "thinking",
+      "thinking": "This is asking about primes congruent to 3 modulo 4...",
+      "signature": "EswgCkYIBhgCKkDCG..."
+    }
+  ]
+}
+```
+
+For more on enabling thinking mode via the gateway, see [Enable Thinking](/documentation/features/llm-gateway/advanced-configuration#enable-thinking).
+
+### Prompt variables
+
+Log prompt variables so they appear in the side panel for easy inspection and can be added to [testsets](/documentation/features/evals/testsets) with one click.
+
+<Frame>
+<video
+  controls
+  className="w-full aspect-video"
+  src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/prompt-variable-logging.mp4"
+  alt="Prompt variables in logs"
+></video>
+</Frame>
+
+Wrap variables in `{{}}` in your input and pass a `variables` object:
+
+```json
+"input": [
+    {
+      "content": "Please develop an optimized Python function to {{task_description}}, utilizing {{specific_library}}.",
+      "role": "user"
+    }
+],
+"variables": {
+    "task_description": "Square a number",
+    "specific_library": "math"
+}
+```
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/sidepanel-prompt-variables.png" alt="Prompt variables in logs" />
+</Frame>
+
+<Note>
+If you are using prompts via the [LLM Gateway](/documentation/features/prompt-management/use-prompt), variables are logged automatically — no need to pass them manually.
+</Note>
+
+### Tool calls
+
+Log tool calls and function calling interactions as part of chat messages:
+
+```python
+import requests
+
+url = "https://api.respan.ai/api/request-logs/"
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+
+payload = {
+    "model": "gpt-4",
+    "input": [
+        {"role": "user", "content": "What's the weather in Boston?"},
+        {
+            "role": "assistant",
+            "content": None,
+            "tool_calls": [
+                {
+                    "id": "call_abc123",
+                    "type": "function",
+                    "function": {
+                        "name": "get_current_weather",
+                        "arguments": '{"location": "Boston, MA"}'
+                    }
+                }
+            ]
+        }
+    ],
+    "output": {
+        "role": "assistant",
+        "content": "The current weather in Boston is 72°F and sunny."
+    },
+    "tools": [
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather in a given location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "location": {"type": "string", "description": "City and state, e.g. San Francisco, CA"},
+                        "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]}
+                    },
+                    "required": ["location"]
+                }
+            }
+        }
+    ]
+}
+
+response = requests.post(url, headers=headers, json=payload)
+```
+
+**Key fields:**
+- **`tool_calls`** in the assistant message — array of function calls made
+- **`tools`** at the top level — array of available function definitions
+- **`tool_choice`** (optional) — specify which tool the model should use
+
+---
+
+## Embedding
+
+Set `log_type` to `"embedding"`. Input is text, output is the vector array.
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://api.respan.ai/api/request-logs/"
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "log_type": "embedding",
+    "model": "text-embedding-3-small",
+    "input": "something to embed",
+    "output": [
+        -0.006929283495992422,
+        -0.005336422007530928,
+        -4.547132266452536e-05,
+        -0.024047505110502243
+    ],
+    "latency": 0.323887338
+}
+response = requests.post(url, headers=headers, json=payload)
+```
+```typescript Typescript
+const url = 'https://api.respan.ai/api/request-logs/';
+const headers = {
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY',
+    'Content-Type': 'application/json'
+};
+
+const payload = {
+    log_type: 'embedding',
+    model: 'text-embedding-3-small',
+    input: 'something to embed',
+    output: [
+        -0.006929283495992422,
+        -0.005336422007530928,
+        -4.547132266452536e-05,
+        -0.024047505110502243
+    ],
+    latency: 0.323887338
+};
+
+fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+---
+
+## Speech & transcription
+
+### Transcription (speech-to-text)
+
+Set `log_type` to `"transcription"`. Input is audio metadata, output is transcribed text.
+
+```json
+{
+  "log_type": "transcription",
+  "model": "whisper-1",
+  "input": {"audio_url": "https://example.com/audio.mp3", "filename": "recording.mp3"},
+  "output": "Hello, how can I help you today?"
+}
+```
+
+### Speech (text-to-speech)
+
+Set `log_type` to `"speech"`. Input is text, output is audio metadata.
+
+```json
+{
+  "log_type": "speech",
+  "model": "tts-1",
+  "input": "Hello, how can I help you today?",
+  "output": {"audio_url": "https://example.com/output.mp3", "filename": "response.mp3"}
+}
+```
+
+---
+
+## Workflow & agent types
+
+These log types are used by [tracing](/documentation/features/observability/traces/quickstart) to represent spans in a trace hierarchy:
+
+- **`workflow`** — Root-level workflow orchestration
+- **`task`** — Individual task within a workflow
+- **`tool`** — Tool or function execution
+- **`agent`** — AI agent operation
+- **`handoff`** — Agent-to-agent transfer
+- **`guardrail`** — Safety and validation check
+
+For details on how to create and orchestrate these span types, see [Orchestration](/documentation/features/observability/traces/span-types).

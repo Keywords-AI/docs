@@ -1,0 +1,209 @@
+---
+title: "Trace a RAG pipeline"
+description: "Build a retrieval-augmented generation pipeline with full tracing to debug each step."
+---
+
+## Overview
+
+A RAG pipeline has multiple steps — retrieval, optional reranking, and generation — that can each fail silently. Tracing lets you see exactly what was retrieved, what context the LLM received, and how it responded. When something goes wrong, you can pinpoint which step broke.
+
+This cookbook builds a simple RAG pipeline with Respan tracing, so every step appears as a span in the trace tree.
+
+## Setup
+
+<CodeGroup>
+```bash Python
+pip install respan-tracing openai chromadb
+```
+```bash JavaScript
+npm install @respan/tracing openai
+```
+</CodeGroup>
+
+Set your environment variables:
+
+```bash
+export RESPAN_API_KEY="your_respan_api_key"
+export OPENAI_API_KEY="your_openai_api_key"
+```
+
+## Full example
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+from respan_tracing.decorators import workflow, task
+from respan_tracing.main import RespanTelemetry
+import chromadb
+
+# Initialize
+k_tl = RespanTelemetry()
+client = OpenAI()
+chroma = chromadb.Client()
+collection = chroma.get_or_create_collection("docs")
+
+# Seed some documents
+collection.add(
+    documents=[
+        "Respan supports 250+ LLM models through a unified API gateway.",
+        "Traces organize logs into hierarchical workflows with parent-child spans.",
+        "Evaluators can be LLM-based, code-based, or human reviewers.",
+        "Automations run evaluators on production logs in real-time.",
+    ],
+    ids=["doc1", "doc2", "doc3", "doc4"],
+)
+
+
+@task(name="retrieve_documents")
+def retrieve_documents(query: str, top_k: int = 3):
+    """Retrieve relevant documents from the vector store."""
+    results = collection.query(query_texts=[query], n_results=top_k)
+    return results["documents"][0]
+
+
+@task(name="generate_answer")
+def generate_answer(query: str, context: list[str]):
+    """Generate an answer using retrieved context."""
+    context_str = "\n".join(f"- {doc}" for doc in context)
+
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": f"Answer based on this context:\n{context_str}",
+            },
+            {"role": "user", "content": query},
+        ],
+    )
+    return completion.choices[0].message.content
+
+
+@workflow(name="rag_pipeline")
+def rag_pipeline(query: str):
+    """Full RAG pipeline: retrieve → generate."""
+    documents = retrieve_documents(query)
+    answer = generate_answer(query, documents)
+    return answer
+
+
+# Run it
+result = rag_pipeline("How does Respan handle tracing?")
+print(result)
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'rag-app'
+});
+const openai = new OpenAI();
+
+// Simple in-memory docs for this example
+const docs = [
+    "Respan supports 250+ LLM models through a unified API gateway.",
+    "Traces organize logs into hierarchical workflows with parent-child spans.",
+    "Evaluators can be LLM-based, code-based, or human reviewers.",
+    "Automations run evaluators on production logs in real-time.",
+];
+
+async function ragPipeline(query: string) {
+    return await respanAi.withWorkflow(
+        { name: 'rag_pipeline' },
+        async () => {
+            // Retrieve
+            const documents = await respanAi.withTask(
+                { name: 'retrieve_documents' },
+                async () => {
+                    // Simplified retrieval — in production, use a vector DB
+                    return docs.filter(d =>
+                        d.toLowerCase().includes(query.toLowerCase().split(' ')[0])
+                    );
+                }
+            );
+
+            // Generate
+            const answer = await respanAi.withTask(
+                { name: 'generate_answer' },
+                async () => {
+                    const context = documents.map(d => `- ${d}`).join('\n');
+                    const completion = await openai.chat.completions.create({
+                        model: 'gpt-4o-mini',
+                        messages: [
+                            { role: 'system', content: `Answer based on this context:\n${context}` },
+                            { role: 'user', content: query },
+                        ],
+                    });
+                    return completion.choices[0].message.content;
+                }
+            );
+
+            return answer;
+        }
+    );
+}
+
+ragPipeline("How does Respan handle tracing?").then(console.log);
+```
+</CodeGroup>
+
+## What you'll see in Respan
+
+After running the pipeline, go to [Traces](https://platform.respan.ai/platform/traces) to see the trace tree:
+
+```
+rag_pipeline (workflow)
+├── retrieve_documents (task)
+└── generate_answer (task)
+    └── gpt-4o-mini (LLM call - auto-captured)
+```
+
+Each span shows:
+- **Input/Output**: What went in and what came out
+- **Latency**: How long each step took
+- **Cost**: Token usage and cost for LLM calls
+
+## Add metadata for filtering
+
+Tag your RAG traces with metadata so you can filter and analyze them:
+
+```python
+from respan_tracing.contexts.span import respan_span_attributes
+
+@workflow(name="rag_pipeline")
+def rag_pipeline(query: str):
+    with respan_span_attributes(
+        respan_params={
+            "customer_identifier": "user_123",
+            "metadata": {
+                "pipeline": "rag",
+                "retriever": "chromadb",
+                "top_k": 3,
+            },
+        }
+    ):
+        documents = retrieve_documents(query)
+        answer = generate_answer(query, documents)
+    return answer
+```
+
+## Debug a bad answer
+
+When a RAG answer is wrong, the trace tells you why:
+
+1. **Bad retrieval**: The `retrieve_documents` span shows irrelevant documents were returned → fix your embeddings or retrieval logic
+2. **Good retrieval, bad generation**: The context was relevant but the LLM ignored it → adjust your system prompt
+3. **Missing context**: No relevant documents found → add more data to your knowledge base
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Tracing quickstart" icon="sitemap" href="/documentation/getting-started/quickstart/tracing">
+  Set up tracing for your framework
+</Card>
+<Card title="Tracing parameters" icon="sliders" href="/documentation/features/observability/traces/span-parameters">
+  Add metadata, customer IDs, and grouping
+</Card>
+</CardGroup>

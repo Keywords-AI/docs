@@ -1,0 +1,262 @@
+---
+title: "Datasets"
+description: "Create and manage datasets for evaluations and experiments."
+---
+
+A **dataset** is a curated collection of logs (inputs/outputs + metadata) that you can evaluate, annotate, and use to power experiments.
+
+---
+
+## Create from existing logs
+
+Sample production logs into a dataset by applying filters, time ranges, and sampling percentages.
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Go to Datasets and click Create">
+Navigate to **Datasets** and click **Create dataset**. Choose **From logs (sampling)**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/fromlogs_sampling.png" alt="Create dataset from logs" />
+</Frame>
+</Step>
+
+<Step title="Set filters, time range, and sampling percentage">
+Configure filters (e.g. `status_code = 200`, specific model, metadata), time range, and sampling percentage.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/filters.png" alt="Dataset filters" />
+</Frame>
+</Step>
+
+<Step title="Create and verify">
+Click **Create**. Once ingestion finishes, open the dataset and confirm logs appear.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/see_logs.png" alt="Dataset logs" />
+</Frame>
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+**Create with specific log IDs:**
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+url = "https://api.respan.ai/api/datasets/"
+
+payload = {
+  "name": "Dataset from existing logs",
+  "type": "sampling",
+  "sampling": 100,
+  "start_time": "2025-07-30T00:00:00Z",
+  "end_time": "2025-08-01T00:00:00Z",
+  "initial_log_filters": {
+    "id": {"operator": "in", "value": ["log_id_1", "log_id_2"]}
+  }
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/datasets/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name":"Dataset from existing logs",
+    "type":"sampling",
+    "sampling":100,
+    "start_time":"2025-07-30T00:00:00Z",
+    "end_time":"2025-08-01T00:00:00Z",
+    "initial_log_filters":{"id":{"operator":"in","value":["log_id_1","log_id_2"]}}
+  }'
+```
+</CodeGroup>
+
+**Or bulk add by filters:**
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+dataset_id = "YOUR_DATASET_ID"
+
+url = f"https://api.respan.ai/api/datasets/{dataset_id}/logs/bulk/"
+payload = {
+  "start_time": "2025-07-01T00:00:00Z",
+  "end_time": "2025-07-31T23:59:59Z",
+  "filters": {"status_code": {"operator": "eq", "value": 200}},
+  "sampling_percentage": 40
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/datasets/{dataset_id}/logs/bulk/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "start_time":"2025-07-01T00:00:00Z",
+    "end_time":"2025-07-31T23:59:59Z",
+    "filters":{"status_code":{"operator":"eq","value":200}},
+    "sampling_percentage": 40
+  }'
+```
+</CodeGroup>
+
+See the [Datasets API reference](/apis/evaluate/datasets/list) for all endpoints.
+
+</Tab>
+</Tabs>
+
+---
+
+## Create manually
+
+Create an empty dataset and add logs by hand — via JSON, CSV, or API.
+
+<Tabs>
+<Tab title="Via UI">
+
+<Steps>
+<Step title="Create an empty dataset">
+Navigate to **Datasets**, click **Create dataset**, and choose **Create empty**.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/create.png" alt="Create empty dataset" />
+</Frame>
+</Step>
+
+<Step title="Add logs">
+Click **Insert new log** and provide JSON with **input** and **output**, or click **Import from CSV** to upload a batch.
+
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/insert_json.png" alt="Insert JSON log" />
+</Frame>
+
+[CSV template (Google Drive)](https://drive.google.com/file/d/10U_nYZxCd_uOYyuZob9x0gE6McJPdYb8/view?usp=drive_link)
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Via API">
+
+<Steps>
+<Step title="Create an empty dataset">
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+
+url = "https://api.respan.ai/api/datasets/"
+payload = {
+  "name": "Demo Dataset (via API)",
+  "description": "Created from docs tutorial",
+  "is_empty": True
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+dataset = res.json()
+print("dataset_id:", dataset["id"])
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/datasets/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Demo Dataset (via API)",
+    "description": "Created from docs tutorial",
+    "is_empty": true
+  }'
+```
+</CodeGroup>
+</Step>
+
+<Step title="Add a dataset log">
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+dataset_id = "YOUR_DATASET_ID"
+
+url = f"https://api.respan.ai/api/datasets/{dataset_id}/logs/"
+payload = {
+  "input": {
+    "question": "What is 2+2?",
+    "context": {"source": "docs_tutorial"}
+  },
+  "output": {
+    "answer": "4",
+    "explanation": "2 + 2 = 4."
+  },
+  "metadata": {
+    "custom_identifier": "dataset-tutorial-log",
+    "model": "gpt-4o-mini"
+  }
+}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/datasets/{dataset_id}/logs/" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {"question":"What is 2+2?"},
+    "output": {"answer":"4","explanation":"2 + 2 = 4."},
+    "metadata": {"custom_identifier":"dataset-tutorial-log","model":"gpt-4o-mini"}
+  }'
+```
+</CodeGroup>
+</Step>
+
+<Step title="Run an eval on the dataset">
+
+<CodeGroup>
+```python Python
+import requests
+
+API_KEY = "YOUR_API_KEY"
+dataset_id = "YOUR_DATASET_ID"
+
+url = f"https://api.respan.ai/api/datasets/{dataset_id}/eval-reports/create"
+payload = {"evaluator_slugs": ["char_count_eval"]}
+
+res = requests.post(url, headers={"Authorization": f"Bearer {API_KEY}"}, json=payload)
+print(res.json())
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/datasets/{dataset_id}/eval-reports/create" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"evaluator_slugs":["char_count_eval"]}'
+```
+</CodeGroup>
+</Step>
+</Steps>
+
+See the [Datasets API reference](/apis/evaluate/datasets/list) for all endpoints.
+
+</Tab>
+</Tabs>
+

@@ -1,0 +1,215 @@
+---
+title: "Tracing SDK"
+description: "Detailed features of the Respan tracing SDK — decorators, class-based workflows, and overriding span input/output."
+---
+
+The Respan tracing SDK provides decorators and wrappers to instrument your code. This page covers the detailed features. For initial setup, see the [quickstart](/documentation/getting-started/quickstart/tracing).
+
+---
+
+## Decorators & span types
+
+Use decorators (Python) or wrapper methods (JS/TS) to create spans. Each decorator creates a different span type in the trace tree.
+
+| Decorator | Span type | Use for |
+|-----------|-----------|---------|
+| `@workflow` / `withWorkflow` | Workflow | Top-level parent span |
+| `@task` / `withTask` | Task | Individual steps within a workflow |
+| `@agent` / `withAgent` | Agent | Agent-level operations |
+| `@tool` / `withTool` | Tool | Tool/function calls |
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+from respan_tracing.decorators import workflow, task
+from respan_tracing.main import RespanTelemetry
+
+k_tl = RespanTelemetry()
+client = OpenAI()
+
+@task(name="joke_creation")
+def create_joke():
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "Tell me a joke about opentelemetry"}],
+        temperature=0.5,
+        max_tokens=100,
+    )
+    return completion.choices[0].message.content
+
+@task(name="pirate_joke_translation")
+def translate_joke_to_pirate(joke: str):
+    completion = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": "translate to pirate language:\n\n" + joke}],
+    )
+    return completion.choices[0].message.content
+
+@workflow(name="joke_workflow")
+def joke_workflow():
+    joke = create_joke()
+    pirate_joke = translate_joke_to_pirate(joke)
+    return pirate_joke
+
+result = joke_workflow()
+print(result)
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'joke-app'
+});
+const openai = new OpenAI();
+
+async function createJoke() {
+    return await respanAi.withTask(
+        { name: 'joke_creation' },
+        async () => {
+            const completion = await openai.chat.completions.create({
+                messages: [{ role: 'user', content: 'Tell me a joke about opentelemetry' }],
+                model: 'gpt-3.5-turbo',
+            });
+            return completion.choices[0].message.content;
+        }
+    );
+}
+
+async function translateJokeToPirate(joke: string) {
+    return await respanAi.withTask(
+        { name: 'pirate_joke_translation' },
+        async () => {
+            const completion = await openai.chat.completions.create({
+                messages: [{ role: 'user', content: `translate to pirate language:\n\n${joke}` }],
+                model: 'gpt-3.5-turbo'
+            });
+            return completion.choices[0].message.content;
+        }
+    );
+}
+
+async function jokeWorkflow() {
+    return await respanAi.withWorkflow(
+        { name: 'joke_workflow' },
+        async () => {
+            const joke = await createJoke();
+            return await translateJokeToPirate(joke!);
+        }
+    );
+}
+
+jokeWorkflow().then(console.log);
+```
+</CodeGroup>
+
+For the full SDK API reference, see the [Python SDK](/sdks/python-tracing/quickstart) or [TypeScript SDK](/sdks/typescript-tracing/quickstart).
+
+---
+
+## Class-based workflows
+
+Apply `@workflow` to a class with `method_name` to designate the entry point. Use `@task` on individual methods.
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+from respan_tracing import RespanTelemetry
+from respan_tracing.decorators import workflow, task
+
+k_tl = RespanTelemetry()
+client = OpenAI()
+
+@workflow(name="joke_agent", method_name="run")
+class JokeAgent:
+    @task(name="joke_creation")
+    def create_joke(self):
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": "Tell me a joke"}],
+        )
+        return completion.choices[0].message.content
+
+    def run(self):
+        return self.create_joke()
+
+agent = JokeAgent()
+result = agent.run()
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'joke-app'
+});
+const openai = new OpenAI();
+
+class JokeAgent {
+    async createJoke() {
+        return await respanAi.withTask(
+            { name: 'joke_creation' },
+            async () => {
+                const completion = await openai.chat.completions.create({
+                    messages: [{ role: 'user', content: 'Tell me a joke' }],
+                    model: 'gpt-3.5-turbo'
+                });
+                return completion.choices[0].message.content;
+            }
+        );
+    }
+
+    async run() {
+        return await respanAi.withWorkflow(
+            { name: 'joke_agent' },
+            async () => this.createJoke()
+        );
+    }
+}
+
+const agent = new JokeAgent();
+agent.run().then(console.log);
+```
+</CodeGroup>
+
+---
+
+## Override span input & output
+
+Control what appears as a span's input/output in the trace UI using OpenTelemetry attributes:
+
+```python Python
+import json
+from opentelemetry.semconv_ai import SpanAttributes
+from respan_tracing.main import RespanTelemetry
+from respan_tracing.decorators import workflow
+
+k_tl = RespanTelemetry()
+client = k_tl.get_client()
+
+@workflow(name="update_attributes_test")
+def update_attributes_test(input: str):
+    force_set_attributes = {
+        SpanAttributes.TRACELOOP_ENTITY_INPUT: json.dumps({
+            "args": [],
+            "kwargs": {"text": "custom input"}
+        }),
+    }
+
+    client.update_current_span(
+        attributes=force_set_attributes,
+        name="update_attributes_test",
+        respan_params={"metadata": {"test": "test"}},
+    )
+
+    return "Some desired output"
+
+if __name__ == "__main__":
+    update_attributes_test("Some input")
+```
+
+<Note>
+Use `update_current_span(attributes=...)` for overriding displayed input/output. Values must be JSON-serializable strings via `json.dumps(...)`.
+</Note>

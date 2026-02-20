@@ -1,0 +1,157 @@
+---
+title: "Build an eval pipeline from production logs"
+description: "Curate failing logs into a dataset, create evaluators, run experiments, and deploy the winner."
+---
+
+## Overview
+
+The best evaluation datasets come from real production data. This cookbook walks through the full evaluation loop:
+
+1. Find failing or low-quality logs in production
+2. Curate them into a dataset
+3. Create an evaluator to score responses
+4. Run experiments to compare prompt versions
+5. Deploy the winning version
+
+## 1. Identify problem logs
+
+Start by reviewing production logs on the [Logs page](https://platform.respan.ai/platform/requests). Look for:
+
+- Logs with low evaluation scores
+- Logs with error status codes
+- Logs flagged by users (negative feedback)
+- Logs with specific metadata tags (e.g., `feature: "support_chat"`)
+
+Use [saved views](/documentation/features/observability/views) to create a filter for logs you want to investigate.
+
+## 2. Save logs to a dataset
+
+Once you've identified representative failure cases, save them as a testset for offline evaluation.
+
+### Via the platform
+
+1. Select logs on the Logs page
+2. Click **Save to dataset**
+3. Map the log fields to testset columns:
+   - Log input → testset variables (match your prompt template variables)
+   - Log output → `ideal_output` (or manually write better expected outputs)
+
+### Via the API
+
+<CodeGroup>
+```python Python
+import requests
+
+headers = {"Authorization": "Bearer YOUR_RESPAN_API_KEY"}
+
+# 1. Fetch recent logs with issues
+logs_response = requests.get(
+    "https://api.respan.ai/api/request-logs/",
+    headers=headers,
+    params={
+        "status": "error",
+        "limit": 50,
+    },
+)
+logs = logs_response.json()["data"]
+
+# 2. Transform into testset rows
+test_cases = []
+for log in logs:
+    test_cases.append({
+        "user_message": log["input"],       # Map to your prompt variables
+        "ideal_output": "",                   # Fill in manually or leave empty
+    })
+
+# Use these test cases in your experiment
+print(f"Created {len(test_cases)} test cases from production logs")
+```
+```typescript TypeScript
+const headers = { Authorization: "Bearer YOUR_RESPAN_API_KEY" };
+
+// 1. Fetch recent logs with issues
+const logsResponse = await fetch(
+    "https://api.respan.ai/api/request-logs/?status=error&limit=50",
+    { headers }
+);
+const logs = (await logsResponse.json()).data;
+
+// 2. Transform into testset rows
+const testCases = logs.map((log: any) => ({
+    user_message: log.input,
+    ideal_output: "",
+}));
+
+console.log(`Created ${testCases.length} test cases from production logs`);
+```
+</CodeGroup>
+
+## 3. Create an evaluator
+
+Set up an evaluator that scores the quality criteria you care about. Go to **Evaluation** > **Evaluators** > **+ New evaluator**.
+
+**Example: Helpfulness evaluator**
+
+| Field | Value |
+|-------|-------|
+| **Name** | Helpfulness |
+| **Type** | LLM |
+| **Model** | gpt-4o |
+| **Score type** | Numerical (1-5) |
+| **Definition** | Rate how helpful the response is to the user's question. Consider: Does it directly answer the question? Is the information accurate? Is it actionable? Score 1 = unhelpful, 5 = excellent. |
+
+The evaluator has access to these variables in the definition:
+- `{{llm_input}}` — the input sent to the LLM
+- `{{llm_output}}` — the LLM's response
+- `{{ideal_output}}` — the expected output (if provided in the dataset)
+
+See [LLM evaluators](/documentation/features/evals/llm-evals/llm-evaluator) for more.
+
+## 4. Run experiments
+
+Now test different prompt versions against your dataset:
+
+1. Go to **Experiments** > **+ New experiment**
+2. Select your prompt and choose the versions to compare (e.g., v1 current vs v2 candidate)
+3. Load your testset
+4. Run the experiment
+5. Run evaluations on the outputs
+
+The experiment results show scores side-by-side for each test case across prompt versions.
+
+## 5. Deploy the winner
+
+Once you've identified the better prompt version:
+
+1. Go to **Prompts** and set the winning version as the active version
+2. Your production code automatically picks up the new version (if using the Prompts API)
+3. Set up [online evaluation](/documentation/features/automations/quickstart_online_eval) to continuously monitor the deployed version
+
+## The full loop
+
+```
+Production logs → Identify failures → Curate dataset
+                                           ↓
+                             Create/update evaluators
+                                           ↓
+                              Run experiments (offline)
+                                           ↓
+                              Deploy winning prompt
+                                           ↓
+                         Monitor with online eval (back to production logs)
+```
+
+<Note>
+This loop gets faster over time. As your dataset grows and evaluators mature, each iteration requires less manual work.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Experiments" icon="flask" href="/documentation/features/evals/experiments/experiments">
+  Run and compare experiments
+</Card>
+<Card title="Online evaluation" icon="gauge" href="/documentation/features/automations/quickstart_online_eval">
+  Monitor production quality continuously
+</Card>
+</CardGroup>

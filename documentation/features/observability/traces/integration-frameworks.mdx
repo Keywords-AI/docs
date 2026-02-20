@@ -1,0 +1,178 @@
+---
+title: "Integration frameworks"
+description: "Use pre-built integrations to add Respan tracing to popular AI frameworks."
+---
+
+If you're using a popular AI framework, Respan has pre-built integrations that auto-capture traces with minimal setup. Each integration page has full install, configure, and run instructions.
+
+---
+
+## OpenAI Agents SDK
+
+The OpenAI Agents SDK auto-creates child spans for each agent run. Use `trace()` (Python) or `withTrace()` (JS/TS) to define the parent span.
+
+<CodeGroup>
+```python Python
+import asyncio
+from agents import Agent, Runner
+from agents.tracing import set_trace_processors, trace
+from respan_exporter_openai_agents import RespanTraceProcessor
+import os
+
+set_trace_processors([
+    RespanTraceProcessor(
+        api_key=os.getenv("RESPAN_API_KEY"),
+        endpoint=os.getenv("RESPAN_OAIA_TRACING_ENDPOINT"),
+    ),
+])
+
+agent = Agent(
+    name="Assistant",
+    instructions="You only respond in haikus.",
+)
+
+async def main():
+    with trace("Haiku generation"):
+        result = await Runner.run(agent, "Tell me about recursion in programming.")
+        print(result.final_output)
+
+asyncio.run(main())
+```
+```typescript JavaScript
+import { Agent, BatchTraceProcessor, run, setTraceProcessors, withTrace } from '@openai/agents';
+import { RespanOpenAIAgentsTracingExporter } from '@respan/exporter-openai-agents';
+
+setTraceProcessors([
+  new BatchTraceProcessor(
+    new RespanOpenAIAgentsTracingExporter(),
+  ),
+]);
+
+const agent = new Agent({
+  name: 'Assistant',
+  instructions: 'You only respond in haikus.',
+});
+
+async function main() {
+  const result = await withTrace('Haiku generation', async () => {
+    return run(agent, 'Tell me about recursion in programming.');
+  });
+  console.log(result.finalOutput);
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+
+For full setup, see [OpenAI Agents SDK (Python)](/integrations/tracing/openai-agents-sdk) or [OpenAI Agents SDK (JS)](/integrations/tracing/openai-agents-sdk-js).
+
+---
+
+## Vercel AI SDK
+
+The Vercel AI SDK auto-creates spans for each LLM call when telemetry is enabled.
+
+```typescript app/api/chat/route.ts
+import { openai } from "@ai-sdk/openai";
+import { streamText } from "ai";
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const result = streamText({
+    model: openai("gpt-4o"),
+    messages,
+    experimental_telemetry: {
+      isEnabled: true,
+    },
+  });
+
+  return result.toDataStreamResponse();
+}
+```
+
+For full setup, see [Vercel AI SDK integration](/integrations/tracing/vercel-tracing).
+
+---
+
+## All frameworks
+
+<CardGroup cols={3}>
+
+<Card href="/integrations/tracing/openai-agents-sdk" className="bg-white">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0.png" alt="OpenAI Agents SDK" style={{
+    pointerEvents: 'none',
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0_black.png" alt="OpenAI Agents SDK" style={{
+    pointerEvents: 'none',
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/vercel-tracing">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0.png" alt="Vercel AI SDK" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0_black.png" alt="Vercel AI SDK" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/mastra">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0.png" alt="Mastra" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0_black.png" alt="Mastra" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/langgraph">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0.png" alt="LangGraph" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0_black.png" alt="LangGraph" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/langfuse">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0_black.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/haystack">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0.png" alt="Haystack" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0_black.png" alt="Haystack" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/baml">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0.png" alt="BAML" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0_black.png" alt="BAML" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/instructor">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0.png" alt="Instructor" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0_black.png" alt="Instructor" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card title="Respan Native" icon="code" href="/integrations/tracing/respan-native">
+  Python & TypeScript SDK with OpenTelemetry
+</Card>
+
+</CardGroup>

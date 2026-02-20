@@ -1,0 +1,167 @@
+---
+title: "Respan (OTel)"
+description: "Trace your LLM workflows using the Respan tracing SDK with OpenTelemetry."
+---
+
+## Overview
+
+The Respan tracing SDK uses OpenTelemetry under the hood. Add the `respan_tracing` package to your project and annotate your workflows with `@workflow` and `@task` decorators to get full trace visibility.
+
+## Setup
+
+<Tabs>
+<Tab title="Python">
+
+<Steps>
+<Step title="Install the SDK">
+<Note>
+**Python Requirement**: This package requires **Python 3.9** or later.
+</Note>
+```bash pip
+pip install respan-tracing
+```
+</Step>
+
+<Step title="Set up Environment Variables">
+Get your API key from the [API Keys page](https://platform.respan.ai/platform/api/api-keys) in Settings, then configure it in your environment:
+
+```python .env
+RESPAN_BASE_URL="https://api.respan.ai/api"
+RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+</Step>
+
+<Step title="A full example with LLM calls">
+Use the `@workflow` and `@task` decorators to instrument your code:
+```python Python {8}
+import os
+from openai import OpenAI
+from respan_tracing.decorators import workflow, task
+from respan_tracing.main import RespanTelemetry
+
+# Initialize Respan Telemetry
+os.environ["RESPAN_API_KEY"] = "YOUR_RESPAN_API_KEY"
+k_tl = RespanTelemetry()
+
+# Initialize OpenAI client
+client = OpenAI()
+
+@task(name="joke_creation")
+def create_joke():
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Tell me a joke about AI"}],
+        temperature=0.7,
+        max_tokens=100,
+    )
+    return completion.choices[0].message.content
+
+@workflow(name="simple_joke_workflow")
+def joke_workflow():
+    joke = create_joke()
+    return joke
+
+if __name__ == "__main__":
+    result = joke_workflow()
+    print(result)
+```
+</Step>
+
+</Steps>
+</Tab>
+
+<Tab title="JS/TS">
+<Steps>
+<Step title="Install the SDK">
+Install the package using your preferred package manager:
+```bash
+npm install @respan/tracing
+# or yarn
+
+yarn add @respan/tracing
+```
+</Step>
+<Step title="Set up Environment Variables">
+Get your API key from the [API Keys page](https://platform.respan.ai/platform/api/api-keys) in Settings, then configure it in your environment:
+
+```bash .env
+RESPAN_BASE_URL="https://api.respan.ai/api"
+RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+```
+</Step>
+<Step title="Create a simple workflow">
+```typescript server.ts {1-2, 5-9, 13-14, 16-17, 25-28}
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+// Initialize Respan Telemetry
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'test-app',
+    disableBatch: true  // For testing, disable batching
+});
+
+// Initialize OpenAI client
+const openai = new OpenAI();
+
+async function createJoke() {
+    return await respanAi.withTask(
+        { name: 'joke_creation' },
+        async () => {
+            const completion = await openai.chat.completions.create({
+                messages: [{ role: 'user', content: 'Tell me a joke about AI' }],
+                model: 'gpt-4o-mini',
+                temperature: 0.7,
+                max_tokens: 100
+            });
+            return completion.choices[0].message.content;
+        }
+    );
+}
+
+async function simpleJokeWorkflow() {
+    return await respanAi.withWorkflow(
+        { name: 'simple_joke_workflow' },
+        async () => {
+            const joke = await createJoke();
+            return joke;
+        }
+    );
+}
+
+// Run the workflow
+async function main() {
+    const result = await simpleJokeWorkflow();
+    console.log(result);
+}
+
+main().catch(console.error);
+```
+</Step>
+
+</Steps>
+</Tab>
+
+</Tabs>
+
+<Note>
+Optional HTTP instrumentation
+If you see logs like:
+<Code>
+ERROR:root:Failed to initialize Requests instrumentation
+ERROR:root:Failed to initialize urllib3 instrumentation
+</Code>
+install the OpenTelemetry instrumentations to enable and silence these messages:
+```bash
+pip install opentelemetry-instrumentation-requests opentelemetry-instrumentation-urllib3
+```
+This is optional; tracing works without them. Add only if your app uses `requests` or `urllib3`.
+</Note>
+
+## View your traces
+
+You can now see your traces in the [Traces](https://platform.respan.ai/platform/traces) page.
+<Frame className="rounded-md">
+<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/overview/trace_tree_v1.png" alt="Agent tracing visualization" />
+</Frame>

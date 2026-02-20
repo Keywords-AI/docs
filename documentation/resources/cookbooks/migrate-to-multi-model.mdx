@@ -1,0 +1,133 @@
+---
+title: "Migrate from OpenAI to multi-model"
+description: "Switch between LLM providers through the Respan gateway with fallbacks and cost comparison."
+---
+
+## Overview
+
+Most teams start with a single LLM provider. The Respan gateway lets you switch between 250+ models by changing one string — no code rewrites, no new SDKs. This cookbook shows how to migrate from direct OpenAI calls to a multi-model setup with automatic fallbacks.
+
+## Before: Direct OpenAI calls
+
+```python
+from openai import OpenAI
+
+client = OpenAI(api_key="sk-...")
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Summarize this article..."}],
+)
+```
+
+## After: Respan gateway (2-line change)
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",  # Change 1
+    api_key="YOUR_RESPAN_API_KEY",           # Change 2
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Summarize this article..."}],
+)
+```
+```typescript TypeScript
+import OpenAI from "openai";
+
+const client = new OpenAI({
+    baseURL: "https://api.respan.ai/api/",  // Change 1
+    apiKey: "YOUR_RESPAN_API_KEY",           // Change 2
+});
+
+const response = await client.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "Summarize this article..." }],
+});
+```
+</CodeGroup>
+
+Everything else stays the same — same SDK, same parameters, same response format.
+
+## Switch models
+
+Now you can swap models by changing the `model` string:
+
+```python
+# OpenAI
+response = client.chat.completions.create(model="gpt-4o", messages=messages)
+
+# Anthropic
+response = client.chat.completions.create(model="claude-sonnet-4-20250514", messages=messages)
+
+# Google
+response = client.chat.completions.create(model="gemini-2.0-flash", messages=messages)
+
+# DeepSeek
+response = client.chat.completions.create(model="deepseek-chat", messages=messages)
+```
+
+All models use the same OpenAI-compatible format. See the [full model list](https://platform.respan.ai/platform/models).
+
+## Add fallback models
+
+If your primary model goes down, Respan automatically retries with fallback models:
+
+<CodeGroup>
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[{"role": "user", "content": "Summarize this article..."}],
+    extra_body={
+        "fallback_models": ["claude-sonnet-4-20250514", "gemini-2.0-flash"],
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "Summarize this article..." }],
+    // @ts-ignore
+    fallback_models: ["claude-sonnet-4-20250514", "gemini-2.0-flash"],
+});
+```
+</CodeGroup>
+
+If `gpt-4o` fails, Respan tries `claude-sonnet-4-20250514`, then `gemini-2.0-flash`. Your users never see an error.
+
+## Compare cost and quality
+
+After running traffic through multiple models, use the Respan dashboard to compare:
+
+1. Go to [Dashboard](https://platform.respan.ai/platform/dashboard)
+2. Use the **model breakdown** to compare cost, latency, and token usage per model
+3. Filter logs by model to review output quality side-by-side
+
+<Note>
+Add `metadata` to tag requests by use case, so you can compare model performance per feature — not just globally.
+</Note>
+
+```python
+response = client.chat.completions.create(
+    model="claude-sonnet-4-20250514",
+    messages=messages,
+    extra_body={
+        "metadata": {"feature": "summarization", "version": "v2"},
+    }
+)
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+<Card title="Gateway setup" icon="route" href="/documentation/features/llm-gateway/setup">
+  Full setup guide with all supported frameworks
+</Card>
+<Card title="Advanced configuration" icon="gear" href="/documentation/features/llm-gateway/advanced-configuration">
+  Load balancing, caching, rate limits, and more
+</Card>
+</CardGroup>

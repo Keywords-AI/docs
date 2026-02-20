@@ -1,0 +1,94 @@
+---
+title: "Views"
+description: "Save filters from Logs, Traces, Users, Prompts, and more as reusable views for quick access and sharing."
+---
+
+## What are views?
+
+**Views** are saved filter configurations. When you apply filters on [Logs](/documentation/features/observability/logs/quickstart), [Traces](/documentation/features/observability/traces/quickstart), [Users](/documentation/features/observability/customer-identifier), [Prompts](/documentation/features/prompt-management/quickstart), or elsewhere in Respan—for example, by `status`, `model`, `user`, `timestamp`, or [custom properties](/documentation/features/observability/logs/log-parameters#custom-properties)—you can save that filter setup as a **view**. Views let you reuse the same filters with one click instead of reconfiguring them each time.
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/go_to_view_page_v0.png" />
+</Frame>
+
+
+## Where you create filters
+
+You can set up filters in **Logs**, **Traces**, **Users**, **Prompts**, and more:
+
+- **Logs** — Filter by status, model, user, timestamp, custom properties, and more. Use the **Filter** button on the [Logs](https://platform.respan.ai/platform/logs) page.
+- **Traces** — Filter traces by workflow, metadata, customer identifier, and other fields on the [Traces](https://platform.respan.ai/platform/traces) page.
+- **Users** — Filter users by identifier, usage, and related fields.
+- **Prompts** — Filter prompts by name, model, and other attributes.
+- **And more** — Views work across filtered surfaces throughout Respan.
+
+Build the filter combination you care about (e.g. “production errors” or “high-cost requests”), then save it as a view.
+
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/create_filters_v0.png" />
+</Frame>
+
+## Steps to save a filter as a view
+
+<Steps>
+<Step title="Apply filters in Logs, Traces, Users, Prompts, or more">
+Open [Logs](https://platform.respan.ai/platform/logs), [Traces](https://platform.respan.ai/platform/traces), Users, Prompts, or any filtered surface and apply the filters you want (status, model, user, custom properties, etc.).
+</Step>
+
+<Step title="Save as view">
+Use the **Save as view** option next to the filters.
+
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/Save_filters_as_views_v0.png" />
+</Frame>
+</Step>
+
+<Step title="Add your view's name">
+Enter a name for your view (e.g. “Production errors”, “GPT-4 usage”) so you can find and reuse it later.
+
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/save_views2_v0.png" />
+</Frame>
+</Step>
+
+<Step title="You can now see your saved views">
+Your view is saved. Open the views list to see it and select it anytime to instantly apply its filters.
+
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/go_to_view_page_v0.png" />
+</Frame>
+</Step>
+</Steps>
+
+## Use and manage views
+
+- **Apply a view** — Select a saved view from the views list to instantly apply its filters.
+- **Change filters and save** — When you’re in a view, you can change the filters, then **Save** to update the current view or **Save as new** to create a new view from the current filters.
+
+<Frame className="rounded-md">
+    <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dashboard/views/save_saveasnew_v0.png" />
+</Frame>
+
+## Resources
+
+- [Filters API Reference](/apis/reference/filters_api_reference) — Filter logs, traces, users, prompts, and more programmatically; filters support operators like `gt`, `gte`, `contains`, `in`, and more.
+
+## Additional
+
+<CardGroup cols={2}>
+<Card title="Logs quickstart" href="/documentation/features/observability/logs/quickstart">
+Get started with logging and filtering LLM requests.
+</Card>
+
+<Card title="Traces quickstart" href="/documentation/features/observability/traces/quickstart">
+Instrument workflows and filter traces.
+</Card>
+
+<Card title="Filters API Reference" href="/apis/reference/filters_api_reference">
+Complete API documentation for filtering logs, traces, users, prompts, and more.
+</Card>
+</CardGroup>
+
+---
+## Need help?
+
+[Join our Discord](https://discord.com/invite/KEanfAafQQ) — we’ll help you get the most out of views and filters.

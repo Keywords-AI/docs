@@ -1,0 +1,349 @@
+---
+title: "Use prompt in code"
+description: "Deploy prompts to your codebase via the AI gateway or log prompt usage via the logging API."
+---
+
+After you [create a prompt](/documentation/features/prompt-management/manage-prompts), deploy it to your codebase and call it through the API.
+
+---
+
+## Find the prompt ID
+
+Find the Prompt ID in the **Overview** panel on the [Prompts page](https://platform.respan.ai/platform/prompts).
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-id.png" alt="Prompt ID" />
+</Frame>
+
+---
+
+## Use prompt in gateway
+
+Connect your prompt to your codebase through the Respan AI gateway.
+
+<Tabs>
+<Tab title="OpenAI Python SDK">
+```python {13-18}
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://api.respan.ai/api/",
+  api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "Tell me a long story"}
+    ],
+    extra_body={"prompt": {"prompt_id":"042f5f",
+                "variables":{"task_description":"Square a number", "specific_library":"math"},
+                "override": True,
+                }
+    }
+)
+```
+<Note>
+**Prompt overrides SDK parameters** — Setting `override: True` tells Respan to ignore the `model` and `messages` fields in your request and use the saved prompt configuration instead.
+</Note>
+</Tab>
+<Tab title="OpenAI TypeScript SDK">
+```typescript {12-18}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    prompt: {
+      prompt_id: "042f5f",
+      variables: { task_description: "Square a number", specific_library: "math" },
+      override: true,
+    }
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</Tab>
+<Tab title="Standard API">
+```python Python {14-17}
+import requests
+def demo_call(token="YOUR_RESPAN_API_KEY"):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'prompt': {
+            'prompt_id': '042f5f',
+            'variables': {'task_description': 'Square a number', 'specific_library': 'math'},
+        }
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+print(demo_call().json())
+```
+With the standard API, you don't need to pass `model` and `messages` since the prompt configuration is used automatically.
+</Tab>
+</Tabs>
+
+### Use a specific version
+
+- Omit `version` to use the deployed live version.
+- Set `version` to a number (e.g., `3`) to pin that version.
+- Use `"version": "latest"` to use the most recent draft (not deployed).
+
+```python
+{
+    "prompt": {
+        "prompt_id": "YOUR_PROMPT_ID",
+        "version": 3,
+    }
+}
+```
+
+### Override prompt messages
+
+<Tabs>
+<Tab title="Append messages">
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override_config": {"messages_override_mode": "append"},
+        "override_params": {"messages": [{"role": "user", "content": "Additional context"}]},
+    }
+}
+```
+Adds new messages to the end of your existing prompt messages.
+</Tab>
+<Tab title="Replace messages">
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override_config": {"messages_override_mode": "override"},
+        "override_params": {"messages": [{"role": "user", "content": "Completely new conversation"}]},
+    }
+}
+```
+Replaces all existing prompt messages with the new ones.
+</Tab>
+</Tabs>
+
+### Override other parameters
+
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override_params": {
+            "temperature": 0.8,
+            "max_tokens": 150,
+            "model": "gpt-4o"
+        }
+    }
+}
+```
+
+---
+
+## Use prompt in logging
+
+Log prompt usage to track performance metrics, compare versions, and analyze request distribution.
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://api.respan.ai/api/request-logs/create/"
+payload = {
+    "model": "claude-3-5-sonnet-20240620",
+    "completion_message": {
+        "role": "assistant",
+        "content": "Hi, how can I assist you today?"
+    },
+    "prompt": {
+        "prompt_id": "xxxxxx",
+        "variables": {
+            "task_description": "Square a number",
+            "specific_library": "math"
+        },
+    },
+    "generation_time": 5.7,
+    "ttft": 3.1,
+}
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+
+response = requests.post(url, headers=headers, json=payload)
+```
+```typescript TypeScript
+const url = 'https://api.respan.ai/api/request-logs/create/';
+const headers = {
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY',
+    'Content-Type': 'application/json'
+};
+
+const payload = {
+    model: 'claude-3-5-sonnet-20240620',
+    completion_message: {
+        role: "assistant",
+        content: "Hi, how can I assist you today?"
+    },
+    prompt: {
+        prompt_id: "xxxxxx",
+        variables: {
+            task_description: "Square a number",
+            specific_library: "math"
+        },
+    },
+    generation_time: 5.7,
+    ttft: 3.1,
+};
+
+fetch(url, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(payload)
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+<Frame>
+<video controls className="w-full aspect-video" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-monitor.mp4"></video>
+</Frame>
+
+### External prompt logging
+
+If you use prompts outside of Respan, pass any `prompt_id` and set `is_custom_prompt: true`:
+
+<CodeGroup>
+```python Python
+payload = {
+    "model": "claude-3-5-sonnet-20240620",
+    "prompt_messages": [{"role": "user", "content": "Hi"}],
+    "completion_message": {"role": "assistant", "content": "Hello!"},
+    "prompt_id": "your-custom-id",
+    "is_custom_prompt": True,
+    "generation_time": 5.7
+}
+```
+```typescript TypeScript
+const payload = {
+    model: 'claude-3-5-sonnet-20240620',
+    prompt_messages: [{role: 'user', content: 'Hi'}],
+    completion_message: {role: 'assistant', content: 'Hello!'},
+    prompt_id: 'your-custom-id',
+    is_custom_prompt: true,
+    generation_time: 5.7
+};
+```
+</CodeGroup>
+
+---
+
+## View logs with prompts
+
+Filter logs by prompt name on the [Logs page](https://platform.respan.ai/platform/logs).
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-logs.png" alt="Prompt logs" />
+</Frame>
+
+---
+
+## Parameters reference
+
+<ParamField path="prompt_id" type="string" required>
+  The unique identifier of your saved prompt template.
+</ParamField>
+
+<ParamField path="variables" type="object">
+  Variables to inject into your prompt template.
+```json
+{
+  "variables": {
+    "user_name": "John",
+    "task": "summarize"
+  }
+}
+```
+</ParamField>
+
+<ParamField path="override" type="boolean" default={false}>
+  When `true`, the saved prompt configuration overrides SDK parameters like `model` and `messages`.
+</ParamField>
+
+<ParamField path="override_params" type="object">
+  Parameters that override your saved prompt configuration (temperature, max_tokens, messages, model, etc.).
+</ParamField>
+
+<ParamField path="override_config" type="object">
+  Controls how override parameters are applied.
+  - `messages_override_mode`: `"append"` (add to existing) or `"override"` (replace all)
+</ParamField>
+
+<ParamField path="echo" type="boolean" default={false}>
+  When enabled, the response includes the final prompt messages used.
+</ParamField>
+
+<ParamField path="version" type="integer | string">
+  Pin a specific prompt version. Omit for deployed version, use `"latest"` for newest draft.
+</ParamField>
+
+<Info>See [all Respan supported params](/apis/develop/gateway/chat-completions#respan-parameters).</Info>
+
+---
+
+## Troubleshooting
+
+### Streaming with OpenAI SDK
+
+If you use a prompt with streaming enabled, you must also set `stream=True` in your SDK call:
+
+<CodeGroup>
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role":"user", "content":"Tell me a long story"}],
+    stream=True,
+    extra_body={
+      "prompt": {
+          "prompt_id": "YOUR_PROMPT_ID",
+          "variables": {"variable_name": "variable_value"},
+        }
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    stream: true,
+    // @ts-expect-error
+    prompt: {
+      prompt_id: "YOUR_PROMPT_ID",
+      variables: { variable_name: "variable_value" },
+    },
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</CodeGroup>

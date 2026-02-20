@@ -99,14 +99,14 @@ You can pass in your customer's credentials for [supported providers](/integrati
 
 <ParamField path="disable_log" type="boolean" deafault={false}>
   When set to true, only the request and [performance
-  metrics](/documentation/products/dashboard/Metrics) will be recorded, input
+  metrics](/documentation/features/observability/metrics) will be recorded, input
   and output messages will be omitted from the log.
 </ParamField>
 
 ### Observability parameters
 
 <ParamField path="metadata" type="dict">
-You can add any key-value pair to this metadata field for your reference. Check the [details of metadata here.](/documentation/products/logs/configuration/custom_properties)
+You can add any key-value pair to this metadata field for your reference. Check the [details of metadata here.](/documentation/features/observability/logs/log-parameters#custom-properties)
 
 Contact team@respan.ai if you need extra parameter support for your use case.
 
@@ -120,7 +120,7 @@ Contact team@respan.ai if you need extra parameter support for your use case.
 </ParamField>
 
 <ParamField path="customer_identifier" type="string">
-  Use this as a tag to identify the user associated with the API call. See the [details of customer identifier here.](/documentation/products/users/customer-identifier)
+  Use this as a tag to identify the user associated with the API call. See the [details of customer identifier here.](/documentation/features/observability/customer-identifier)
   <Accordion title="Example">
 ```json
 {

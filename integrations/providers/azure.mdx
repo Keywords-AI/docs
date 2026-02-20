@@ -59,18 +59,18 @@ Pick an API version from the [available Azure OpenAI versions](https://learn.mic
 
 <AccordionGroup>
   <Accordion title="✅ Supported Frameworks">
-    - [OpenAI SDK](/integrations/development-frameworks/llm_framework/openai/openai-sdk)
-    - [LangChain SDK](/integrations/development-frameworks/llm_framework/langchain) 
-    - [Vercel/OpenAI](/integrations/development-frameworks/llm_framework/vercel#openai)
-    - [Vercel/Google](/integrations/development-frameworks/llm_framework/vercel#google)
-    - [LlamaIndex SDK](/integrations/development-frameworks/llm_framework/llama-index)
-    - [Google GenAI](/integrations/development-frameworks/llm_framework/google_genai)
+    - [OpenAI SDK](/integrations/gateway/openai/openai-sdk)
+    - [LangChain SDK](/integrations/gateway/langchain) 
+    - [Vercel/OpenAI](/integrations/gateway/vercel#openai)
+    - [Vercel/Google](/integrations/gateway/vercel#google)
+    - [LlamaIndex SDK](/integrations/gateway/llama-index)
+    - [Google GenAI](/integrations/gateway/google_genai)
     - [Respan native (Otel)](/documentation/getting-started/quickstart/gateway)
   </Accordion>
   
   <Accordion title="❌ Unsupported Frameworks">
-    - [Anthropic SDK](/integrations/development-frameworks/llm_framework/anthropic)
-    - [Vercel/Anthropic](/integrations/development-frameworks/llm_framework/vercel#anthropic)
+    - [Anthropic SDK](/integrations/gateway/anthropic)
+    - [Vercel/Anthropic](/integrations/gateway/vercel#anthropic)
   </Accordion>
 </AccordionGroup>
 
@@ -317,7 +317,7 @@ const response = await client.chat.completions.create({
 <Step title="(Optional) Load balance between multiple deployments">
 You can add multiple Azure deployments and load balance between them for better availability and cost optimization.
 
-Learn more: [Load Balancing Guide](/documentation/products/gateway/traffic_management/load-balancing)
+Learn more: [Load Balancing Guide](/documentation/features/llm-gateway/advanced-configuration#load-balancing)
 </Step>
 </Steps>
 </Tab>

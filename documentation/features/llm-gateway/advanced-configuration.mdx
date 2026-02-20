@@ -1,0 +1,960 @@
+---
+title: "Advanced"
+description: "Advanced configuration for the Respan LLM Gateway — models, traffic management, caching, and more."
+---
+
+## Load balancing
+
+Load balancing allows you to balance the request load across different deployments. You can specify weights for each deployment based on their rate limit and your preference.
+
+_See all supported params [here](/apis/develop/gateway/chat-completions)._
+
+### Load balancing between models
+
+<Steps>
+    <Step title="Go to the Load balancing page">
+        Go to the [Load balancing page](https://platform.respan.ai/platform/api/load-balance) and click on `Create new load balancer`
+        <Frame>
+        <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/load-balancing.jpg" alt="Load balancing group"/>
+        </Frame>
+    </Step>
+    <Step title="Add models">
+        Click `Add model` to add models and specify the weight for each model and add your own credentials.
+    </Step>
+        <Step title="Copy group ID to your codebase">
+        After you have added the models, copy the group ID (**the blue text**) to your codebase and use it in your requests.
+
+<Note> **The `model` parameter will overwrite the `load_balance_group`!**  </Note>
+```json
+{
+    "messages": [
+        {
+            "role": "user",
+            "content": "Hi, how are you?"
+        }
+    ],
+    "load_balance_group": {
+        "group_id":"THE_GROUP_ID"
+    }
+}
+```
+    </Step>
+
+    <Step title="Add load balancing group in code (Optional)">
+    You can also add the load balancing group in your codebase directly. The `models` field will overwrite the `load_balance_group` you specified in the UI.
+    <Accordion title="Example code">
+```json
+{
+  "load_balance_group": {
+      "group_id":"THE_GROUP_ID",
+      "models": [
+        {
+          "model": "azure/gpt-35-turbo",
+          "weight": 1
+        },
+        {
+          "model": "azure/gpt-4",
+          "credentials": {
+              "api_base": "Your own Azure api_base",
+              "api_version": "Your own Azure api_version",
+              "api_key": "Your own Azure api_key"
+          },
+          "weight": 1
+        }
+      ]
+  }
+}
+```
+    </Accordion>
+    </Step>
+</Steps>
+
+### Load balancing between deployments
+
+A deployment basically means a credential. If you add an OpenAI API key, you have one deployment. If you add 2 OpenAI API keys, you have 2 deployments.
+
+You can go to the platform and add multiple deployments for the same provider, specifying load balancing weights for each deployment.
+
+<video
+  controls
+  className="w-full aspect-video"
+  src="/images/api-features/webhooks/loadbalancing.mp4"
+></video>
+
+You can also load balance between deployments in your codebase using the `customer_credentials` field:
+
+```json
+{
+  "customer_credentials": [
+    {
+        "credentials": {
+            "openai": {
+                "api_key": "YOUR_OPENAI_API_KEY",
+            }
+        },
+        "weight": 1.0
+    },
+    {
+        "credentials": {
+            "openai": {
+                "api_key": "YOUR_OPENAI_API_KEY",
+            }
+        },
+        "weight": 1.0
+    },
+  ],
+}
+```
+
+<Accordion title="Specify available models">
+You can specify the available models for load balancing. For example, if you only want to use `gpt-3.5-turbo` in an OpenAI deployment, specify it in the `available_models` field or do it in the platform.
+
+Learn more about how to specify available models in the platform [here](/integrations/providers/azure).
+
+```json
+{
+  "customer_credentials": [
+    {
+        "credentials": {
+            "openai": {
+                "api_key": "YOUR_OPENAI_API_KEY",
+            }
+        },
+        "weight": 1.0,
+        "available_models": ["gpt-3.5-turbo"],
+        "exclude_models": ["gpt-4"]
+    },
+    {
+        "credentials": {
+            "openai": {
+                "api_key": "YOUR_OPENAI_API_KEY",
+            }
+        },
+        "weight": 1.0,
+    },
+  ],
+}
+```
+</Accordion>
+
+---
+
+## Retries
+
+When an LLM call fails, the system detects the error and retries the request to prevent failovers.
+
+<Tabs>
+<Tab title="Via UI">
+Go to the [Retries page](https://platform.respan.ai/platform/api/retries) and enable retries and set the number of retries and the initial retry time.
+<Frame>
+<img height="200" width="500"  src="/images/api-features/retries.png" alt="Retries Page"/>
+</Frame>
+</Tab>
+<Tab title="Via code">
+Add the retry parameters in the request body:
+```json
+{
+    "retry_params": {
+        "num_retries": 3,
+        "retry_after": 0.1,
+        "retry_enabled": true
+    }
+}
+```
+</Tab>
+</Tabs>
+
+<Accordion title="Supported parameters">
+<ResponseField name="retry_params" type="object">
+    Enable or disable retries and set the number of retries and the time to wait before retrying.
+    <ResponseField name="retry_enabled" type="boolean" required>
+        Enable or disable retries.
+    </ResponseField>
+    <ResponseField name="num_retries" type="number">
+        The number of retries to attempt.
+    </ResponseField>
+    <ResponseField name="retry_after" type="number">
+        The time to wait before retrying in seconds.
+    </ResponseField>
+</ResponseField>
+</Accordion>
+
+<Accordion title="Automatic retry logic">
+Respan will automatically retry failed requests if the failure is a rate limit issue from the upstream provider:
+
+```python
+model # User requested model
+model_params = respan_models_data[model]
+# Exponential backoff retry logic
+for i in range(0, fallback_retries):
+    try:
+        response = respan_response_with_load_balance(model)
+        return response
+        break
+    except RateLimitError:
+        if model_params["fallback_models"]:
+            for fallback_model in model_params["fallback_models"]:
+                response = respan_response_with_load_balance(fallback_model)
+                return response
+        sleep(2 ** i)
+    except Exception as e:
+        raise e
+```
+</Accordion>
+
+---
+
+## Fallback models
+
+Respan catches any errors occurring in a request and falls back to the list of models you specified in the `fallback_models` field. This is useful to avoid downtime and ensure availability.
+
+See all Respan params [here](/apis/develop/gateway/chat-completions#respan-parameters).
+
+<Tabs>
+<Tab title="Via UI">
+Go to Settings -> [Fallback](https://platform.respan.ai/platform/api/fallback) -> Click on `Add fallback models` -> Select the models you want to add as fallbacks.
+
+You can drag and drop the models to reorder them. The order of the models in the list is the order in which they will be tried.
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/fallback.png" alt="Fallback Page"/>
+</Frame>
+</Tab>
+<Tab title="OpenAI Python SDK">
+```python {14}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "Tell me a long story"}
+    ],
+    extra_body={
+        "fallback_models": ["claude-3-5-sonnet-20240620", "gemini-1.5-pro-002"]
+    }
+)
+```
+</Tab>
+<Tab title="OpenAI TypeScript SDK">
+```typescript {12}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    fallback_models: ["claude-3-5-sonnet-20240620", "gemini-1.5-pro-002"]
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</Tab>
+<Tab title="Standard API">
+```python {14}
+import requests
+def demo_call(input,
+              model="gpt-4o-mini",
+              token="YOUR_RESPAN_API_KEY",
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+        'fallback_models': ["claude-3-5-sonnet-20240620", "gemini-1.5-pro-002"]
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+</Tab>
+</Tabs>
+
+---
+
+## Rate limit
+
+You can set rate limits for each model and API key. See our [rate limit configuration guide](https://platform.respan.ai/platform/api/limits) for detailed instructions.
+
+---
+
+## Caches
+
+Caches save and reuse exact LLM requests. Enable caches to reduce LLM costs and improve response times.
+
+- **Reduce latency**: Serve stored responses instantly, eliminating repeated API calls.
+- **Save costs**: Minimize expenses by reusing cached responses.
+
+Turn on caches by setting `cache_enabled` to `true`. We will cache the whole conversation, including the system message, user message and the response.
+
+<Tabs>
+<Tab title="OpenAI Python SDK">
+```python {13-19}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "Tell me a long story"}
+    ],
+    extra_body={
+        "cache_enabled": True,
+        "cache_ttl": 600,
+        "cache_options": {
+            "cache_by_customer": True
+        }
+    }
+)
+```
+</Tab>
+<Tab title="OpenAI TypeScript SDK">
+```typescript {12-19}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    cache_enabled: true,
+    cache_ttl: 600,
+    cache_options: {
+        cache_by_customer: true
+    }
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</Tab>
+<Tab title="Standard API">
+```python {14-18}
+import requests
+def demo_call(input,
+              model="gpt-4o-mini",
+              token="YOUR_RESPAN_API_KEY",
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+        'cache_enabled': True,
+        'cache_ttl': 600,
+        'cache_options': {
+            'cache_by_customer': True
+        }
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+</Tab>
+</Tabs>
+
+### Cache parameters
+
+<ParamField path="cache_enabled" type="boolean">
+Enable or disable caches.
+
+```json
+{
+    "cache_enabled": true
+}
+```
+</ParamField>
+
+<ParamField path="cache_ttl" type="number">
+Time-to-live (TTL) for the cache in seconds.
+
+<Note>Optional — default value is 30 **days**.</Note>
+```json
+{
+    "cache_ttl": 3600
+}
+```
+</ParamField>
+
+<ParamField path="cache_options" type="object">
+Cache options. Set `cache_by_customer` to `true` to store caches by customer identifier.
+
+<Note>Optional parameter</Note>
+```json
+{
+    "cache_options": {
+        "cache_by_customer": true,
+        "omit_log": true
+    }
+}
+```
+</ParamField>
+
+### View caches
+You can view the caches on the Logs page. The model tag will be `respan/cache`. You can also filter the logs by the `Cache hit` field.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/llm-proxy/caches-logs.png" alt="Caches" />
+</Frame>
+
+### Omit logs when cache hit
+Set the `omit_logs` parameter to `true` or go to [Caches](https://platform.respan.ai/platform/api/caches) in Settings. This won't generate a new LLM log when the cache is hit.
+
+---
+
+## Prompt caching
+
+<Note>
+You can only enable prompt caching if you are using **LLM proxy for Anthropic models**.
+</Note>
+
+Prompt caching stores the model's intermediate computation state. This allows the model to generate diverse responses while still saving computational costs, as it doesn't need to reprocess the entire prompt from scratch.
+
+<Tabs>
+<Tab title="Anthropic Python SDK">
+```python {18}
+import anthropic
+
+client = anthropic.Anthropic(
+    base_url="https://api.respan.ai/api/anthropic/",
+    api_key="Your_Respan_API_Key",
+)
+
+message = client.messages.create(
+    model="claude-3-opus-20240229",
+    system=[
+      {
+        "type": "text",
+        "text": "You are an AI assistant tasked with analyzing literary works. Your goal is to provide insightful commentary on themes, characters, and writing style.\n",
+      },
+      {
+        "type": "text",
+        "text": "<the entire contents of 'Pride and Prejudice'>",
+        "cache_control": {"type": "ephemeral"}
+      }
+    ],
+    messages=[{"role": "user", "content": "Analyze the major themes in 'Pride and Prejudice'."}]
+)
+
+print(message.content)
+```
+</Tab>
+<Tab title="Anthropic TypeScript SDK">
+```typescript {17}
+import Anthropic from "@anthropic-ai/sdk";
+
+const anthropic = new Anthropic({
+  baseUrl: "https://api.respan.ai/api/anthropic/",
+  apiKey: 'YOUR_RESPAN_API_KEY',
+});
+
+const msg = await anthropic.messages.create({
+model: "claude-3-5-sonnet-20240620",
+system: [
+      {
+        "type": "text",
+        "text": "You are an AI assistant tasked with analyzing literary works. Your goal is to provide insightful commentary on themes, characters, and writing style.\n",
+      },
+      {
+        "type": "text",
+        "text": "<the entire contents of 'Pride and Prejudice'>",
+        "cache_control": {"type": "ephemeral"}
+      }
+    ],
+messages: [
+    {
+    "role": "user",
+    "content": [
+        {
+        "type": "text",
+        "text": "Why is the ocean salty?"
+        }
+    ]
+    }
+]
+});
+console.log(msg);
+```
+</Tab>
+<Tab title="Proxy API">
+```python {24}
+import requests
+def demo_call(input,
+              model="claude-3-5-sonnet-20240620",
+              token="YOUR_RESPAN_API_KEY",
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [
+        {
+            "role": "system",
+            "content": [
+                {
+                    "type": "text",
+                    "text": "You are an AI assistant tasked with analyzing legal documents.",
+                },
+                {
+                    "type": "text",
+                    "text": "Here is the full text of a complex legal agreement" * 400,
+                    "cache_control": {"type": "ephemeral"},
+                },
+            ],
+        },
+        {
+            "role": "user",
+            "content": input,
+        },
+    ]
+
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "what are the key terms and conditions in this agreement?'"
+print(demo_call(messages).json())
+```
+</Tab>
+</Tabs>
+
+<Accordion title="How does prompt caching work?">
+All information is from [Anthropic's documentation](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching).
+
+When you send a request with prompt caching enabled:
+
+1. The system checks if a prompt prefix, up to a specified cache breakpoint, is already cached from a recent query.
+2. If found, it uses the cached version, reducing processing time and costs.
+3. Otherwise, it processes the full prompt and caches the prefix once the response begins.
+
+This is especially useful for:
+
+- Prompts with many examples
+- Large amounts of context or background information
+- Repetitive tasks with consistent instructions
+- Long multi-turn conversations
+
+The cache has a 5-minute lifetime, refreshed each time the cached content is used.
+</Accordion>
+
+<Accordion title="Pricing for Anthropic models">
+| Model | Base Input Tokens | Cache Writes | Cache Hits | Output Tokens |
+|-------|------------------|--------------|------------|---------------|
+| Claude 3.5 Sonnet | $3 / MTok | $3.75 / MTok | $0.30 / MTok | $15 / MTok |
+| Claude 3.5 Haiku | $1 / MTok | $1.25 / MTok | $0.10 / MTok | $5 / MTok |
+| Claude 3 Haiku | $0.25 / MTok | $0.30 / MTok | $0.03 / MTok | $1.25 / MTok |
+| Claude 3 Opus | $15 / MTok | $18.75 / MTok | $1.50 / MTok | $75 / MTok |
+
+- Cache write tokens are 25% more expensive than base input tokens
+- Cache read tokens are 90% cheaper than base input tokens
+- Regular input and output tokens are priced at standard rates
+</Accordion>
+
+<Accordion title="Supported models and limitations">
+Prompt caching is currently supported on: Claude 3.5 Sonnet, Claude 3.5 Haiku, Claude 3 Haiku, Claude 3 Opus.
+
+**Minimum cacheable prompt length:**
+- 1024 tokens for Claude 3.5 Sonnet and Claude 3 Opus
+- 2048 tokens for Claude 3.5 Haiku and Claude 3 Haiku
+
+Shorter prompts cannot be cached, even if marked with `cache_control`.
+</Accordion>
+
+---
+
+## Function calling
+
+Function calling allows you to call a function from a model and get the result.
+
+```python
+from openai import OpenAI
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+tools = [
+  {
+    "type": "function",
+    "function": {
+      "name": "get_current_weather",
+      "description": "Get the current weather in a given location",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "The city and state, e.g. San Francisco, CA",
+          },
+          "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+        },
+        "required": ["location"],
+      },
+    }
+  }
+]
+messages = [{"role": "user", "content": "What's the weather like in Boston today?"}]
+completion = client.chat.completions.create(
+  model="gpt-4o",
+  messages=messages,
+  tools=tools,
+  tool_choice="auto"
+)
+print(completion)
+```
+
+---
+
+## Enable thinking
+
+Thinking mode allows supported models to show their reasoning process before providing the final answer.
+
+```python
+payload = {
+    "model": "claude-sonnet-4-20250514",
+    "max_tokens": 16000,
+    "thinking": {
+        "type": "enabled",
+        "budget_tokens": 10000
+    },
+    "messages": [
+        {
+            "role": "user",
+            "content": "Are there an infinite number of prime numbers such that n mod 4 == 3?"
+        }
+    ]
+}
+```
+
+**Parameters:**
+- **type**: Set to `"enabled"` to activate thinking mode
+- **budget_tokens**: Maximum number of tokens allocated for the thinking process (optional)
+
+Choose models that support thinking like `gpt-5`, `claude-sonnet-4-20250514`. See the [Log Thinking](/documentation/features/observability/logs/log-content-types#thinking-blocks) documentation for details on the response structure.
+
+---
+
+## Upload PDF
+
+To help models understand PDF content, we put into the model's context both the extracted text and an image of each page.
+
+```python {21-30}
+import os
+import base64
+import requests
+from openai import OpenAI
+
+openai_client = OpenAI()
+pdf_url = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+response = requests.get(pdf_url)
+file_data = response.content
+file = openai_client.files.create(file=file_data, purpose="user_data")
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api",
+    api_key=os.getenv("RESPAN_API_KEY_TEST"),
+)
+
+model = "gpt-4.1"
+
+file_content = [
+    {"type": "text", "text": "What's this file about?"},
+    {
+        "type": "file",
+        "file": {
+            "file_id": file.id,
+        },
+    }
+]
+
+response = client.chat.completions.create(
+    model=model,
+    messages=[
+        {
+            "role": "user",
+            "content": file_content,
+        }
+    ],
+)
+```
+
+---
+
+## Upload image
+
+You can upload images to the LLM request. We support `base64` or `url` format for image variables.
+
+<Tabs>
+<Tab title="OpenAI SDK">
+<CodeGroup>
+```python OpenAI SDK Python {11-13}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role":"user", "content":"Tell me a long story"}],
+    extra_body={
+        "variables": {
+            "image_variable": {"_type": "image_url", "value": "url_string"}
+        }
+    },
+)
+```
+```javascript OpenAI SDK JavaScript {12-18}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api/",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    variables: {
+      image_variable: {
+        _type: "image_url",
+        value: "url_string",
+      },
+    },
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</CodeGroup>
+</Tab>
+<Tab title="Standard API">
+<CodeGroup>
+```python Standard API Python {14-16}
+import requests
+def demo_call(input,
+              model="gpt-4o-mini",
+              token="YOUR_RESPAN_API_KEY"
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+        'variables': {
+            'image_variable': {'_type': 'image_url', 'value': 'url_string'}
+        }
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+```javascript Standard API JavaScript {10-12}
+fetch('https://api.respan.ai/api/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+  },
+    body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{role: 'user', content: "Say 'Hello World'"}],
+        variables: {
+            'image_variable': {'_type': 'image_url', 'value': 'url_string'}
+        }
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+</Tab>
+</Tabs>
+
+---
+
+## Disable logging
+
+<Note>This feature is available for the **LLM proxy** (chat completions endpoint) and **Async logging**.</Note>
+
+At Respan, data privacy is our priority. Set the `disable_log` parameter to `true` to disable logging for sensitive data.
+
+The following fields will not be logged: `full_request`, `full_response`, `messages`, `prompt_messages`, `completion_message`, `tools`.
+
+See all supported parameters [here](/apis/develop/gateway/chat-completions).
+
+<Tabs>
+<Tab title="OpenAI Python SDK">
+```python {14}
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "user", "content": "Tell me a long story"}
+    ],
+    extra_body={
+        "disable_log": True
+    }
+)
+```
+</Tab>
+<Tab title="OpenAI TypeScript SDK">
+```typescript {12}
+import { OpenAI } from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://api.respan.ai/api",
+  apiKey: "YOUR_RESPAN_API_KEY",
+});
+
+const response = await client.chat.completions
+  .create({
+    messages: [{ role: "user", content: "Say this is a test" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    disable_log: true
+  })
+  .asResponse();
+
+console.log(await response.json());
+```
+</Tab>
+<Tab title="Standard API">
+```python {14}
+import requests
+def demo_call(input,
+              model="gpt-4o-mini",
+              token="YOUR_RESPAN_API_KEY",
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+        'disable_log': True
+    }
+
+    response = requests.post('https://api.respan.ai/api/chat/completions', headers=headers, json=data)
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+</Tab>
+</Tabs>
+
+---
+
+## Streaming
+
+When streaming is enabled, Respan forwards the streaming response to your end token by token. This is useful when you want to process the output as soon as it is available, rather than waiting for the entire response.
+
+_See all params [here](/apis/develop/gateway/chat-completions)._
+
+<CodeGroup>
+```python Python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.respan.ai/api/",
+    api_key="YOUR_RESPAN_API_KEY",
+)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Hello"}],
+    stream=True,
+)
+
+for chunk in response:
+    print(chunk)
+```
+
+```typescript TypeScript
+fetch('https://api.respan.ai/api/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+  },
+    body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{role: 'user', content: "Say 'Hello World'"}],
+        stream: true,
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/chat/completions" \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer YOUR_RESPAN_API_KEY" \
+-d '{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello"
+    }
+  ],
+  "model": "gpt-4o-mini",
+  "stream": true,
+  "max_tokens": 100
+}'
+```
+</CodeGroup>

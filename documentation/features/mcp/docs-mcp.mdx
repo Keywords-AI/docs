@@ -1,0 +1,93 @@
+---
+title: "Docs MCP"
+description: "Access Respan documentation directly from your AI coding assistant using MCP"
+---
+
+The Docs MCP server gives your AI tools direct access to the Respan documentation. This allows AI assistants like Cursor and Claude to search and reference Respan docs when helping you build integrations.
+
+## Getting started
+
+<Steps>
+  <Step title="Configure your AI tool">
+    Add the Respan Docs MCP server to your MCP configuration:
+
+    <CodeGroup>
+    ```json Cursor (~/.cursor/mcp.json)
+    {
+      "mcpServers": {
+        "respan-docs": {
+          "url": "https://docs.respan.ai/mcp"
+        }
+      }
+    }
+    ```
+
+    ```json Claude Desktop (macOS)
+    // ~/Library/Application Support/Claude/claude_desktop_config.json
+    {
+      "mcpServers": {
+        "respan-docs": {
+          "url": "https://docs.respan.ai/mcp"
+        }
+      }
+    }
+    ```
+
+    ```json Claude Desktop (Windows)
+    // %APPDATA%\Claude\claude_desktop_config.json
+    {
+      "mcpServers": {
+        "respan-docs": {
+          "url": "https://docs.respan.ai/mcp"
+        }
+      }
+    }
+    ```
+    </CodeGroup>
+  </Step>
+  <Step title="Restart your AI tool">
+    Restart Cursor or Claude Desktop to load the MCP server.
+  </Step>
+</Steps>
+
+<Note>
+No API key is required — the Docs MCP server provides read-only access to public documentation.
+</Note>
+
+## Available tools
+
+Once connected, your AI tools can:
+
+| Tool | Description |
+|------|-------------|
+| `search_docs` | Search across all Respan documentation |
+| `get_page` | Retrieve the full content of a specific documentation page |
+
+## Use cases
+
+- **Integration setup** — Ask your AI assistant "How do I set up Respan tracing with LangGraph?" and it will pull the relevant docs directly
+- **API reference lookup** — Query specific API endpoints and parameters without leaving your editor
+- **SDK usage** — Get code examples and SDK method signatures in context while coding
+
+## Combining with Platform MCP
+
+For the best experience, use both MCP servers together:
+
+- **Docs MCP** — documentation, guides, and API reference
+- **[Platform MCP](/documentation/features/mcp/platform-mcp)** — live data (logs, traces, prompts, customers)
+
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    },
+    "respan": {
+      "url": "https://mcp.respan.ai/api/mcp",
+      "headers": {
+        "Authorization": "Bearer your_respan_api_key"
+      }
+    }
+  }
+}
+```
