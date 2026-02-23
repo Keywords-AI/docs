@@ -306,7 +306,6 @@
                   "/apis/observe/logs/get-log-endpoint",
                   "/apis/observe/logs/update-single-log-endpoint",
                   "/apis/observe/logs/logs-update-endpoint",
-                  "/apis/observe/logs/delete-log-endpoint",
                   "/apis/observe/logs/ingest"
                 ]
               },
@@ -391,8 +390,7 @@
                     "pages": [
                       "/apis/develop/prompts/create-prompt-version",
                       "/apis/develop/prompts/get-prompt-versions",
-                      "/apis/develop/prompts/update-prompt-version",
-                      "/apis/develop/prompts/delete-prompt-version"
+                      "/apis/develop/prompts/update-prompt-version"
                     ]
                   }
                 ]

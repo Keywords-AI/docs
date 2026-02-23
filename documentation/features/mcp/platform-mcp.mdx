@@ -12,8 +12,121 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
 ## Installation
 
 <Tabs>
-  <Tab title="Public HTTP (Recommended)">
-    Connect to Respan's hosted MCP server. The simplest setup - no installation required.
+  <Tab title="OAuth (Recommended)">
+    Connect directly using your AI tool's built-in OAuth support. Your tool will open a browser window for you to sign in — no keys or tokens to manage.
+
+    <Steps>
+      <Step title="Add the MCP server">
+        <CodeGroup>
+        ```bash Claude Code (CLI)
+        claude mcp add --transport http respan https://mcp.keywordsai.co/mcp
+        ```
+
+        ```bash Claude Desktop
+        # Add this to your MCP configuration:
+        # macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+        # Windows: %APPDATA%\Claude\claude_desktop_config.json
+        ```
+
+        ```json Claude Desktop (config)
+        {
+          "mcpServers": {
+            "respan": {
+              "url": "https://mcp.keywordsai.co/mcp"
+            }
+          }
+        }
+        ```
+
+        ```json Cursor (~/.cursor/mcp.json)
+        {
+          "mcpServers": {
+            "respan": {
+              "url": "https://mcp.keywordsai.co/mcp"
+            }
+          }
+        }
+        ```
+        </CodeGroup>
+      </Step>
+      <Step title="Authenticate">
+        Your tool will open a browser window where you can sign in with **Google** or **email/password**. Once authenticated, the connection is established automatically.
+      </Step>
+    </Steps>
+
+    <Tip>
+    This is the recommended setup for most users. No keys to copy, no tokens to manage — just add the server and authenticate in your browser.
+    </Tip>
+
+    <Note>
+    If OAuth fails in Cursor (which can happen occasionally), use the **JWT Token** or **API Key** method as a fallback.
+    </Note>
+  </Tab>
+
+  <Tab title="JWT Token">
+    Sign in through the web login page and copy your access token. Useful as a fallback when OAuth doesn't work in your tool.
+
+    <Steps>
+      <Step title="Sign in">
+        Go to [mcp.keywordsai.co/login](https://mcp.keywordsai.co/login) and sign in with **Google** or **email/password**.
+      </Step>
+      <Step title="Copy your token">
+        After signing in, you'll see your access token and a ready-to-paste MCP config. Copy either one.
+      </Step>
+      <Step title="Configure your AI tool">
+        Add to your MCP configuration file:
+
+        <CodeGroup>
+        ```json Cursor (~/.cursor/mcp.json)
+        {
+          "mcpServers": {
+            "respan": {
+              "url": "https://mcp.keywordsai.co/mcp",
+              "headers": {
+                "Authorization": "Bearer your_jwt_token"
+              }
+            }
+          }
+        }
+        ```
+
+        ```json Claude Desktop (macOS)
+        // ~/Library/Application Support/Claude/claude_desktop_config.json
+        {
+          "mcpServers": {
+            "respan": {
+              "url": "https://mcp.keywordsai.co/mcp",
+              "headers": {
+                "Authorization": "Bearer your_jwt_token"
+              }
+            }
+          }
+        }
+        ```
+
+        ```json Claude Desktop (Windows)
+        // %APPDATA%\Claude\claude_desktop_config.json
+        {
+          "mcpServers": {
+            "respan": {
+              "url": "https://mcp.keywordsai.co/mcp",
+              "headers": {
+                "Authorization": "Bearer your_jwt_token"
+              }
+            }
+          }
+        }
+        ```
+        </CodeGroup>
+      </Step>
+      <Step title="Restart your AI tool">
+        Restart Cursor or Claude Desktop to load the MCP server.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="API Key">
+    Use your Respan API key directly. Works with any MCP client.
 
     <Steps>
       <Step title="Get your API key">
@@ -21,13 +134,13 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
       </Step>
       <Step title="Configure your AI tool">
         Add to your MCP configuration file:
-        
+
         <CodeGroup>
         ```json Cursor (~/.cursor/mcp.json)
         {
           "mcpServers": {
             "respan": {
-              "url": "https://mcp.respan.ai/api/mcp",
+              "url": "https://mcp.keywordsai.co/mcp",
               "headers": {
                 "Authorization": "Bearer your_respan_api_key"
               }
@@ -41,7 +154,7 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
         {
           "mcpServers": {
             "respan": {
-              "url": "https://mcp.respan.ai/api/mcp",
+              "url": "https://mcp.keywordsai.co/mcp",
               "headers": {
                 "Authorization": "Bearer your_respan_api_key"
               }
@@ -55,7 +168,7 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
         {
           "mcpServers": {
             "respan": {
-              "url": "https://mcp.respan.ai/api/mcp",
+              "url": "https://mcp.keywordsai.co/mcp",
               "headers": {
                 "Authorization": "Bearer your_respan_api_key"
               }
@@ -69,14 +182,10 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
         Restart Cursor or Claude Desktop to load the MCP server.
       </Step>
     </Steps>
-
-    <Tip>
-    This is the recommended setup for most users. No installation, no maintenance - just configure and go.
-    </Tip>
   </Tab>
 
   <Tab title="Local Stdio">
-    Run the MCP server locally via stdio - for personal development or offline use.
+    Run the MCP server locally via stdio — for personal development or offline use.
 
     <Steps>
       <Step title="Prerequisites">
@@ -96,7 +205,7 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
       </Step>
       <Step title="Configure your AI tool">
         Add to your MCP configuration file. **Important:** Replace the path with your actual installation path.
-        
+
         <CodeGroup>
         ```json Cursor (~/.cursor/mcp.json)
         {
@@ -154,14 +263,14 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
   </Tab>
 
   <Tab title="Private HTTP (Teams)">
-    Deploy your own instance to Vercel with your API key stored as an environment variable. Perfect for teams - no client-side keys needed.
+    Deploy your own instance to Vercel with your API key stored as an environment variable. Perfect for teams — no client-side keys needed.
 
     <Steps>
       <Step title="Deploy to Vercel">
         Click to deploy with one click:
-        
+
         [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Respan/respan-mcp&env=RESPAN_API_KEY&envDescription=Your%20Respan%20API%20key&envLink=https://platform.respan.ai/platform/api/api-keys)
-        
+
         Or deploy manually:
         ```bash
         git clone https://github.com/Respan/respan-mcp.git
@@ -176,7 +285,7 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
       </Step>
       <Step title="Configure your AI tool">
         Share this config with your team (replace with your Vercel URL):
-        
+
         ```json
         {
           "mcpServers": {
@@ -190,7 +299,7 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
     </Steps>
 
     <Tip>
-    This mode is ideal for teams - deploy once, and everyone can use the same URL without exposing API keys in their local config.
+    This mode is ideal for teams — deploy once, and everyone can use the same URL without exposing API keys in their local config.
     </Tip>
   </Tab>
 </Tabs>
@@ -199,13 +308,13 @@ Respan provides an MCP server that gives your AI tools direct access to your obs
 
 ## Authentication
 
-| Mode | API Key Location | Best For |
-|------|------------------|----------|
-| **Public HTTP** | `Authorization` header | Individual users, quick setup |
+| Method | How it works | Best For |
+|--------|-------------|----------|
+| **OAuth** | Tool opens browser for sign-in | Claude Code, Claude Desktop, Cursor |
+| **JWT Token** | Sign in at [mcp.keywordsai.co/login](https://mcp.keywordsai.co/login), copy token | Fallback when OAuth fails |
+| **API Key** | Use key from [platform.respan.ai](https://platform.respan.ai/platform/api/api-keys) | Programmatic access, scripts |
 | **Local Stdio** | `RESPAN_API_KEY` env var | Personal development, offline use |
 | **Private HTTP** | Vercel environment variable | Teams, shared access |
-
-Get your Respan API key from [platform.respan.ai](https://platform.respan.ai/platform/api/api-keys).
 
 ---
 
@@ -216,14 +325,14 @@ For enterprise users with a custom API endpoint (e.g., `endpoint.respan.ai`), yo
 <Tabs>
   <Tab title="HTTP Mode">
     Add the `respan-api-base-url` header:
-    
+
     ```json
     {
       "mcpServers": {
         "respan": {
-          "url": "https://mcp.respan.ai/api/mcp",
+          "url": "https://mcp.keywordsai.co/mcp",
           "headers": {
-            "Authorization": "Bearer your_respan_api_key",
+            "Authorization": "Bearer your_token_or_api_key",
             "respan-api-base-url": "https://endpoint.respan.ai/api"
           }
         }
@@ -326,9 +435,10 @@ Once connected, your AI tools have access to the following Respan features.
     4. For stdio mode: ensure `npm run build` completed successfully
   </Accordion>
   <Accordion title="Authentication errors">
-    1. Verify your API key is correct
-    2. For HTTP mode: ensure header is `Authorization: Bearer YOUR_KEY` (not just the key)
-    3. For stdio mode: check the `RESPAN_API_KEY` env var is set correctly
+    1. **OAuth**: Try signing out and re-authenticating. If OAuth keeps failing in Cursor, use the JWT Token or API Key method instead.
+    2. **JWT Token**: Tokens expire — sign in again at [mcp.keywordsai.co/login](https://mcp.keywordsai.co/login) to get a fresh token.
+    3. **API Key**: Verify your API key is correct and the header is `Authorization: Bearer YOUR_KEY` (not just the key).
+    4. **Stdio mode**: Check the `RESPAN_API_KEY` env var is set correctly.
   </Accordion>
   <Accordion title="Connection timeout or errors">
     1. Check your internet connection
