@@ -2,6 +2,10 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "maple",
   "name": "Docs",
+  "banner": {
+    "content": "Keywords AI is now Respan! [Learn more](https://www.respan.ai/blog/introducing-respan)",
+    "dismissible": true
+  },
   "colors": {
     "primary": "#6483F0",
     "light": "#7590F2",
