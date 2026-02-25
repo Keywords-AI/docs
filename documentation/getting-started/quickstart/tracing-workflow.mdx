@@ -1,233 +1,36 @@
 ---
-title: "Trace"
-description: "Traces for agents, requests, and tool calls"
+title: "Trace & monitor"
+description: "Observe your AI system end to end"
 icon: "route"
 ---
 
-## Find your integration path
+## Set up tracing
 
-Respan captures traces from your LLM workflows — every agent step, tool call, and model request. Pick the path that fits your stack:
+To observe your AI agents, start by setting up tracing. Traces capture the full execution tree of your workflows, every agent step, tool call, and model request in a single view.
 
-- **Tracing SDK** — works with any framework or custom code (recommended)
-- **Framework integrations** — pre-built, lightweight exporters for popular frameworks
-- **Manual ingestion** — OTLP or JSON API for existing telemetry pipelines
+We provide different ways to get started. See the [agent tracing quickstart](/documentation/getting-started/quickstart/tracing) for a hands-on walkthrough:
 
-<Note>
-Only need to log individual LLM calls, not full agent tracing? Use the [Logging API](/documentation/getting-started/quickstart/logging) instead.
-</Note>
+- **[Tracing SDK](/documentation/features/tracing/traces/tracing-sdk)**: install the SDK and add `@workflow` / `@task` decorators to your code. LLM calls are auto-captured. Works with any framework or custom code.
+- **[Framework integrations](/documentation/features/tracing/traces/integration-frameworks)**: if you're already using OpenAI Agents SDK, Vercel AI SDK, Mastra, LangGraph, or other frameworks, use our pre-built exporters for zero-effort tracing.
+- **[Manual ingestion](/documentation/features/tracing/traces/manual-ingestion)**: send traces directly via the OTLP endpoint or JSON ingest API if you have existing telemetry pipelines.
 
----
+Once tracing is set up, you can pass [tracing parameters](/documentation/features/tracing/traces/span-parameters) to enrich your spans:
 
-## Tracing SDK
+- `customer_identifier`: track per-user metrics, budgets, and rate limits
+- `thread_identifier`: group spans into conversation threads
+- `trace_group_identifier`: link related traces across sessions
+- `metadata`: attach any custom key-value pairs for filtering and tagging
 
-The easiest way to add tracing to any project. Install the SDK, add a few decorators, and all your LLM calls are auto-captured — works with any framework or custom code.
-
-<CodeGroup>
-```python Python
-# pip install respan-tracing
-from openai import OpenAI
-from respan_tracing.decorators import workflow, task
-from respan_tracing.main import RespanTelemetry
-
-k_tl = RespanTelemetry()
-client = OpenAI()
-
-@task(name="joke_creation")
-def create_joke():
-    completion = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": "Tell me a joke about AI"}],
-    )
-    return completion.choices[0].message.content
-
-@workflow(name="joke_workflow")
-def joke_workflow():
-    return create_joke()
-
-result = joke_workflow()
-print(result)
-```
-```typescript JavaScript
-// npm install @respan/tracing
-import { RespanTelemetry } from '@respan/tracing';
-import OpenAI from 'openai';
-
-const respanAi = new RespanTelemetry({
-    apiKey: process.env.RESPAN_API_KEY || "",
-    appName: 'my-app'
-});
-const openai = new OpenAI();
-
-async function jokeWorkflow() {
-    return await respanAi.withWorkflow(
-        { name: 'joke_workflow' },
-        async () => {
-            return await respanAi.withTask(
-                { name: 'joke_creation' },
-                async () => {
-                    const completion = await openai.chat.completions.create({
-                        messages: [{ role: 'user', content: 'Tell me a joke about AI' }],
-                        model: 'gpt-4o-mini',
-                    });
-                    return completion.choices[0].message.content;
-                }
-            );
-        }
-    );
-}
-
-jokeWorkflow().then(console.log);
-```
-</CodeGroup>
-
-For advanced SDK features (class-based workflows, override span I/O), see [Tracing SDK reference](/documentation/features/tracing/traces/tracing-sdk).
+If you don't need full agent tracing and just want to log each LLM call or tool use separately, use the [Logging API](/documentation/getting-started/quickstart/logging) instead. It's a single API call per request, great for simple setups or non-agentic workflows.
 
 ---
 
-## Framework integrations
+## Monitor
 
-Already using a specific framework? These lightweight, pre-built integrations auto-capture traces with minimal setup — just install the exporter and connect.
+Once data is flowing into Respan, your [dashboard](/documentation/features/monitoring/metrics) automatically shows requests, tokens, latency, cost, and error rates. You can drill into individual [logs](https://platform.respan.ai/platform/requests) or [traces](https://platform.respan.ai/platform/traces) to debug issues.
 
-<CardGroup cols={3}>
+To go further, you can set up:
 
-<Card href="/integrations/tracing/openai-agents-sdk" className="bg-white">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0.png" alt="OpenAI Agents SDK" style={{
-    pointerEvents: 'none',
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0_black.png" alt="OpenAI Agents SDK" style={{
-    pointerEvents: 'none',
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/vercel-tracing">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0.png" alt="Vercel AI SDK" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0_black.png" alt="Vercel AI SDK" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/mastra">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0.png" alt="Mastra" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0_black.png" alt="Mastra" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/langgraph">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0.png" alt="LangGraph" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0_black.png" alt="LangGraph" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/langfuse">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0.png" alt="Langfuse" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0_black.png" alt="Langfuse" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/haystack">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0.png" alt="Haystack" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0_black.png" alt="Haystack" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/baml">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0.png" alt="BAML" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0_black.png" alt="BAML" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card href="/integrations/tracing/instructor">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0.png" alt="Instructor" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0_black.png" alt="Instructor" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-
-<Card title="Respan Native" icon="code" href="/integrations/tracing/respan-native">
-  Python & TypeScript SDK with OpenTelemetry
-</Card>
-
-</CardGroup>
-
----
-
-## Manual ingestion
-
-If you have existing telemetry pipelines or need full control, send traces directly via the OTLP endpoint or the JSON ingest API.
-
-**OTLP endpoint:**
-```
-Endpoint: https://api.respan.ai/v1/traces
-Authorization: Bearer {RESPAN_API_KEY}
-```
-
-**Ingest API:**
-```bash
-curl -X POST "https://api.respan.ai/v1/traces/ingest" \
-  -H "Authorization: Bearer $RESPAN_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '[{
-    "trace_unique_id": "a-trace-id",
-    "span_unique_id": "root-span-id",
-    "span_name": "workflow.start",
-    "span_parent_id": null,
-    "timestamp": "2025-09-08T07:46:14.007279Z",
-    "start_time": "2025-09-08T07:46:14.007279Z"
-  }]'
-```
-
-See [Manual ingestion](/documentation/features/tracing/traces/manual-ingestion) for full details.
-
----
-
-## Enrich your traces with Respan fields
-
-Respan automatically captures all your trace metadata. However, we strongly recommend mapping to Respan's built-in fields for the best experience — this unlocks user analytics, conversation threading, trace grouping, and more.
-
-| Field | What it unlocks |
-|-------|-----------------|
-| `customer_identifier` | Per-user metrics, budgets, and rate limits |
-| `thread_identifier` | Group spans into conversation threads |
-| `trace_group_identifier` | Link related traces across sessions |
-| `group_identifier` | Batch related requests for analysis |
-| `metadata` | Custom key-value pairs for filtering and tagging |
-
-```python
-from respan_tracing.decorators import workflow
-from respan_tracing.contexts.span import respan_span_attributes
-
-@workflow(name="my_workflow")
-def my_workflow():
-    with respan_span_attributes(
-        respan_params={
-            "customer_identifier": "user_123",
-            "thread_identifier": "thread_001",
-            "trace_group_identifier": "pipeline_run_001",
-            "group_identifier": "group_abc",
-            "metadata": {"env": "production", "feature": "chat"}
-        }
-    ):
-        # your code here
-        pass
-```
-
-See [Tracing parameters](/documentation/features/tracing/traces/span-parameters) for the full list of fields and framework-specific examples.
+- **[Views](/documentation/features/monitoring/views)**: save reusable filter configurations you apply often (e.g. "production errors", "high-cost requests").
+- **[Alerts & notifications](/documentation/features/monitoring/notifications/subscribe_alerts)**: get notified by email when issues are detected, like LLM outages or error spikes.
+- **[Automations](/documentation/features/monitoring/automations/quickstart)**: add guardrails to your system by running [online evaluations](/documentation/features/monitoring/automations/quickstart_online_eval) on live traffic, flagging problematic responses, or triggering alerts when quality drops.

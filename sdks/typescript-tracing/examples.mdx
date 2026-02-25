@@ -4,7 +4,7 @@ description: "Real TypeScript examples from the respan-example-projects reposito
 ---
 
 <Check>
-All examples are available on GitHub: [respan-example-projects/typescript/tracing_sdk_example](https://github.com/Respan/respan-example-projects/tree/main/example_scripts/typescript/tracing_sdk_example)
+All examples are available on GitHub: [respan-example-projects/typescript/tracing_sdk_example](https://github.com/Repsan/respan-example-projects/tree/main/example_scripts/typescript/tracing_sdk_example)
 </Check>
 
 ## Setup
@@ -26,7 +26,7 @@ ANTHROPIC_API_KEY=your_anthropic_api_key  # Optional
 
 ## Basic Usage
 
-From [`basic_usage.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/basic_usage.ts). Core concepts: `withWorkflow`, `withTask`, `withAgent`, `withTool`.
+From [`basic_usage.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/basic_usage.ts). Core concepts: `withWorkflow`, `withTask`, `withAgent`, `withTool`.
 
 ```typescript
 import { RespanTelemetry } from '@respan/tracing';
@@ -93,7 +93,7 @@ npx tsx basic_usage.ts
 
 ## OpenAI Integration
 
-From [`openai_integration.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/openai_integration.ts). Automatic instrumentation of the OpenAI SDK.
+From [`openai_integration.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/openai_integration.ts). Automatic instrumentation of the OpenAI SDK.
 
 ```typescript
 import OpenAI from "openai";
@@ -148,7 +148,7 @@ npx tsx openai_integration.ts
 
 ## Advanced Agentic Workflow
 
-From [`advanced_tracing.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/advanced_tracing.ts). Demonstrates `withAgent`, `withTool`, and custom metadata for complex agent workflows.
+From [`advanced_tracing.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/advanced_tracing.ts). Demonstrates `withAgent`, `withTool`, and custom metadata for complex agent workflows.
 
 ```typescript
 import { RespanTelemetry } from '@respan/tracing';
@@ -307,7 +307,7 @@ await respanAi.shutdown();
 
 ## Multi-Provider Tracing
 
-From [`multi_provider.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/multi_provider.ts). Trace across multiple AI providers (OpenAI + Anthropic) in a single workflow.
+From [`multi_provider.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/multi_provider.ts). Trace across multiple AI providers (OpenAI + Anthropic) in a single workflow.
 
 ```typescript
 import OpenAI from 'openai';
@@ -439,10 +439,10 @@ console.log('Agent Response:', result);
 
 Explore additional examples in the GitHub repository:
 
-- **Instrumentation Management** ([`instrumentation_management.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/instrumentation_management.ts)): Disabling specific instrumentations, explicit module loading
-- **Manual Instrumentation** ([`manual_instrumentation.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/manual_instrumentation.ts)): For Next.js and environments where dynamic imports don't work
-- **Span Buffering** ([`span_buffering.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/span_buffering.ts)): Manual control over span creation and batch processing
-- **Noise Filtering** ([`noise_filtering.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/noise_filtering.ts)): How the SDK filters out auto-instrumentation noise
-- **Multi-Processor** ([`multi_processor.ts`](https://github.com/Respan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/multi_processor.ts)): Custom span processors with routing and filters
+- **Instrumentation Management** ([`instrumentation_management.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/instrumentation_management.ts)): Disabling specific instrumentations, explicit module loading
+- **Manual Instrumentation** ([`manual_instrumentation.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/manual_instrumentation.ts)): For Next.js and environments where dynamic imports don't work
+- **Span Buffering** ([`span_buffering.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/span_buffering.ts)): Manual control over span creation and batch processing
+- **Noise Filtering** ([`noise_filtering.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/noise_filtering.ts)): How the SDK filters out auto-instrumentation noise
+- **Multi-Processor** ([`multi_processor.ts`](https://github.com/Repsan/respan-example-projects/blob/main/example_scripts/typescript/tracing_sdk_example/multi_processor.ts)): Custom span processors with routing and filters
 
-[View all TypeScript examples on GitHub →](https://github.com/Respan/respan-example-projects/tree/main/example_scripts/typescript/tracing_sdk_example)
+[View all TypeScript examples on GitHub →](https://github.com/Repsan/respan-example-projects/tree/main/example_scripts/typescript/tracing_sdk_example)

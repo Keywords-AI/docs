@@ -1,0 +1,28 @@
+---
+title: "Prompt & gateway"
+description: "Manage prompts and route traffic through the AI gateway"
+icon: "wand-magic-sparkles"
+---
+
+## Prompt management
+
+Instead of hardcoding prompts in your codebase, manage them on Respan. Every prompt has full version history: edit the text, model, temperature, or any configuration, commit a new version, and deploy it to production without touching your code. See the [prompt quickstart](/documentation/getting-started/quickstart/prompt_management) for a hands-on walkthrough.
+
+- **[Manage prompts](/documentation/features/prompt-management/manage-prompts)**: create prompt templates, commit new versions, and compare changes across versions.
+- **[Variables](/documentation/features/prompt-management/manage-prompts#variables)**: use `{{variable_name}}` to add dynamic content to your prompts. Variables let you reuse the same template across different inputs, and they map directly to testset columns when running experiments.
+- **[Use prompt in code](/documentation/features/prompt-management/use-prompt)**: reference your prompt by ID in code. When you deploy a new version on the platform, your application picks it up immediately with no code changes.
+
+---
+
+## AI gateway
+
+The Respan AI gateway is a proxy that sits between your application and LLM providers. Route all your LLM traffic through a single API to get observability, reliability, and control without changing your SDK. See the [gateway quickstart](/documentation/getting-started/quickstart/gateway) for a hands-on walkthrough.
+
+- **[Gateway setup](/documentation/features/gateway/quickstart)**: connect to 250+ models (OpenAI, Anthropic, Google, Azure, and more) through one unified API. Just change the base URL.
+- **[Fallbacks & retries](/documentation/features/gateway/fallbacks)**: if your primary model fails, the gateway automatically retries on fallback models. Your users never see the error.
+- **[Load balancing](/documentation/features/gateway/load-balancing)**: distribute traffic across multiple models or deployments to avoid rate limits and optimize cost.
+- **[Advanced configuration](/documentation/features/gateway/advanced-configuration)**: enable caching to reduce cost and latency on identical requests, set rate limits, configure function calling, and more.
+
+<Note>
+The gateway adds ~50-150ms of latency. If your product has strict latency requirements, use [tracing](/documentation/getting-started/quickstart/tracing) for observability instead of routing through the gateway.
+</Note>

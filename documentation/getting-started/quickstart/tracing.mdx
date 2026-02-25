@@ -1,5 +1,5 @@
 ---
-title: "Agent tracing"
+title: "Quickstart"
 description: "Three ways to start tracing your LLM workflows with Respan."
 ---
 
@@ -121,6 +121,92 @@ jokeWorkflow().then(console.log);
 Using a framework like OpenAI Agents SDK or Vercel AI SDK? See [Integration frameworks](/documentation/features/tracing/traces/integration-frameworks) for pre-built integrations.
 
 For advanced SDK features (class-based workflows, override span I/O), see [Tracing SDK](/documentation/features/tracing/traces/tracing-sdk).
+
+</Tab>
+
+<Tab title="Integrations">
+
+Already using a specific framework? These lightweight, pre-built integrations auto-capture traces with minimal setup — just install the exporter and connect.
+
+<CardGroup cols={3}>
+
+<Card href="/integrations/tracing/openai-agents-sdk" className="bg-white">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0.png" alt="OpenAI Agents SDK" style={{
+    pointerEvents: 'none',
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0_black.png" alt="OpenAI Agents SDK" style={{
+    pointerEvents: 'none',
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/vercel-tracing">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0.png" alt="Vercel AI SDK" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/vercel_v0_black.png" alt="Vercel AI SDK" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/mastra">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0.png" alt="Mastra" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mastra_v0_black.png" alt="Mastra" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/langgraph">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0.png" alt="LangGraph" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langgraph_v0_black.png" alt="LangGraph" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/langfuse">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0_black.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/haystack">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0.png" alt="Haystack" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/haystack_v0_black.png" alt="Haystack" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/baml">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0.png" alt="BAML" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0_black.png" alt="BAML" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card href="/integrations/tracing/instructor">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0.png" alt="Instructor" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0_black.png" alt="Instructor" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+
+<Card title="Respan Native" icon="code" href="/integrations/tracing/respan-native">
+  Python & TypeScript SDK with OpenTelemetry
+</Card>
+
+</CardGroup>
 
 </Tab>
 

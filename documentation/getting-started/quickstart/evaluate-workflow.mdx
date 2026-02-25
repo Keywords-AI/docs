@@ -1,126 +1,25 @@
 ---
-title: "Evaluate"
-description: "Experiments with code, AI, and human scoring"
+title: "Evaluate & optimize"
+description: "Test, score, and improve your AI system"
 icon: "flask"
 ---
 
-## Evaluate before you ship
+## Evaluate
 
-Once you have data flowing into Respan — or you have your own dataset — you can start evaluating your AI system. The goal is to compare different versions of your prompts, models, and LLM configurations (temperature, max tokens, etc.) so you ship the best version with confidence.
+Once you have data flowing into Respan, you can start evaluating your AI system. The goal is to compare different versions of your prompts, models, and configurations so you ship the best version with confidence. See the [evaluation quickstart](/documentation/getting-started/quickstart/evaluation) for a hands-on walkthrough.
 
-The workflow:
+Here's how the eval pipeline works:
 
-1. **Create a dataset** — the test cases you'll evaluate against
-2. **Create evaluators** — how you'll score the outputs
-3. **Run experiments** — compare prompt versions, models, and configurations side by side
-
----
-
-## 1. Create a dataset
-
-You need test cases to evaluate against. Respan gives you two ways to build a dataset:
-
-<Tabs>
-<Tab title="From your Respan logs">
-
-If you already have logs on Respan, sample them into a dataset. Go to [Datasets](https://platform.respan.ai/platform/datasets), click **Create dataset**, and choose **From logs (sampling)**. Apply filters, set a time range and sampling percentage, then create.
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/dataset/fromlogs_sampling.png" alt="Create dataset from logs" />
-</Frame>
-
-This is the fastest way to get started — your real production data becomes your test cases.
-
-</Tab>
-<Tab title="Import your own">
-
-Upload a CSV or create a dataset manually. Go to [Testsets](https://platform.respan.ai/platform/testsets), click **+ New testset**, and either upload a CSV or create rows directly in the interface.
-
-Your CSV columns should match your prompt variables. Add an `ideal_output` column for expected outputs so evaluators can compare against it.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/testset-create.png" />
-</Frame>
-
-</Tab>
-</Tabs>
-
-<CardGroup cols={2}>
-  <Card title="Datasets" icon="database" href="/documentation/features/evals/dataset">
-    Create datasets from logs
-  </Card>
-  <Card title="Testsets" icon="table" href="/documentation/features/evals/testsets">
-    Import or build test cases manually
-  </Card>
-</CardGroup>
+1. **Build a dataset**: you need test cases to evaluate against. You can [create a dataset from your Respan logs](/documentation/features/evals/dataset) (sample real production data) or [import your own testset](/documentation/features/evals/testsets) via CSV.
+2. **Set up evaluators**: define how outputs are scored. Respan supports [LLM evaluators](/documentation/features/evals/evaluators) (an LLM judges quality), code evaluators (a Python function checks format, length, etc.), and human evaluators (your team reviews manually).
+3. **Run experiments**: bring it all together in [experiments](/documentation/features/evals/experiments-v2). Run your dataset through different prompt versions, models, and configurations, then compare evaluator scores side by side to find the best one. You can also [run experiments programmatically](/apis/develop/experiments-v2/create) via the API.
 
 ---
 
-## 2. Create evaluators
+## Optimize
 
-Evaluators define how outputs are scored. Go to [Evaluators](https://platform.respan.ai/platform/evaluators) and click **+ New evaluator**.
+After identifying the best configuration from your experiments, iterate and deploy:
 
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/evaluators/evaluator_v0.png"/>
-</Frame>
-
-Respan supports three types:
-
-| Type | How it works | Best for |
-|------|-------------|----------|
-| **LLM evaluator** | An LLM judges the output based on your criteria | Subjective quality — relevance, tone, correctness |
-| **Code evaluator** | A Python function scores the output programmatically | Deterministic checks — format, length, keyword presence |
-| **Human evaluator** | A team member reviews and annotates outputs manually | Edge cases, nuanced judgment |
-
-When creating an LLM evaluator, you write a **definition** (what to evaluate) and a **scoring rubric** (how to score). Use variables like `{{llm_output}}`, `{{llm_input}}`, and `{{ideal_output}}` to reference the data.
-
-<Card title="Evaluators" icon="scale-balanced" href="/documentation/features/evals/evaluators">
-  Set up LLM, code, and human evaluators
-</Card>
-
----
-
-## 3. Run experiments
-
-Experiments bring everything together — run your dataset through different prompt versions, models, and configurations, then compare the results with your evaluators.
-
-Go to [Experiments](https://platform.respan.ai/platform/experiments) and click **New experiment**.
-
-<Steps>
-<Step title="Select a dataset">
-Choose the dataset or testset you created in step 1.
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_dataset.png" alt="Select dataset" />
-</Frame>
-</Step>
-
-<Step title="Choose what to test">
-Select a prompt and the versions you want to compare. Each version can have different prompt text, model, temperature, max tokens, or any other LLM configuration.
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/experiments_v2/select_task.png" alt="Select task" />
-</Frame>
-</Step>
-
-<Step title="Run and evaluate">
-Run the experiment, then apply your evaluators to score the outputs. Compare scores side by side to see which configuration performs best.
-
-<Frame>
-<video
-  controls
-  className="w-full aspect-video"
-  src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/evaluations/llm-evals/experiments/evals-result.mp4"
-></video>
-</Frame>
-</Step>
-</Steps>
-
-<CardGroup cols={2}>
-  <Card title="Experiments" icon="flask" href="/documentation/features/evals/experiments-v2">
-    Run and compare experiments
-  </Card>
-  <Card title="Experiments API" icon="code" href="/apis/develop/experiments-v2/create">
-    Run experiments programmatically
-  </Card>
-</CardGroup>
+- **[Manage prompts](/documentation/features/prompt-management/manage-prompts)**: edit your prompt, commit a new version, and run another experiment. Repeat until you're confident in the result.
+- **[Deploy to production](/documentation/features/prompt-management/use-prompt)**: push the winning version live with one click. All API calls using this prompt automatically pick up the new version, no code changes needed.
+- **[Online evaluation](/documentation/features/monitoring/automations/quickstart_online_eval)**: keep quality high after deployment by running evaluators on live traffic automatically. Get alerted when scores drop.

@@ -140,9 +140,11 @@ See the [Prompts API reference](/apis/develop/prompts/create-prompts) for full d
 
 ---
 
-## Variables & Jinja templates
+## Variables
 
-Variables use `{{variable_name}}` syntax. Respan also supports [Jinja templates](https://jinja.palletsprojects.com/en/stable/templates/) for advanced logic.
+Variables are a core part of prompt management. Use `{{variable_name}}` syntax to add dynamic content to your prompts. Variables let you reuse the same prompt template across different inputs: pass values at runtime from your code, or fill them from testset columns when running experiments.
+
+Respan also supports [Jinja templates](https://jinja.palletsprojects.com/en/stable/templates/) for conditionals, filters, and JSON input access.
 
 <Tabs>
 <Tab title="Via UI">

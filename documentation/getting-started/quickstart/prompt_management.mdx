@@ -1,5 +1,5 @@
 ---
-title: "Create a prompt"
+title: "Quickstart"
 description: "A complete guide to create, deploy, and use prompts in your codebase."
 ---
 
@@ -81,24 +81,21 @@ Once you have created a new prompt, you can configure it. Go to the `Editor` tab
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/configure-prompt.png" alt="Create prompt placeholder" />
 
     </Step>
-<Step title="Write the content">
-Once you have configured your prompt, you can write the content of your prompt. Click on the `+ Add message` button to add a new message to your prompt. You can change the role of the message to `user` or `assistant` by clicking on the role name.
+<Step title="Write the content with variables">
+Click on the `+ Add message` button to add a new message to your prompt. You can change the role of the message to `user` or `assistant` by clicking on the role name.
 
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/write-prompt.png" alt="Create prompt placeholder" />
+Use `{{variable_name}}` to add variables to your prompt. Variables are placeholders for dynamic content that let you reuse the same prompt template across different inputs. For example:
 
-    </Step>
-<Step title="Variables in the prompt">
-You can also add variables to your prompt. Variables are placeholders for dynamic content that can be used to generate prompts. Simply add double curly braces `{{variable_name}}` to your prompt and you will be able to use the variable in your prompt.
-
-Replace the User message with this:
 ```
-Please develop an optimized Python function to {{task_description}}, 
-utilizing {{specific_library}},include error handling, and write unit tests for the function.
+Please develop an optimized Python function to {{task_description}},
+utilizing {{specific_library}}, include error handling, and write unit tests for the function.
 ```
+
 <Note>
-The format of the variable can't be `{{task description}}`. It should be `{{task_description}}` with "_" instead of spaces.
+Variable names must use underscores: `{{task_description}}` not `{{task description}}`.
 </Note>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/prompt-variables.png" alt="Create prompt placeholder" />
+
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/prompt-variables.png" alt="Prompt with variables" />
 
 </Step>
 <Step title="Commit the first version">

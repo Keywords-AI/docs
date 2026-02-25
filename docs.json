@@ -33,23 +33,11 @@
             "pages": [
               "/documentation/getting-started/overview",
               {
-                "group": "Quickstart",
-                "pages": [
-                  "/documentation/getting-started/quickstart/logging",
-                  "/documentation/getting-started/quickstart/tracing",
-                  "/documentation/getting-started/quickstart/gateway",
-                  "/documentation/getting-started/quickstart/prompt_management",
-                  "/documentation/getting-started/quickstart/evaluation"
-                ]
-              },
-              {
-                "group": "Workflow",
+                "group": "Workflows",
                 "pages": [
                   "/documentation/getting-started/quickstart/tracing-workflow",
-                  "/documentation/getting-started/quickstart/monitor-workflow",
-                  "/documentation/getting-started/quickstart/evaluate-workflow",
-                  "/documentation/getting-started/quickstart/optimize-workflow",
-                  "/documentation/getting-started/quickstart/deploy-workflow"
+                  "/documentation/getting-started/quickstart/prompt-gateway-workflow",
+                  "/documentation/getting-started/quickstart/evaluate-workflow"
                 ]
               },
               "/documentation/getting-started/data_model"
@@ -64,7 +52,7 @@
                   {
                     "group": "Logs",
                     "pages": [
-                      "/documentation/features/tracing/logs/quickstart",
+                      "/documentation/getting-started/quickstart/logging",
                       "/documentation/features/tracing/logs/log-content-types",
                       "/documentation/features/tracing/logs/log-parameters",
                       "/documentation/features/tracing/logs/save_log_to_prompt",
@@ -75,7 +63,7 @@
                   {
                     "group": "Traces",
                     "pages": [
-                      "/documentation/features/tracing/traces/quickstart",
+                      "/documentation/getting-started/quickstart/tracing",
                       "/documentation/features/tracing/traces/integration-frameworks",
                       "/documentation/features/tracing/traces/tracing-sdk",
                       "/documentation/features/tracing/traces/manual-ingestion",
@@ -114,7 +102,7 @@
               {
                 "group": "Evals",
                 "pages": [
-                  "/documentation/features/evals/quickstart",
+                  "/documentation/getting-started/quickstart/evaluation",
                   "/documentation/features/evals/evaluators",
                   "/documentation/features/evals/dataset",
                   "/documentation/features/evals/testsets",
@@ -125,7 +113,7 @@
               {
                 "group": "Prompt management",
                 "pages": [
-                  "/documentation/features/prompt-management/quickstart",
+                  "/documentation/getting-started/quickstart/prompt_management",
                   "/documentation/features/prompt-management/manage-prompts",
                   "/documentation/features/prompt-management/use-prompt"
                 ]
@@ -133,7 +121,7 @@
               {
                 "group": "Gateway",
                 "pages": [
-                  "/documentation/features/gateway/quickstart",
+                  "/documentation/getting-started/quickstart/gateway",
                   "/documentation/features/gateway/setup",
                   "/documentation/features/gateway/advanced-configuration"
                 ]
@@ -203,7 +191,6 @@
             "group": "Help & Community",
             "pages": [
               "/documentation/support/support",
-              "/documentation/support/feedback",
               "/documentation/support/status"
             ]
           }
@@ -773,7 +760,7 @@
   "footer": {
     "socials": {
       "linkedin": "https://www.linkedin.com/company/respan/",
-      "github": "https://github.com/respan",
+      "github": "https://github.com/Repsan",
       "discord": "https://discord.com/invite/KEanfAafQQ"
     }
   },
