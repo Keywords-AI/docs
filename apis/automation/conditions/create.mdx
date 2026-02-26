@@ -3,7 +3,7 @@ title: "Create condition"
 api: "POST https://api.respan.ai/automation/conditions/"
 ---
 
-Creates a new automation condition that defines which logs should trigger evaluations.
+Creates a new automation condition that defines which spans should trigger evaluations.
 
 ## Authentication
 
@@ -77,7 +77,7 @@ data = {
     "name": "Successful Requests",
     "condition_slug": "success_logs",
     "condition_type": "single_log",
-    "description": "Matches logs with HTTP status code 200",
+    "description": "Matches spans with HTTP status code 200",
     "condition_policy": {
         "rules": [
             {
@@ -102,7 +102,7 @@ curl -X POST "https://api.respan.ai/automation/conditions/" \
     "name": "Successful Requests",
     "condition_slug": "success_logs",
     "condition_type": "single_log",
-    "description": "Matches logs with HTTP status code 200",
+    "description": "Matches spans with HTTP status code 200",
     "condition_policy": {
       "rules": [
         {
@@ -245,7 +245,7 @@ curl -X POST "https://api.respan.ai/automation/conditions/" \
   "name": "Successful Requests",
   "condition_slug": "success_logs",
   "condition_type": "single_log",
-  "description": "Matches logs with HTTP status code 200",
+  "description": "Matches spans with HTTP status code 200",
   "condition_policy": {
     "rules": [
       {

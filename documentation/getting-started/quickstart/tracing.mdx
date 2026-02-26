@@ -212,11 +212,41 @@ Already using a specific framework? These lightweight, pre-built integrations au
 
 <Tab title="Manually">
 
-Construct traces by posting span JSON directly to Respan. Use this when you have existing log data or custom telemetry pipelines.
+Send traces directly to Respan without an SDK. Choose between the OTLP endpoint (standard OpenTelemetry) or the JSON ingest API.
 
-**Ingest API:**
+**OTLP endpoint (recommended):**
+
+Point any OpenTelemetry SDK or collector at Respan's OTLP-compatible endpoint:
+
 ```bash
-curl -X POST "$RESPAN_BASE_URL/v1/traces/ingest" \
+curl -X POST "https://api.respan.ai/api/v2/traces" \
+  -H "Authorization: Bearer $RESPAN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": {
+        "attributes": [{"key": "service.name", "value": {"stringValue": "my-service"}}]
+      },
+      "scopeSpans": [{
+        "scope": {"name": "manual"},
+        "spans": [{
+          "traceId": "0af7651916cd43dd8448eb211c80319c",
+          "spanId": "b7ad6b7169203332",
+          "name": "my-operation",
+          "startTimeUnixNano": "1700000000000000000",
+          "endTimeUnixNano": "1700000001000000000",
+          "status": {"code": 1},
+          "attributes": []
+        }]
+      }]
+    }]
+  }'
+```
+
+**JSON ingest API:**
+
+```bash
+curl -X POST "https://api.respan.ai/api/v1/traces/ingest" \
   -H "Authorization: Bearer $RESPAN_API_KEY" \
   -H "Content-Type: application/json" \
   -d '[{
@@ -227,12 +257,6 @@ curl -X POST "$RESPAN_BASE_URL/v1/traces/ingest" \
     "timestamp": "2025-09-08T07:46:14.007279Z",
     "start_time": "2025-09-08T07:46:14.007279Z"
   }]'
-```
-
-**OTLP endpoint:**
-```
-Endpoint: https://api.respan.ai/v1/traces
-Authorization: Bearer {RESPAN_API_KEY}
 ```
 
 See [Manual ingestion](/documentation/features/tracing/traces/manual-ingestion) for full details.

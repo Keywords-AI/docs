@@ -1,14 +1,14 @@
 ---
-title: Create log
+title: Create span
 api: POST https://api.respan.ai/api/request-logs/
 ---
 
-This guide shows you how to log any type of LLM request to Respan using the **universal input/output design** that supports all span types.
+This guide shows you how to create any type of LLM span in Respan using the **universal input/output design** that supports all span types.
 
 <Warning>
-**Log size limit: 20MB**
+**Span size limit: 20MB**
 
-Each log payload has a maximum size limit of 20MB. This includes the `input`, `output`, and all other fields combined. Logs exceeding this limit will be rejected.
+Each span payload has a maximum size limit of 20MB. This includes the `input`, `output`, and all other fields combined. Spans exceeding this limit will be rejected.
 </Warning>
 
 ## Input/Output
@@ -284,7 +284,7 @@ Same functionality as `metadata`, but indexed for faster querying.
 </ParamField>
 
 <ParamField body="group_identifier" type="string">
-Group identifier. Use to group related logs together.
+Group identifier. Use to group related spans together.
 </ParamField>
 
 ### Workflow & tracing

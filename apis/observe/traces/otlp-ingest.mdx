@@ -1,0 +1,227 @@
+---
+title: Ingest traces via OTLP
+api: POST https://api.respan.ai/api/v2/traces
+---
+
+Send traces to Respan using the standard [OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/) protocol. Any OpenTelemetry-compatible SDK can export directly to this endpoint.
+
+<Info>
+For the easiest setup, use the [Respan tracing SDK](/documentation/features/tracing/traces/tracing-sdk) or the [OpenTelemetry integration](/integrations/tracing/opentelemetry) which auto-configures the exporter. This endpoint is for direct OTLP/HTTP access.
+</Info>
+
+## Authentication
+
+```
+Authorization: Bearer YOUR_API_KEY
+```
+
+## Content types
+
+| Content-Type | Format | Description |
+|---|---|---|
+| `application/json` | OTLP/HTTP JSON | Standard OTLP JSON encoding |
+| `application/x-protobuf` | OTLP/HTTP Protobuf | Binary protobuf encoding (`ExportTraceServiceRequest`) |
+
+## Body
+
+The request body follows the standard [OTLP `ExportTraceServiceRequest`](https://opentelemetry.io/docs/specs/otlp/#otlphttp-request) schema.
+
+<ParamField body="resourceSpans" type="array" required>
+Array of resource spans. Each element represents spans from a single resource (service).
+
+<ParamField body="resource" type="object">
+Resource metadata for the spans.
+
+<ParamField body="attributes" type="array">
+Key-value attributes identifying the resource. Set `service.name` to identify your application.
+</ParamField>
+</ParamField>
+
+<ParamField body="scopeSpans" type="array" required>
+Array of instrumentation scope spans.
+
+<ParamField body="scope" type="object">
+Instrumentation scope metadata (library name and version).
+</ParamField>
+
+<ParamField body="spans" type="array" required>
+Array of span objects.
+
+<ParamField body="traceId" type="string" required>
+Hex-encoded trace identifier (16 bytes / 32 hex chars).
+</ParamField>
+<ParamField body="spanId" type="string" required>
+Hex-encoded span identifier (8 bytes / 16 hex chars).
+</ParamField>
+<ParamField body="parentSpanId" type="string">
+Hex-encoded parent span ID. Empty for root spans.
+</ParamField>
+<ParamField body="name" type="string" required>
+Name of the span operation.
+</ParamField>
+<ParamField body="startTimeUnixNano" type="string" required>
+Start time as nanoseconds since Unix epoch (string).
+</ParamField>
+<ParamField body="endTimeUnixNano" type="string" required>
+End time as nanoseconds since Unix epoch (string).
+</ParamField>
+<ParamField body="status" type="object">
+Span status. `code`: `1` (OK) or `2` (ERROR). `message`: error description.
+</ParamField>
+<ParamField body="attributes" type="array">
+Span attributes as key-value pairs. See [Recognized attributes](#recognized-attributes) below.
+</ParamField>
+<ParamField body="events" type="array">
+Span events (e.g., exceptions). Each event has `name`, `timeUnixNano`, and `attributes`.
+</ParamField>
+</ParamField>
+</ParamField>
+</ParamField>
+
+## Recognized attributes
+
+### Gen AI semantic conventions
+
+| Attribute key | Description |
+|---|---|
+| `gen_ai.request.model` | Requested model name |
+| `gen_ai.response.model` | Model that actually responded |
+| `gen_ai.request.temperature` | Temperature setting |
+| `gen_ai.request.max_tokens` | Max token limit |
+| `gen_ai.usage.prompt_tokens` | Input token count |
+| `gen_ai.usage.completion_tokens` | Output token count |
+| `gen_ai.usage.total_tokens` | Total token count |
+| `gen_ai.prompt.{N}.role` | Message role (user, assistant, system) |
+| `gen_ai.prompt.{N}.content` | Message content |
+| `gen_ai.completion.{N}.role` | Response role |
+| `gen_ai.completion.{N}.content` | Response content |
+
+### Respan extensions
+
+| Attribute key | Description |
+|---|---|
+| `respan.customer.identifier` | Customer/user identifier for filtering |
+| `respan.customer.email` | Customer email |
+| `respan.customer.name` | Customer display name |
+| `respan.thread.id` | Thread/conversation identifier |
+| `respan.trace_group.id` | Trace group for linking related traces |
+| `respan.metadata` | JSON object merged into span metadata |
+| `respan.entity.log_type` | Explicit span type override |
+
+All other attributes are stored in the span's `metadata` and are queryable via the metadata filter in the Respan UI.
+
+## OTLP value types
+
+Attribute values are wrapped in typed objects per the OTLP spec:
+
+| Wrapper key | Type | Example |
+|---|---|---|
+| `stringValue` | string | `{"stringValue": "hello"}` |
+| `intValue` | int | `{"intValue": "42"}` |
+| `doubleValue` | float | `{"doubleValue": 3.14}` |
+| `boolValue` | bool | `{"boolValue": true}` |
+| `arrayValue` | list | `{"arrayValue": {"values": [...]}}` |
+| `kvlistValue` | dict | `{"kvlistValue": {"values": [{"key": "k", "value": {...}}]}}` |
+
+<RequestExample>
+```python Python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+exporter = OTLPSpanExporter(
+    endpoint="https://api.respan.ai/api/v2/traces",
+    headers={"Authorization": "Bearer YOUR_API_KEY"},
+)
+
+provider = TracerProvider()
+provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer("my-service")
+with tracer.start_as_current_span("my-operation") as span:
+    span.set_attribute("gen_ai.request.model", "gpt-4")
+    span.set_attribute("respan.customer.identifier", "user_123")
+```
+
+```typescript TypeScript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+const exporter = new OTLPTraceExporter({
+    url: 'https://api.respan.ai/api/v2/traces',
+    headers: {
+        'Authorization': 'Bearer YOUR_API_KEY',
+    },
+});
+
+const sdk = new NodeSDK({
+    traceExporter: exporter,
+});
+
+sdk.start();
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/v2/traces" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [
+      {
+        "resource": {
+          "attributes": [
+            {"key": "service.name", "value": {"stringValue": "my-service"}}
+          ]
+        },
+        "scopeSpans": [
+          {
+            "scope": {"name": "manual"},
+            "spans": [
+              {
+                "traceId": "0af7651916cd43dd8448eb211c80319c",
+                "spanId": "b7ad6b7169203332",
+                "name": "my-operation",
+                "startTimeUnixNano": "1700000000000000000",
+                "endTimeUnixNano": "1700000001000000000",
+                "status": {"code": 1},
+                "attributes": [
+                  {"key": "gen_ai.request.model", "value": {"stringValue": "gpt-4"}},
+                  {"key": "respan.customer.identifier", "value": {"stringValue": "user_123"}}
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 OK
+{
+  "partialSuccess": {
+    "rejectedSpans": 0,
+    "errorMessage": ""
+  }
+}
+```
+</ResponseExample>
+
+### Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `partialSuccess.rejectedSpans` | integer | Number of spans that failed to ingest |
+| `partialSuccess.errorMessage` | string | Error description (empty on success) |
+
+### Error responses
+
+| Code | Description |
+|---|---|
+| `200 OK` | All spans accepted |
+| `400 Bad Request` | Malformed payload |
+| `401 Unauthorized` | Invalid or missing API key |

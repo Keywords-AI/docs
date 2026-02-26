@@ -9,14 +9,99 @@ Use manual ingestion when you have existing log data, custom telemetry pipelines
 
 ## OTLP endpoint
 
-If you have an existing OpenTelemetry setup, send traces directly to Respan's OTLP-compatible endpoint. Configure your OTel exporter to point at Respan:
+If you have an existing OpenTelemetry setup, send traces directly to Respan's OTLP-compatible endpoint. This works with any OpenTelemetry SDK or collector.
 
 ```
-Endpoint: https://api.respan.ai/v1/traces
+POST https://api.respan.ai/api/v2/traces
 Authorization: Bearer {RESPAN_API_KEY}
+Content-Type: application/json  (or application/x-protobuf)
 ```
 
-This works with any OpenTelemetry SDK or collector. Respan automatically parses OTel spans and maps them to the Respan data model.
+### Environment variable configuration
+
+```bash .env
+OTEL_EXPORTER_OTLP_ENDPOINT="https://api.respan.ai/api"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer YOUR_RESPAN_API_KEY"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/json"
+```
+
+### SDK configuration
+
+<Tabs>
+<Tab title="Python">
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+exporter = OTLPSpanExporter(
+    endpoint="https://api.respan.ai/api/v2/traces",
+    headers={"Authorization": "Bearer YOUR_RESPAN_API_KEY"},
+)
+
+provider = TracerProvider()
+provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer("my-service")
+with tracer.start_as_current_span("my-operation") as span:
+    span.set_attribute("gen_ai.request.model", "gpt-4")
+    # Your code here
+```
+</Tab>
+
+<Tab title="JS/TS">
+```typescript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+const exporter = new OTLPTraceExporter({
+    url: 'https://api.respan.ai/api/v2/traces',
+    headers: {
+        'Authorization': 'Bearer YOUR_RESPAN_API_KEY',
+    },
+});
+
+const sdk = new NodeSDK({
+    traceExporter: exporter,
+});
+
+sdk.start();
+```
+</Tab>
+
+<Tab title="cURL">
+```bash
+curl -X POST "https://api.respan.ai/api/v2/traces" \
+  -H "Authorization: Bearer YOUR_RESPAN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resourceSpans": [{
+      "resource": {
+        "attributes": [
+          {"key": "service.name", "value": {"stringValue": "my-service"}}
+        ]
+      },
+      "scopeSpans": [{
+        "scope": {"name": "manual"},
+        "spans": [{
+          "traceId": "0af7651916cd43dd8448eb211c80319c",
+          "spanId": "b7ad6b7169203332",
+          "name": "my-operation",
+          "startTimeUnixNano": "1700000000000000000",
+          "endTimeUnixNano": "1700000001000000000",
+          "status": {"code": 1},
+          "attributes": []
+        }]
+      }]
+    }]
+  }'
+```
+</Tab>
+</Tabs>
+
+Respan automatically parses OTel spans, extracts [Gen AI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/) and Respan-specific attributes, and maps them to the Respan data model. For the full OTLP schema and recognized attributes, see the [OTLP ingest API reference](/apis/observe/traces/otlp-ingest).
 
 ---
 

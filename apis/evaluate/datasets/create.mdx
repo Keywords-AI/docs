@@ -3,7 +3,7 @@ title: "Create dataset"
 api: "POST https://api.respan.ai/api/datasets/"
 ---
 
-Creates a new dataset, either populated with existing logs or empty for manual population. You can specify filters and sampling rate to select which logs to include, or create an empty dataset to add logs manually later.
+Creates a new dataset, either populated with existing spans or empty for manual population. You can specify filters and sampling rate to select which spans to include, or create an empty dataset to add spans manually later.
 
 ## Authentication
 
@@ -24,15 +24,15 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="sampling" type="integer" default="100">
-  Percentage of logs to include (0-100).
+  Percentage of spans to include (0-100).
 </ParamField>
 
 <ParamField body="start_time" type="string">
-  ISO 8601 timestamp for log filtering. Required when `is_empty` is false or not provided. Ignored when `is_empty` is true.
+  ISO 8601 timestamp for span filtering. Required when `is_empty` is false or not provided. Ignored when `is_empty` is true.
 </ParamField>
 
 <ParamField body="end_time" type="string">
-  ISO 8601 timestamp for log filtering. Required when `is_empty` is false or not provided. Ignored when `is_empty` is true.
+  ISO 8601 timestamp for span filtering. Required when `is_empty` is false or not provided. Ignored when `is_empty` is true.
 </ParamField>
 
 <ParamField body="is_empty" type="boolean" default="false">
@@ -40,7 +40,7 @@ Authorization: Bearer YOUR_API_KEY
 </ParamField>
 
 <ParamField body="initial_log_filters" type="object">
-  Filters to apply to select logs for the dataset.
+  Filters to apply to select spans for the dataset.
   <Accordion title="Example">
     ```json
     {

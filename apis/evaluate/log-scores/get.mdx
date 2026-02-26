@@ -1,5 +1,5 @@
 ---
-title: Retrieve log score
+title: Retrieve span score
 api: GET https://api.respan.ai/api/logs/{log_id}/scores/{score_id}/
 ---
 
@@ -42,15 +42,15 @@ print(response.json())
 ```
 </ResponseExample>
 
-## Score Enrichment in Logs
+## Score Enrichment in Spans
 
-When you retrieve log details, scores are automatically included in the response under a `scores` field. This enriched format includes:
+When you retrieve span details, scores are automatically included in the response under a `scores` field. This enriched format includes:
 
 - **evaluator_name**: Human-readable name of the evaluator
 - **evaluator_slug**: URL-friendly identifier
 - **score_value**: The actual score value (numerical, boolean, etc.)
 
-Example enriched scores in a log response:
+Example enriched scores in a span response:
 ```json
 {
   "id": "log_abc123",
@@ -69,8 +69,8 @@ Example enriched scores in a log response:
 
 Aggregated score summaries are available in summary endpoints. These show average scores for numerical evaluators and true/false counts for boolean evaluators:
 
-- **Logs Summary**: [GET/POST /api/request-logs/summary/](/apis/observe/logs/logs-summary-endpoint)
-- **Experiment Logs Summary**: GET/POST /evaluations/experiments/{experiment_id}/logs/summary/
-- **Dataset Logs Summary**: GET/POST /api/datasets/{dataset_id}/logs/summary/
+- **Spans Summary**: [GET/POST /api/request-logs/summary/](/apis/observe/logs/logs-summary-endpoint)
+- **Experiment Spans Summary**: GET/POST /evaluations/experiments/{experiment_id}/logs/summary/
+- **Dataset Spans Summary**: GET/POST /api/datasets/{dataset_id}/logs/summary/
 
-See the [Logs Summary endpoint](/apis/observe/logs/logs-summary-endpoint) for complete details on the score summary format.
+See the [Spans Summary endpoint](/apis/observe/logs/logs-summary-endpoint) for complete details on the score summary format.

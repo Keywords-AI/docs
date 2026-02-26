@@ -1,9 +1,9 @@
 ---
-title: List logs
+title: List spans
 api: POST https://api.respan.ai/api/request-logs/list/
 ---
 
-The Logs List endpoint allows you to retrieve past logs with specified filters.
+The Spans List endpoint allows you to retrieve past spans with specified filters.
 
 ## Response fields
 
@@ -38,7 +38,7 @@ For example:
 "https://api.respan.ai/api/request-logs/list/?page=1&sort_by=-id&is_test=false&all_envs=false&fetch_filters=false&page_size=1"
 ```
 <ParamField query="start_time" type="string" required>
-  The start time for filtering logs in ISO 8601 format. If not provided, defaults to 1 hour ago.
+  The start time for filtering spans in ISO 8601 format. If not provided, defaults to 1 hour ago.
   <Accordion title="Example">
     ```json
     {
@@ -49,7 +49,7 @@ For example:
 </ParamField>
 
 <ParamField query="end_time" type="string" required>
-  The end time for filtering logs in ISO 8601 format. If not provided, defaults to current time.
+  The end time for filtering spans in ISO 8601 format. If not provided, defaults to current time.
   <Accordion title="Example">
     ```json
     {
@@ -99,12 +99,12 @@ For example:
 </AccordionGroup>
 </ParamField>
 <ParamField query="all_envs" type="string" default="false">
-  Whether to include logs from all environments. `is_test` parameter will override this parameter.
+  Whether to include spans from all environments. `is_test` parameter will override this parameter.
   Options: `true`, `false`.
 </ParamField>
 
 <ParamField query="is_test" type="string" default="false">
-  Whether the log is a test call or not. This parameter will override the `all_envs` parameter.
+  Whether the span is a test call or not. This parameter will override the `all_envs` parameter.
   Options: `true`, `false`.
 </ParamField>
 
@@ -114,17 +114,17 @@ For example:
 </ParamField>
 
 <ParamField query="page_size" type="number" default={100}>
-  The number of logs to return per page. Maximum is 1000.
+  The number of spans to return per page. Maximum is 1000.
 </ParamField>
 
 <ParamField query="page" type="number" default={1}>
-  The page number of the current logs.
+  The page number of the current spans.
 </ParamField>
 
 <ParamField query="include_fields" type="string">
-  Comma separated fields to be included in the response logs. This parameter allows you to specify which fields should be returned to improve performance and reduce response size.
+  Comma separated fields to be included in the response spans. This parameter allows you to specify which fields should be returned to improve performance and reduce response size.
   <Note>
-    include_fields guarantees the listed fields will be present in each log item, but it does not enforce exclusivity. The API may still return additional fields required for the endpoint (e.g., identifiers, pagination-related fields, or internal metadata).
+    include_fields guarantees the listed fields will be present in each span item, but it does not enforce exclusivity. The API may still return additional fields required for the endpoint (e.g., identifiers, pagination-related fields, or internal metadata).
   </Note>
   <Accordion title="Example">
     ```
@@ -135,7 +135,7 @@ For example:
 
 ## URL-based Filtering (Quick Filters)
 
-You can filter logs directly via URL query parameters. This is useful for sharing filtered views, bookmarking, or building dynamic filter links.
+You can filter spans directly via URL query parameters. This is useful for sharing filtered views, bookmarking, or building dynamic filter links.
 
 ### Basic Syntax
 
@@ -165,10 +165,10 @@ The system automatically detects how to handle each URL parameter:
 
 1. **Pagination/Sort parameters**: Skipped (page, page_size, sort_by, etc.)
 2. **Metadata fields starting with "metadata__"**: Filter custom metadata
-3. **Known log fields**: Filter directly on that field
+3. **Known span fields**: Filter directly on that field
 4. **Unknown fields**: Treated as custom metadata (auto-prefix "metadata__")
 
-### Known Log Fields
+### Known span fields
 
 These fields can be filtered directly without the `metadata__` prefix:
 
@@ -254,7 +254,7 @@ Multiple URL filters can be combined. All filters are joined with AND logic by d
 
 ## Sorting and Filtering by Evaluation Scores
 
-You can sort and filter logs by evaluator scores using the `scores__` prefix pattern (consistent with `metadata__` filtering).
+You can sort and filter spans by evaluator scores using the `scores__` prefix pattern (consistent with `metadata__` filtering).
 
 ### Sorting by Scores
 
@@ -265,16 +265,16 @@ You can sort and filter logs by evaluator scores using the `scores__` prefix pat
 ```
 
 **How to find your evaluator_id:**
-- The `evaluator_id` is the key in the `scores` object returned in log responses
+- The `evaluator_id` is the key in the `scores` object returned in span responses
 - It's the same as the UUID of the evaluator in your organization
 - Example: If your scores object has `"d4f46e95-73ff-4166-8581-928c1a1b1589": {...}`, use `sort_by=-scores__d4f46e95-73ff-4166-8581-928c1a1b1589`
 
 ### Filtering by Scores
 
-Use POST body filters to filter logs by score values:
+Use POST body filters to filter spans by score values:
 
 <AccordionGroup>
-  <Accordion title="Filter logs with score greater than 4.0">
+  <Accordion title="Filter spans with score greater than 4.0">
     ```bash
     curl -X POST "https://api.respan.ai/api/request-logs/list/" \
       -H "Authorization: Bearer YOUR_API_KEY" \
@@ -290,7 +290,7 @@ Use POST body filters to filter logs by score values:
     ```
   </Accordion>
 
-  <Accordion title="Filter logs with score less than or equal to 2.0">
+  <Accordion title="Filter spans with score less than or equal to 2.0">
     ```bash
     curl -X POST "https://api.respan.ai/api/request-logs/list/" \
       -H "Authorization: Bearer YOUR_API_KEY" \
@@ -336,7 +336,7 @@ response = requests.post(url, headers=headers, json=data)
 ```
 
 <ParamField body="filters" type="object" default={{}}>
-  The filters be applied to the logs. For available options in the response body, use the `fetch_filters` parameter.
+  The filters to be applied to the spans. For available options in the response body, use the `fetch_filters` parameter.
 
 <Note>If you want to filter your custom properties, you should add `metadata__`+ your custom property name. For example, if you want to filter your custom property `my_custom_property`, you should add `metadata__my_custom_property` to the filters.</Note>
 <Accordion title="Example">

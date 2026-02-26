@@ -1,0 +1,72 @@
+---
+title: "Hyperspell"
+description: "A guide to integrating Hyperspell with Respan."
+---
+
+[Hyperspell](https://hyperspell.com/) is a memory management platform for AI applications, providing persistent memory and context management for LLM-powered products.
+
+Hyperspell + Respan gives you full observability over your AI application's memory operations, letting you trace how context is stored, retrieved, and used across conversations.
+
+## Setup
+
+<Steps>
+<Step title="Install dependencies">
+```bash
+pip install hyperspell respan-tracing
+```
+</Step>
+
+<Step title="Configure environment variables">
+```bash .env
+HYPERSPELL_API_KEY="YOUR_HYPERSPELL_API_KEY"
+RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+RESPAN_BASE_URL="https://api.respan.ai/api"
+```
+</Step>
+
+<Step title="Use Hyperspell with Respan tracing">
+```python
+import os
+from hyperspell import Hyperspell
+from respan_tracing.decorators import workflow, task
+from respan_tracing.main import RespanTelemetry
+
+# Initialize Respan Telemetry
+os.environ["RESPAN_API_KEY"] = "YOUR_RESPAN_API_KEY"
+k_tl = RespanTelemetry()
+
+# Initialize Hyperspell client
+client = Hyperspell(api_key=os.environ["HYPERSPELL_API_KEY"])
+
+@task(name="store_memory")
+def store_memory(user_id: str, content: str):
+    """Store a memory for a user."""
+    return client.memories.create(
+        user_id=user_id,
+        content=content
+    )
+
+@task(name="retrieve_memory")
+def retrieve_memory(user_id: str, query: str):
+    """Retrieve relevant memories for a user."""
+    return client.memories.search(
+        user_id=user_id,
+        query=query
+    )
+
+@workflow(name="memory_workflow")
+def memory_workflow():
+    store_memory("user_123", "I prefer Python over JavaScript.")
+    memories = retrieve_memory("user_123", "programming language preference")
+    return memories
+
+if __name__ == "__main__":
+    result = memory_workflow()
+    print(result)
+```
+</Step>
+</Steps>
+
+## View your traces
+
+After running your workflow, you can see the memory operations traced in the [Traces](https://platform.respan.ai/platform/traces) page on Respan.

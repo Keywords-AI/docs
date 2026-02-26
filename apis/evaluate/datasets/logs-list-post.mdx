@@ -1,5 +1,5 @@
 ---
-title: "List logs with filters"
+title: "List spans with filters"
 api: "POST https://api.respan.ai/api/datasets/{dataset_id}/logs/list/"
 ---
 
@@ -79,10 +79,10 @@ The response uses the same paginated shape as the GET endpoint: `count`, `next`,
 
 Response Fields:
 
-- `count` (integer): Total number of logs matching the filters
+- `count` (integer): Total number of spans matching the filters
 - `next` (string|null): URL for the next page of results
 - `previous` (string|null): URL for the previous page of results
-- `results` (array): Array of log objects matching the filters
+- `results` (array): Array of span objects matching the filters
 - `filters_data` (object): Available filter options for building filter UIs
 
 Errors:

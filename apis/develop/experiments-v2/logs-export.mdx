@@ -1,9 +1,9 @@
 ---
-title: "Export experiment logs"
+title: "Export experiment spans"
 api: "GET https://api.respan.ai/api/v2/experiments/{experiment_id}/logs/?export=1"
 ---
 
-Exports experiment logs to CSV/Excel format. The export is processed asynchronously and a download link is sent to your email.
+Exports experiment spans to CSV/Excel format. The export is processed asynchronously and a download link is sent to your email.
 
 ## Authentication
 
@@ -12,7 +12,7 @@ Exports experiment logs to CSV/Excel format. The export is processed asynchronou
 ## Path Parameters
 
 <ParamField path="experiment_id" type="string" required>
-  The ID of the experiment to export logs from.
+  The ID of the experiment to export spans from.
 </ParamField>
 
 ## Query Parameters

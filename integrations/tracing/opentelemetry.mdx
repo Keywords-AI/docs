@@ -1,0 +1,131 @@
+---
+title: "OpenTelemetry"
+description: "Send traces from any OpenTelemetry-instrumented application to Respan."
+---
+
+## Overview
+
+If your application is already instrumented with [OpenTelemetry (OTel)](https://opentelemetry.io/), you can send traces directly to Respan without installing any additional SDK. Just configure Respan as your OTLP exporter endpoint.
+
+Respan accepts traces via the standard [OTLP/HTTP](https://opentelemetry.io/docs/specs/otlp/) protocol in both JSON and Protobuf formats.
+
+## Setup
+
+<Steps>
+<Step title="Get your Respan API key">
+Get your API key from the [API Keys page](https://platform.respan.ai/platform/api/api-keys) in Settings.
+</Step>
+
+<Step title="Configure the OTLP exporter">
+
+**Option A: Environment variables**
+
+Set the following environment variables to point your OTel SDK at Respan:
+
+```bash .env
+OTEL_EXPORTER_OTLP_ENDPOINT="https://api.respan.ai/api"
+OTEL_EXPORTER_OTLP_HEADERS="Authorization=Bearer YOUR_RESPAN_API_KEY"
+OTEL_EXPORTER_OTLP_PROTOCOL="http/json"
+```
+
+**Option B: Direct SDK configuration**
+
+<Tabs>
+<Tab title="Python">
+```bash
+pip install opentelemetry-sdk opentelemetry-exporter-otlp-proto-http
+```
+```python
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+
+exporter = OTLPSpanExporter(
+    endpoint="https://api.respan.ai/api/v2/traces",
+    headers={"Authorization": "Bearer YOUR_RESPAN_API_KEY"},
+)
+
+provider = TracerProvider()
+provider.add_span_processor(BatchSpanProcessor(exporter))
+trace.set_tracer_provider(provider)
+
+tracer = trace.get_tracer(__name__)
+
+with tracer.start_as_current_span("my-operation") as span:
+    span.set_attribute("gen_ai.request.model", "gpt-4")
+    # Your application logic here
+    pass
+```
+</Tab>
+
+<Tab title="JS/TS">
+```bash
+npm install @opentelemetry/sdk-node @opentelemetry/exporter-trace-otlp-http
+```
+```typescript
+import { NodeSDK } from '@opentelemetry/sdk-node';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+
+const exporter = new OTLPTraceExporter({
+    url: 'https://api.respan.ai/api/v2/traces',
+    headers: {
+        'Authorization': 'Bearer YOUR_RESPAN_API_KEY',
+    },
+});
+
+const sdk = new NodeSDK({
+    traceExporter: exporter,
+});
+
+sdk.start();
+```
+</Tab>
+</Tabs>
+</Step>
+
+<Step title="Run your application">
+Start your application as usual. Any OTel-instrumented code will now export traces to Respan automatically.
+</Step>
+</Steps>
+
+## Recognized attributes
+
+Respan automatically extracts [Gen AI semantic conventions](https://opentelemetry.io/docs/specs/semconv/gen-ai/) and maps them to queryable fields:
+
+| Attribute | Description |
+|---|---|
+| `gen_ai.request.model` | Requested model name |
+| `gen_ai.usage.prompt_tokens` | Input token count |
+| `gen_ai.usage.completion_tokens` | Output token count |
+| `gen_ai.prompt.{N}.role` / `.content` | Input messages |
+| `gen_ai.completion.{N}.role` / `.content` | Output messages |
+
+Respan-specific attributes for user tracking and grouping:
+
+| Attribute | Description |
+|---|---|
+| `respan.customer.identifier` | Customer/user identifier |
+| `respan.thread.id` | Thread/conversation identifier |
+| `respan.trace_group.id` | Link related traces |
+| `respan.metadata` | JSON object merged into span metadata |
+
+All other attributes are preserved in the span's `metadata` and are queryable in the Respan UI. For the full list, see the [OTLP ingest API reference](/apis/observe/traces/otlp-ingest).
+
+## View your traces
+
+Once configured, your traces will appear on the [Traces](https://platform.respan.ai/platform/traces) page in Respan.
+
+<Frame className="rounded-md">
+<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/overview/trace_tree_v1.png" alt="Agent tracing visualization" />
+</Frame>
+
+## Compatible frameworks
+
+Any framework or library with OTel support works out of the box, including:
+
+- **Python**: Django, Flask, FastAPI, LangChain, LlamaIndex
+- **JS/TS**: Express, Next.js, NestJS
+- **Go, Java, .NET**: All standard OTel SDKs
+
+For Respan's native tracing SDK with built-in `@workflow` and `@task` decorators, see [Respan](/integrations/tracing/respan-native).

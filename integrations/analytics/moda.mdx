@@ -1,0 +1,29 @@
+---
+title: "Moda"
+description: "Moda is a product analytics platform that helps you understand user behavior. Connect Moda with Respan to monitor your LLM performance and get observability."
+---
+
+<Steps>
+
+<Step title="Create your Moda account">
+Go to [Moda](https://www.moda.run/) and create an account. Go to your Moda project settings and get your Moda API key and host.
+</Step>
+
+<Step title="Add 1 parameter to your request body">
+```json
+{
+// other parameters
+"moda_integration": {
+        "moda_api_key":"USER_MODA_API_KEY",
+        "moda_base_url":"USER_MODA_ENDPOINT"
+    }
+}
+
+```
+</Step>
+
+<Step title="Monitor your LLM performance in Moda">
+Once connected, you can create dashboards in Moda to monitor your LLM performance and track key metrics.
+</Step>
+
+</Steps>

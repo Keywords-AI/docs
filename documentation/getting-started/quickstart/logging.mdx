@@ -1,9 +1,9 @@
 ---
 title: "Quickstart"
-description: "Send your LLM logs to Respan and monitor them in real-time"
+description: "Send your LLM spans to Respan and monitor them in real-time"
 ---
 
-## What is logging?
+## What is span logging?
 
 1. Send a `POST` request to log your AI conversations
 2. See them appear instantly on your Respan platform
@@ -14,7 +14,7 @@ description: "Send your LLM logs to Respan and monitor them in real-time"
 
 
 
-## Use logging API
+## Use span logging API
 ### 1. Get your Respan API key
 
 After you create an account on [Respan](https://platform.respan.ai), you can get your API key from the [API keys page](https://platform.respan.ai/platform/api/api-keys).
@@ -23,7 +23,7 @@ After you create an account on [Respan](https://platform.respan.ai), you can get
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/api-keys.png" alt="Create API key placeholder" />
 </Frame>
 
-### 2. Integrate Async Logging into your codebase
+### 2. Integrate Async Span Logging into your codebase
 
 <CodeGroup>
 ```python Python {22}
@@ -104,8 +104,8 @@ curl -X POST "https://api.respan.ai/api/request-logs/create/" \
 </CodeGroup>
 
 
-### 3. Check your logs on the platform
-After you integrate the async logging into your codebase and send the request successfully, you can check your logs on the [Logs page](https://platform.respan.ai/platform/requests).
+### 3. Check your spans on the platform
+After you integrate the async span logging into your codebase and send the request successfully, you can check your spans on the [Spans page](https://platform.respan.ai/platform/requests).
 <Frame className="rounded-md">
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/logging_showlog.png" alt="Logs page placeholder" />
 </Frame>

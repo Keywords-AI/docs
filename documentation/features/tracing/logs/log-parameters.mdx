@@ -1,9 +1,9 @@
 ---
-title: "Log fields & parameters"
-description: "Key log fields for tracking users, conversations, and custom properties — plus how to pass them."
+title: "Span fields & parameters"
+description: "Key span fields for tracking users, conversations, and custom properties — plus how to pass them."
 ---
 
-Every log has fields for content (`input`/`output`), metrics (`latency`, `cost`, `usage`), configuration (`temperature`, `tools`), and status (`status_code`, `error_message`). These are automatically populated when using the [LLM Gateway](/documentation/features/gateway/setup), or set manually via the [logging endpoint](/apis/observe/logs/request-logging-endpoint).
+Every span has fields for content (`input`/`output`), metrics (`latency`, `cost`, `usage`), configuration (`temperature`, `tools`), and status (`status_code`, `error_message`). These are automatically populated when using the [LLM Gateway](/documentation/features/gateway/setup), or set manually via the [logging endpoint](/apis/observe/logs/request-logging-endpoint).
 
 This page covers the most important fields you'll configure. For the complete list, see the [Span fields reference](/documentation/resources/reference/span-fields).
 
@@ -11,7 +11,7 @@ This page covers the most important fields you'll configure. For the complete li
 
 ## How to setup
 
-Add fields to any log by including them in the logging API payload or passing them through your SDK:
+Add fields to any span by including them in the logging API payload or passing them through your SDK:
 
 <Tabs>
 <Tab title="Logging API">
@@ -181,7 +181,7 @@ Filtering by custom properties in the dashboard is only available for **Team pla
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/logs-custom-property.png" alt="Filter by custom properties" />
 </Frame>
 
-**Update metadata on existing logs:**
+**Update metadata on existing spans:**
 
 <CodeGroup>
 ```python Python
@@ -223,7 +223,7 @@ fetch("https://api.respan.ai/api/request-logs/batch-update/", {
 
 ### thread_identifier
 
-`string` — Conversation thread identifier. Every log with the same `thread_identifier` is grouped into the same thread.
+`string` — Conversation thread identifier. Every span with the same `thread_identifier` is grouped into the same thread.
 
 <Frame>
 <video
@@ -271,7 +271,7 @@ View threads on the platform:
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/thread.gif" />
 </Frame>
 
-Click `Open in Logs` in the side panel to see all logs in a thread:
+Click `Open in Spans` in the side panel to see all spans in a thread:
 
 <Frame>
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/threads-to-logs.png" />
@@ -279,7 +279,7 @@ Click `Open in Logs` in the side panel to see all logs in a thread:
 
 ### group_identifier
 
-`string` — Group identifier for related logs. Use this to batch related requests together for analysis.
+`string` — Group identifier for related spans. Use this to batch related requests together for analysis.
 
 <Tabs>
 <Tab title="Logging API">
@@ -321,7 +321,7 @@ const response = await client.chat.completions.create({
 
 ## Other fields
 
-Beyond the key fields above, every log also supports:
+Beyond the key fields above, every span also supports:
 
 | Category | Fields |
 |----------|--------|
@@ -340,7 +340,7 @@ See the full [Span fields reference](/documentation/resources/reference/span-fie
 
 ## Complete example
 
-A full logging payload with required fields, telemetry, and metadata:
+A full span payload with required fields, telemetry, and metadata:
 
 ```python
 import requests

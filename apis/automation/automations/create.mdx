@@ -3,7 +3,7 @@ title: "Create automation"
 api: "POST https://api.respan.ai/automation/automations/"
 ---
 
-Creates an online evaluation automation that automatically runs evaluators on logs matching specified conditions.
+Creates an online evaluation automation that automatically runs evaluators on spans matching specified conditions.
 
 ## Authentication
 
@@ -295,17 +295,17 @@ curl -X POST "https://api.respan.ai/automation/automations/" \
 
 ## How It Works
 
-1. **Condition Evaluation**: Incoming logs are evaluated against the specified condition
-2. **Sampling**: Logs that match the condition are sampled based on `sampling_rate`
-3. **Async Evaluation**: Sampled logs are queued for evaluation (doesn't block logging pipeline)
+1. **Condition Evaluation**: Incoming spans are evaluated against the specified condition
+2. **Sampling**: Spans that match the condition are sampled based on `sampling_rate`
+3. **Async Evaluation**: Sampled spans are queued for evaluation (doesn't block the pipeline)
 4. **Score Creation**: Evaluators run and scores are saved to the database
 5. **Dashboard Visibility**: Scores appear in the existing scores dashboard at `/api/scores/`
 
 ## Important Notes
 
-- Evaluation runs **asynchronously** and doesn't impact logging latency
+- Evaluation runs **asynchronously** and doesn't impact latency
 - Sampling reduces evaluation costs while maintaining statistical significance
-- Multiple evaluators can run on the same log
+- Multiple evaluators can run on the same span
 - Scores are accessible via the standard Scores API
 - Online eval automations **do not** send notifications (use regular automations for alerts)
 

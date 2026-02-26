@@ -1,18 +1,18 @@
 ---
-title: "Ingest Logs from traces"
+title: "Ingest spans from traces"
 api: "POST https://api.respan.ai/api/traces/ingest/"
 ---
 
-Ingest trace data as logs. This endpoint allows you to convert trace data into log format for storage and analysis using the **universal input/output design**.
+Ingest trace data as spans. This endpoint allows you to convert trace data into span format for storage and analysis using the **universal input/output design**.
 
 ## Universal input/output support
 
-This endpoint accepts logs with:
+This endpoint accepts spans with:
 - **`input`**: Any JSON-serializable structure (string, object, array)
 - **`output`**: Any JSON-serializable structure (string, object, array)
 - **`log_type`**: Determines how input/output are interpreted (`"chat"`, `"embedding"`, `"workflow"`, `"task"`, etc.)
 
-The system automatically extracts type-specific fields based on the `log_type`. See [log types](/documentation/getting-started/observability_data_model#log-types) for complete specifications and the [Create Log documentation](/apis/observe/logs/request-logging-endpoint) for all field details.
+The system automatically extracts type-specific fields based on the `log_type`. See [span types](/documentation/getting-started/observability_data_model#log-types) for complete specifications and the [Create span documentation](/apis/observe/logs/request-logging-endpoint) for all field details.
 
 ## Authentication
 

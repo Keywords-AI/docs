@@ -1,9 +1,9 @@
 ---
-title: Get logs summary
+title: Get spans summary
 api: POST https://api.respan.ai/api/request-logs/summary/
 ---
 
-The Logs Summary endpoint returns aggregated statistics for logs matching the given filters. This is useful for getting quick insights into your LLM usage without fetching all individual logs.
+The Spans Summary endpoint returns aggregated statistics for spans matching the given filters. This is useful for getting quick insights into your LLM usage without fetching all individual spans.
 
 <Note>
 Both `GET` and `POST` methods are supported. `POST` is recommended when using complex filters.
@@ -11,10 +11,10 @@ Both `GET` and `POST` methods are supported. `POST` is recommended when using co
 
 ## Query parameters
 
-Same parameters as the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint):
+Same parameters as the [List spans endpoint](/apis/observe/logs/logs-list-endpoint):
 
 <ParamField query="start_time" type="string">
-  The start time for filtering logs in ISO 8601 format. If not provided, defaults to 1 hour ago.
+  The start time for filtering spans in ISO 8601 format. If not provided, defaults to 1 hour ago.
   <Accordion title="Example">
     ```json
     {
@@ -25,7 +25,7 @@ Same parameters as the [List Logs endpoint](/apis/observe/logs/logs-list-endpoin
 </ParamField>
 
 <ParamField query="end_time" type="string">
-  The end time for filtering logs in ISO 8601 format. If not provided, defaults to current time.
+  The end time for filtering spans in ISO 8601 format. If not provided, defaults to current time.
   <Accordion title="Example">
     ```json
     {
@@ -36,21 +36,21 @@ Same parameters as the [List Logs endpoint](/apis/observe/logs/logs-list-endpoin
 </ParamField>
 
 <ParamField query="all_envs" type="string" default="false">
-  Whether to include logs from all environments. `is_test` parameter will override this parameter.
+  Whether to include spans from all environments. `is_test` parameter will override this parameter.
   Options: `true`, `false`.
 </ParamField>
 
 <ParamField query="is_test" type="string" default="false">
-  Whether to include test logs only. This parameter will override the `all_envs` parameter.
+  Whether to include test spans only. This parameter will override the `all_envs` parameter.
   Options: `true`, `false`.
 </ParamField>
 
 ## Body parameters
 
-You can add filter parameters to the request body (same as [List Logs endpoint](/apis/observe/logs/logs-list-endpoint)):
+You can add filter parameters to the request body (same as [List spans endpoint](/apis/observe/logs/logs-list-endpoint)):
 
 <ParamField body="filters" type="object" default={{}}>
-  The filters to be applied to the logs.
+  The filters to be applied to the spans.
 
 <Note>
 If you want to filter your custom properties, add `metadata__` + your custom property name. For example, to filter `my_custom_property`, use `metadata__my_custom_property`.
@@ -76,7 +76,7 @@ For a complete list of filter operators and examples, see the [Filters API Refer
 
 ## URL-based Filtering
 
-Just like the List Logs endpoint, you can use URL parameters for quick filtering:
+Just like the List spans endpoint, you can use URL parameters for quick filtering:
 
 ```bash
 # Filter summary by customer
@@ -86,18 +86,18 @@ GET /api/request-logs/summary/?customer_identifier=user_123
 GET /api/request-logs/summary/?user_tier=premium&department=sales
 ```
 
-See the [List Logs endpoint](/apis/observe/logs/logs-list-endpoint#url-based-filtering-quick-filters) for complete URL filtering documentation.
+See the [List spans endpoint](/apis/observe/logs/logs-list-endpoint#url-based-filtering-quick-filters) for complete URL filtering documentation.
 
 ## Response
 
 All fields are returned at the top level (consistent with experiments API format):
 
 <ResponseField name="total_cost" type="float">
-  Total cost in USD for all filtered logs.
+  Total cost in USD for all filtered spans.
 </ResponseField>
 
 <ResponseField name="total_tokens" type="integer">
-  Total tokens (prompt + completion) for all filtered logs.
+  Total tokens (prompt + completion) for all filtered spans.
 </ResponseField>
 
 <ResponseField name="number_of_requests" type="integer">

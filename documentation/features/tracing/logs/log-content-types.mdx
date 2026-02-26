@@ -1,19 +1,19 @@
 ---
-title: "Log types"
-description: "How to log different types of LLM interactions — chat completions, embeddings, tool calls, audio, and more."
+title: "Span types"
+description: "How to span log different types of LLM interactions — chat completions, embeddings, tool calls, audio, and more."
 ---
 
 ## Overview
 
-Every log has a `log_type` field that determines its input/output format. The most common type is `chat`, but Respan supports logging embeddings, audio, tool calls, and workflow spans.
+Every span has a `log_type` field that determines its input/output format. The most common type is `chat`, but Respan supports logging embeddings, audio, tool calls, and workflow spans.
 
-All log types use universal `input` and `output` fields and are sent to the same [logging endpoint](/apis/observe/logs/request-logging-endpoint). For the complete field reference, see [Log fields & parameters](/documentation/features/tracing/logs/log-parameters).
+All span types use universal `input` and `output` fields and are sent to the same [logging endpoint](/apis/observe/logs/request-logging-endpoint). For the complete field reference, see [Span fields & parameters](/documentation/features/tracing/logs/log-parameters).
 
-### All log types
+### All span types
 
 <Tabs>
 <Tab title="LLM inference">
-| Log type | Description | Input | Output |
+| Span type | Description | Input | Output |
 |----------|-------------|-------|--------|
 | `chat` | Chat completions (default) | Messages array | Assistant message |
 | `completion` | Legacy completion format | Prompt string | Completion string |
@@ -24,7 +24,7 @@ All log types use universal `input` and `output` fields and are sent to the same
 </Tab>
 
 <Tab title="Workflow & agent">
-| Log type | Description |
+| Span type | Description |
 |----------|-------------|
 | `workflow` | Root-level workflow orchestration |
 | `task` | Individual task within a workflow |
@@ -36,7 +36,7 @@ All log types use universal `input` and `output` fields and are sent to the same
 </Tab>
 
 <Tab title="Other">
-| Log type | Description |
+| Span type | Description |
 |----------|-------------|
 | `custom` | User-defined custom operations |
 | `generation` | Detailed generation process tracking |
@@ -48,7 +48,7 @@ All log types use universal `input` and `output` fields and are sent to the same
 
 ## Chat
 
-The default log type. Input is an array of messages, output is the assistant's response.
+The default span type. Input is an array of messages, output is the assistant's response.
 
 ```json
 {
@@ -139,14 +139,14 @@ For more on enabling thinking mode via the gateway, see [Enable Thinking](/docum
 
 ### Prompt variables
 
-Log prompt variables so they appear in the side panel for easy inspection and can be added to [testsets](/documentation/features/evals/testsets) with one click.
+Pass prompt variables so they appear in the side panel for easy inspection and can be added to [testsets](/documentation/features/evals/testsets) with one click.
 
 <Frame>
 <video
   controls
   className="w-full aspect-video"
   src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/prompt-variable-logging.mp4"
-  alt="Prompt variables in logs"
+  alt="Prompt variables in spans"
 ></video>
 </Frame>
 
@@ -166,7 +166,7 @@ Wrap variables in `{{}}` in your input and pass a `variables` object:
 ```
 
 <Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/sidepanel-prompt-variables.png" alt="Prompt variables in logs" />
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/observability/sidepanel-prompt-variables.png" alt="Prompt variables in spans" />
 </Frame>
 
 <Note>
@@ -175,7 +175,7 @@ If you are using prompts via the [LLM Gateway](/documentation/features/prompt-ma
 
 ### Tool calls
 
-Log tool calls and function calling interactions as part of chat messages:
+Record tool calls and function calling interactions as part of chat messages:
 
 ```python
 import requests
@@ -329,7 +329,7 @@ Set `log_type` to `"speech"`. Input is text, output is audio metadata.
 
 ## Workflow & agent types
 
-These log types are used by [tracing](/documentation/features/tracing/traces/quickstart) to represent spans in a trace hierarchy:
+These span types are used by [tracing](/documentation/features/tracing/traces/quickstart) to represent spans in a trace hierarchy:
 
 - **`workflow`** — Root-level workflow orchestration
 - **`task`** — Individual task within a workflow
