@@ -639,8 +639,24 @@ This parameter allows you to control how you can override the parameters in the 
     }
 ```
     </Accordion>
-    
+
   </AccordionGroup>
+</ParamField>
+<ParamField body="schema_version" type="integer" default={1}>
+  Controls the prompt merge strategy.
+  - `1` (default, legacy): uses `override` flag logic — when `override=true`, prompt config wins; when `override=false`, request body wins for conflicts.
+  - `2` (recommended): prompt config always wins. Uses prepend/instructions-style merging. Supports the `patch` field. Requires raw HTTP requests — OpenAI SDKs strip v2 fields. See [Prompt schema](/documentation/features/prompt-management/manage-prompts#prompt-schema).
+</ParamField>
+<ParamField body="patch" type="object">
+  Additional parameter overrides applied in v2 mode (`schema_version=2`). Must **not** contain `messages` or `input`. Useful for overriding fields like `temperature` or `max_tokens` while letting the prompt config control messages and model.
+```json
+{
+  "patch": {
+    "temperature": 0.9,
+    "max_tokens": 500
+  }
+}
+```
 </ParamField>
 </Accordion>
     <Accordion title="Example">
@@ -677,6 +693,24 @@ This parameter allows you to control how you can override the parameters in the 
   }
 }
 ```
+      </Accordion>
+    <Accordion title="v2 merge mode example">
+```json
+{
+  "prompt": {
+    "prompt_id": "YOUR_PROMPT_ID",
+    "schema_version": 2,
+    "variables": {
+      "task_description": "Square a number"
+    },
+    "patch": {
+      "temperature": 0.9,
+      "max_tokens": 500
+    }
+  }
+}
+```
+With `schema_version=2`, the prompt config always wins for conflicting fields. The `patch` object lets you override non-message parameters like `temperature` and `max_tokens`. The `patch` must **not** contain `messages` or `input`.
       </Accordion>
 </AccordionGroup>
 

@@ -266,6 +266,17 @@ const response = await client.chat.completions.create({
 ```
 </CodeGroup>
 
+### Prompt schema (v1 vs v2)
+
+The `prompt` object supports a `schema_version` field that controls how prompt configuration and request parameters are merged. See the [full guide](/documentation/features/prompt-management/manage-prompts#prompt-schema) for details.
+
+- **Prompt schema v1** (default, legacy): `override` flag controls which side wins for conflicts.
+- **Prompt schema v2** (recommended, `schema_version=2`): prompt config always wins. Supports a `patch` field for non-message parameter overrides.
+
+<Warning>
+OpenAI SDKs strip fields like `schema_version`, `patch`, and `prompt_slug` during validation. **Prompt schema v2 requires raw HTTP requests** instead of the OpenAI SDK. See the [Standard API examples](/documentation/features/prompt-management/manage-prompts#prompt-schema-v2-recommended).
+</Warning>
+
 ## Azure OpenAI
 To call Azure OpenAI models, instead of using azure OpenAI's client, the easier way is to use the OpenAI client.
 

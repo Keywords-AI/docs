@@ -1,6 +1,6 @@
 ---
 title: "Advanced"
-description: "Variables, composition, structured output, and deployment options for prompt templates."
+description: "Prompt schema, variables, composition, structured output, and deployment options for prompt templates."
 ---
 
 <Accordion title="Set up Respan">
@@ -14,104 +14,24 @@ Build, test, and deploy prompt templates on Respan. New to prompts? Start with t
 
 ---
 
-## Variables
+## Prompt schema
 
-Use `{{variable_name}}` syntax to add dynamic content to your prompts. Variables let you reuse the same template across different inputs — pass values at runtime from code, or fill them from testset columns in experiments.
+The `prompt` object supports a `schema_version` field that controls how prompt configuration and request-body parameters are merged.
 
-Respan also supports [Jinja templates](https://jinja.palletsprojects.com/en/stable/templates/) for conditionals, filters, and JSON input access.
+### Prompt schema v2 (recommended)
 
-<Tabs>
-<Tab title="Setup">
+Set `schema_version=2` for the recommended merge behavior:
 
-Add variables in the prompt editor using `{{variable_name}}`:
-
-```
-Please develop an optimized Python function to {{task_description}},
-utilizing {{specific_library}}, include error handling, and write unit tests.
-```
+- Prompt configuration always wins for conflicting fields (no `override` flag needed).
+- Uses prepend/instructions-style merging depending on the endpoint mode.
+- Supports a `patch` field for applying additional parameter overrides. The `patch` object must **not** contain `messages` or `input`.
 
 <Note>
-Variable names must use underscores: `{{task_description}}` not `{{task description}}`.
+**Important:** OpenAI SDKs strip fields like `schema_version`, `patch`, and `prompt_slug` during validation. Prompt schema v2 requires raw HTTP requests (e.g., `requests` in Python or `fetch` in TypeScript).
 </Note>
 
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/get-started/prompt-variables.png" alt="Prompt variables" />
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/jinja-in-prompts.png" alt="Jinja support" />
-</Frame>
-
-**Jinja features:**
-
-| Feature | Syntax | Example |
-|---------|--------|---------|
-| Conditionals | `{% if %}...{% endif %}` | `{% if condition %}{{ variable_name }}{% endif %}` |
-| JSON inputs | `{{ input.key }}` | `{{ input.name }}` |
-| Filters | `{{ var \| filter }}` | `{{ variable_name \| filter_name }}` |
-| Comments | `{# ... #}` | `{# This is a comment #}` |
-
-See the [Filters in Jinja templates](/documentation/resources/cookbooks/filters-in-jinja) guide for details.
-
-</Tab>
-<Tab title="Use in code">
-
-Pass variables in `extra_body` when calling the gateway:
-
-<Tabs>
-<Tab title="OpenAI Python SDK">
-```python
-from openai import OpenAI
-
-client = OpenAI(
-  base_url="https://api.respan.ai/api/",
-  api_key="YOUR_RESPAN_API_KEY",
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "placeholder"}],
-    extra_body={
-        "prompt": {
-            "prompt_id": "YOUR_PROMPT_ID",
-            "variables": {
-                "task_description": "Square a number",
-                "specific_library": "math"
-            },
-            "override": True,
-        }
-    }
-)
-```
-</Tab>
-<Tab title="OpenAI TypeScript SDK">
-```typescript
-import { OpenAI } from "openai";
-
-const client = new OpenAI({
-  baseURL: "https://api.respan.ai/api",
-  apiKey: "YOUR_RESPAN_API_KEY",
-});
-
-const response = await client.chat.completions
-  .create({
-    messages: [{ role: "user", content: "placeholder" }],
-    model: "gpt-4o-mini",
-    // @ts-expect-error
-    prompt: {
-      prompt_id: "YOUR_PROMPT_ID",
-      variables: {
-        task_description: "Square a number",
-        specific_library: "math",
-      },
-      override: true,
-    },
-  })
-  .asResponse();
-
-console.log(await response.json());
-```
-</Tab>
-<Tab title="Standard API">
-```python
+<CodeGroup>
+```python Python
 import requests
 
 headers = {
@@ -122,10 +42,14 @@ headers = {
 data = {
     'prompt': {
         'prompt_id': 'YOUR_PROMPT_ID',
+        'schema_version': 2,
         'variables': {
             'task_description': 'Square a number',
-            'specific_library': 'math',
         },
+        'patch': {
+            'temperature': 0.9,
+            'max_tokens': 500
+        }
     }
 }
 
@@ -136,11 +60,102 @@ response = requests.post(
 )
 print(response.json())
 ```
-With the standard API, you don't need to pass `model` and `messages` — the prompt configuration is used automatically.
-</Tab>
-</Tabs>
+```typescript TypeScript
+fetch('https://api.respan.ai/api/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+    },
+    body: JSON.stringify({
+        prompt: {
+            prompt_id: 'YOUR_PROMPT_ID',
+            schema_version: 2,
+            variables: {
+                task_description: 'Square a number',
+            },
+            patch: {
+                temperature: 0.9,
+                max_tokens: 500
+            }
+        }
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
 
-Jinja conditionals, filters, and JSON inputs work the same in API-created prompts. You can also set default variable values when creating a version via the API:
+### Prompt schema v1 (default, legacy)
+
+When `schema_version` is absent or `1`, merging is controlled by the `override` flag:
+- `override=true`: prompt configuration wins for all conflicting fields.
+- `override=false` (default): request body wins for conflicting fields.
+
+<Accordion title="Override other parameters">
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override": True,
+        "override_params": {
+            "temperature": 0.8,
+            "max_tokens": 150,
+            "model": "gpt-4o"
+        }
+    }
+}
+```
+</Accordion>
+
+<Accordion title="Override prompt messages">
+Append new messages to the end of existing prompt messages:
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override_config": {"messages_override_mode": "append"},
+        "override_params": {"messages": [{"role": "user", "content": "Additional context"}]},
+    }
+}
+```
+
+Replace all existing prompt messages:
+```python
+request_body = {
+    "prompt": {
+        "prompt_id": "042f5f",
+        "override_config": {"messages_override_mode": "override"},
+        "override_params": {"messages": [{"role": "user", "content": "Completely new conversation"}]},
+    }
+}
+```
+</Accordion>
+
+---
+
+## Variables
+
+Use `{{variable_name}}` syntax to add dynamic content to your prompts. Variables let you reuse the same template across different inputs — pass values at runtime from code, or fill them from testset columns in experiments. See the [quickstart](/documentation/getting-started/quickstart/prompt_management) for setup and basic usage.
+
+### Jinja templates
+
+Respan supports [Jinja templates](https://jinja.palletsprojects.com/en/stable/templates/) for conditionals, filters, and JSON input access.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/jinja-in-prompts.png" alt="Jinja support" />
+</Frame>
+
+| Feature | Syntax | Example |
+|---------|--------|---------|
+| Conditionals | `{% if %}...{% endif %}` | `{% if condition %}{{ variable_name }}{% endif %}` |
+| JSON inputs | `{{ input.key }}` | `{{ input.name }}` |
+| Filters | `{{ var \| filter }}` | `{{ variable_name \| filter_name }}` |
+| Comments | `{# ... #}` | `{# This is a comment #}` |
+
+See the [Filters in Jinja templates](/documentation/resources/cookbooks/filters-in-jinja) guide for details.
+
+You can also set default variable values when creating a version via the API:
 
 ```python
 data = {
@@ -155,93 +170,6 @@ data = {
     },
 }
 ```
-
-</Tab>
-</Tabs>
-
-### JSON schema (structured output)
-
-Define structured output using JSON schema to ensure AI responses follow a specific format, following the [OpenAI Structured Outputs specification](https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses).
-
-<Tabs>
-<Tab title="Setup">
-
-Configure JSON schema in the **prompt editor** or the **playground**:
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup1_prompt.png" alt="JSON schema in prompt editor" />
-</Frame>
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup2_playground.png" alt="JSON schema in playground" />
-</Frame>
-
-You can generate schemas using the AI generator or browse examples in the editor.
-
-<Frame className="rounded-md">
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/generateai.png" alt="AI schema generator" />
-</Frame>
-
-</Tab>
-<Tab title="Use in code">
-
-Pass `response_format` when creating a prompt version:
-
-<CodeGroup>
-```python Python
-data = {
-    "messages": [
-        {"role": "system", "content": "Extract the information."},
-        {"role": "user", "content": "{{input_text}}"}
-    ],
-    "model": "gpt-4o-mini",
-    "response_format": {
-        "type": "json_schema",
-        "json_schema": {
-            "name": "extraction",
-            "strict": True,
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "date": {"type": "string"},
-                    "customer_id": {"type": "integer"}
-                },
-                "required": ["date", "customer_id"],
-                "additionalProperties": False
-            }
-        }
-    }
-}
-```
-```typescript TypeScript
-const data = {
-    messages: [
-        {role: "system", content: "Extract the information."},
-        {role: "user", content: "{{input_text}}"}
-    ],
-    model: "gpt-4o-mini",
-    response_format: {
-        type: "json_schema",
-        json_schema: {
-            name: "extraction",
-            strict: true,
-            schema: {
-                type: "object",
-                properties: {
-                    date: {type: "string"},
-                    customer_id: {type: "integer"}
-                },
-                required: ["date", "customer_id"],
-                additionalProperties: false
-            }
-        }
-    }
-};
-```
-</CodeGroup>
-
-</Tab>
-</Tabs>
 
 ### Prompt composition
 
@@ -332,122 +260,86 @@ See the [Chat Completions API reference](/apis/develop/gateway/chat-completions)
 
 ---
 
-## Playground
+## Structured output
 
-Test and iterate on prompts in the [Prompt Playground](https://platform.respan.ai/platform/playground).
-
-<Frame>
-<video controls className="w-full aspect-video" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground.mp4"></video>
-</Frame>
-
-From the prompt editor, enter variable values and click **Playground** in the top bar to test. Click **Commit** to save changes back to your prompt library.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-to-playground.png" alt="Bring prompt to playground" />
-</Frame>
-
-You can also debug production logs by clicking **Open in Playground** on any log entry.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/logs-to-playground.png" alt="Debug from logs" />
-</Frame>
-
-Set the number of variants in the side panel to generate multiple responses and compare them in the **Variants** tab.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground-set-variants.jpg" alt="Set variants" />
-</Frame>
-
----
-
-## Deployment & versioning
+Define structured output using JSON schema to ensure AI responses follow a specific format, following the [OpenAI Structured Outputs specification](https://platform.openai.com/docs/guides/structured-outputs?api-mode=responses).
 
 <Tabs>
 <Tab title="Setup">
 
-**Commit** saves a new version of your prompt. **Deploy** makes a version live for production traffic.
+Configure JSON schema in the **prompt editor** or the **playground**:
 
-View version history in the **Overview** panel, or click **Version** in the Editor for detailed diffs.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-activity-history.jpg" alt="Version history" />
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup1_prompt.png" alt="JSON schema in prompt editor" />
 </Frame>
 
-Click on each version to see the diff of changes.
-
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/track-change.jpg" alt="Track changes" />
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/setup2_playground.png" alt="JSON schema in playground" />
 </Frame>
 
-To deploy, go to the **Deployments** tab and click **Deploy**.
+You can generate schemas using the AI generator or browse examples in the editor.
 
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-deploy.jpg" alt="Deploy prompt" />
+<Frame className="rounded-md">
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/products/prompt_management/creating_prompts/json_schema/generateai.png" alt="AI schema generator" />
 </Frame>
-
-To rollback, deploy an earlier version from the Deployments tab.
 
 </Tab>
 <Tab title="Use in code">
 
-### Version pinning
+Pass `response_format` when creating a prompt version:
 
-- Omit `version` to use the **deployed** (live) version.
-- Set `version` to a number (e.g., `3`) to **pin** that version.
-- Use `"version": "latest"` to use the most recent **draft** (not deployed).
-
-```python
-{
-    "prompt": {
-        "prompt_id": "YOUR_PROMPT_ID",
-        "version": 3,
-    }
-}
-```
-
-### Override prompt messages
-
-<Tabs>
-<Tab title="Append messages">
-```python
-request_body = {
-    "prompt": {
-        "prompt_id": "042f5f",
-        "override_config": {"messages_override_mode": "append"},
-        "override_params": {"messages": [{"role": "user", "content": "Additional context"}]},
-    }
-}
-```
-Adds new messages to the end of your existing prompt messages.
-</Tab>
-<Tab title="Replace messages">
-```python
-request_body = {
-    "prompt": {
-        "prompt_id": "042f5f",
-        "override_config": {"messages_override_mode": "override"},
-        "override_params": {"messages": [{"role": "user", "content": "Completely new conversation"}]},
-    }
-}
-```
-Replaces all existing prompt messages with the new ones.
-</Tab>
-</Tabs>
-
-### Override other parameters
-
-```python
-request_body = {
-    "prompt": {
-        "prompt_id": "042f5f",
-        "override_params": {
-            "temperature": 0.8,
-            "max_tokens": 150,
-            "model": "gpt-4o"
+<CodeGroup>
+```python Python
+data = {
+    "messages": [
+        {"role": "system", "content": "Extract the information."},
+        {"role": "user", "content": "{{input_text}}"}
+    ],
+    "model": "gpt-4o-mini",
+    "response_format": {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "extraction",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "date": {"type": "string"},
+                    "customer_id": {"type": "integer"}
+                },
+                "required": ["date", "customer_id"],
+                "additionalProperties": False
+            }
         }
     }
 }
 ```
+```typescript TypeScript
+const data = {
+    messages: [
+        {role: "system", content: "Extract the information."},
+        {role: "user", content: "{{input_text}}"}
+    ],
+    model: "gpt-4o-mini",
+    response_format: {
+        type: "json_schema",
+        json_schema: {
+            name: "extraction",
+            strict: true,
+            schema: {
+                type: "object",
+                properties: {
+                    date: {type: "string"},
+                    customer_id: {type: "integer"}
+                },
+                required: ["date", "customer_id"],
+                additionalProperties: false
+            }
+        }
+    }
+};
+```
+</CodeGroup>
 
 </Tab>
 </Tabs>
@@ -496,6 +388,146 @@ const response = await client.chat.completions
 console.log(await response.json());
 ```
 </CodeGroup>
+
+---
+
+## Deployment & versioning
+
+<Tabs>
+<Tab title="Via UI">
+
+**Commit** saves a new version of your prompt. **Deploy** makes a version live for production traffic.
+
+View version history in the **Overview** panel, or click **Version** in the Editor for detailed diffs.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-activity-history.jpg" alt="Version history" />
+</Frame>
+
+Click on each version to see the diff of changes.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/track-change.jpg" alt="Track changes" />
+</Frame>
+
+To deploy, go to the **Deployments** tab and click **Deploy**.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompts-deploy.jpg" alt="Deploy prompt" />
+</Frame>
+
+To rollback, deploy an earlier version from the Deployments tab.
+
+</Tab>
+<Tab title="Via code">
+
+### Version pinning
+
+When calling a prompt from code, control which version is used:
+
+- Omit `version` to use the **deployed** (live) version.
+- Set `version` to a number (e.g., `3`) to **pin** that version.
+- Use `"version": "latest"` to use the most recent **draft** (not deployed).
+
+```python
+{
+    "prompt": {
+        "prompt_id": "YOUR_PROMPT_ID",
+        "version": 3,
+    }
+}
+```
+
+### Deploy via API
+
+Use the [Prompt Versions API](/apis/develop/prompts/create-prompt-version) to create and deploy versions programmatically. Set `deploy: true` to make a version live immediately.
+
+<CodeGroup>
+```python Python
+import requests
+
+url = "https://api.respan.ai/api/prompts/<prompt_id>/versions/"
+headers = {
+    "Authorization": "Bearer YOUR_RESPAN_API_KEY",
+    "Content-Type": "application/json"
+}
+
+data = {
+    "messages": [
+        {"role": "system", "content": "You are a helpful {{role}}."},
+        {"role": "user", "content": "Hello, how are you?"}
+    ],
+    "model": "gpt-4o-mini",
+    "temperature": 0.7,
+    "max_tokens": 256,
+    "deploy": True  # Deploy as the live version immediately
+}
+
+response = requests.post(url, headers=headers, json=data)
+print(response.json())
+```
+```typescript TypeScript
+fetch('https://api.respan.ai/api/prompts/<prompt_id>/versions/', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+    },
+    body: JSON.stringify({
+        messages: [
+            { role: "system", content: "You are a helpful {{role}}." },
+            { role: "user", content: "Hello, how are you?" }
+        ],
+        model: "gpt-4o-mini",
+        temperature: 0.7,
+        max_tokens: 256,
+        deploy: true  // Deploy as the live version immediately
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+To deploy an existing version, use the [Update Version API](/apis/develop/prompts/update-prompt-version) with `deploy: true`:
+
+```python
+url = "https://api.respan.ai/api/prompts/<prompt_id>/versions/<version_id>/"
+data = {"deploy": True}
+
+response = requests.patch(url, headers=headers, json=data)
+```
+
+</Tab>
+</Tabs>
+
+---
+
+## Playground
+
+Test and iterate on prompts in the [Prompt Playground](https://platform.respan.ai/platform/playground).
+
+<Frame>
+<video controls className="w-full aspect-video" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground.mp4"></video>
+</Frame>
+
+From the prompt editor, enter variable values and click **Playground** in the top bar to test. Click **Commit** to save changes back to your prompt library.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-to-playground.png" alt="Bring prompt to playground" />
+</Frame>
+
+You can also debug production logs by clicking **Open in Playground** on any log entry.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/logs-to-playground.png" alt="Debug from logs" />
+</Frame>
+
+Set the number of variants in the side panel to generate multiple responses and compare them in the **Variants** tab.
+
+<Frame>
+<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/playground-set-variants.jpg" alt="Set variants" />
+</Frame>
 
 ---
 
@@ -654,6 +686,14 @@ const payload = {
   - `messages_override_mode`: `"append"` (add to existing) or `"override"` (replace all)
 </ParamField>
 
+<ParamField path="schema_version" type="integer" default={1}>
+  Controls the prompt merge strategy. `1` (default, legacy) uses `override` flag logic. `2` (recommended) uses prepend/instructions-style merging where the prompt config always wins. See [Prompt schema](#prompt-schema).
+</ParamField>
+
+<ParamField path="patch" type="object">
+  Additional parameter overrides applied in v2 mode (`schema_version=2`). Must **not** contain `messages` or `input`. Useful for overriding fields like `temperature` or `max_tokens` while letting the prompt config control messages and model.
+</ParamField>
+
 <ParamField path="echo" type="boolean" default={false}>
   When enabled, the response includes the final prompt messages used.
 </ParamField>
@@ -663,4 +703,3 @@ const payload = {
 </ParamField>
 
 <Info>See [all Respan supported params](/apis/develop/gateway/chat-completions#respan-parameters).</Info>
-

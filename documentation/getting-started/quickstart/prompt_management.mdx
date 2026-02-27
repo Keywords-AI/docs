@@ -125,66 +125,14 @@ Find the **Prompt ID** in the Overview panel on the [Prompts page](https://platf
 <img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/prompt/prompt-id.png" alt="Find Prompt ID" />
 </Frame>
 
-Then call it from your application:
+Then call it from your application using **prompt schema v2 (recommended)**:
 
-<Tabs>
-<Tab title="OpenAI Python SDK">
-```python
-from openai import OpenAI
+<Note>
+OpenAI SDKs strip v2 fields like `schema_version` and `patch`. Prompt schema v2 requires raw HTTP requests.
+</Note>
 
-client = OpenAI(
-    base_url="https://api.respan.ai/api/",
-    api_key="YOUR_RESPAN_API_KEY",
-)
-
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "placeholder"}],
-    extra_body={
-        "prompt": {
-            "prompt_id": "YOUR_PROMPT_ID",
-            "variables": {
-                "task_description": "Square a number",
-                "specific_library": "math"
-            },
-            "override": True
-        }
-    }
-)
-
-print(response.choices[0].message.content)
-```
-</Tab>
-
-<Tab title="OpenAI TypeScript SDK">
-```typescript
-import { OpenAI } from "openai";
-
-const client = new OpenAI({
-    baseURL: "https://api.respan.ai/api",
-    apiKey: "YOUR_RESPAN_API_KEY",
-});
-
-const response = await client.chat.completions.create({
-    messages: [{ role: "user", content: "placeholder" }],
-    model: "gpt-4o-mini",
-    // @ts-expect-error
-    prompt: {
-        prompt_id: "YOUR_PROMPT_ID",
-        variables: {
-            task_description: "Square a number",
-            specific_library: "math"
-        },
-        override: true
-    }
-});
-
-console.log(response.choices[0].message.content);
-```
-</Tab>
-
-<Tab title="Standard API">
-```python
+<CodeGroup>
+```python Python
 import requests
 
 headers = {
@@ -195,6 +143,7 @@ headers = {
 data = {
     'prompt': {
         'prompt_id': 'YOUR_PROMPT_ID',
+        'schema_version': 2,
         'variables': {
             'task_description': 'Square a number',
             'specific_library': 'math'
@@ -209,9 +158,70 @@ response = requests.post(
 )
 print(response.json())
 ```
-With the standard API, you don't need `model` and `messages` — the prompt configuration is used automatically.
-</Tab>
-</Tabs>
+```typescript TypeScript
+fetch('https://api.respan.ai/api/chat/completions', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+    },
+    body: JSON.stringify({
+        prompt: {
+            prompt_id: 'YOUR_PROMPT_ID',
+            schema_version: 2,
+            variables: {
+                task_description: 'Square a number',
+                specific_library: 'math'
+            }
+        }
+    })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+</CodeGroup>
+
+You don't need `model` and `messages` — the prompt configuration is used automatically.
+
+<Accordion title="Legacy prompt schema v1 (default)">
+With v1, use `override: true` to let the prompt config win over request-body parameters. This is the default when `schema_version` is omitted.
+
+<CodeGroup>
+```python Python
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "placeholder"}],
+    extra_body={
+        "prompt": {
+            "prompt_id": "YOUR_PROMPT_ID",
+            "variables": {
+                "task_description": "Square a number",
+                "specific_library": "math"
+            },
+            "override": True
+        }
+    }
+)
+```
+```typescript TypeScript
+const response = await client.chat.completions.create({
+    messages: [{ role: "user", content: "placeholder" }],
+    model: "gpt-4o-mini",
+    // @ts-expect-error
+    prompt: {
+        prompt_id: "YOUR_PROMPT_ID",
+        variables: {
+            task_description: "Square a number",
+            specific_library: "math"
+        },
+        override: true
+    }
+});
+```
+</CodeGroup>
+
+See [Prompt merge modes (v1 vs v2)](/documentation/features/prompt-management/manage-prompts#prompt-merge-modes-v1-vs-v2) for full details.
+</Accordion>
 
 ---
 
@@ -230,6 +240,7 @@ Filter logs by prompt name on the [Logs page](https://platform.respan.ai/platfor
 - [Variables](/documentation/features/prompt-management/manage-prompts#variables) — Jinja templates, conditionals, and JSON inputs
 - [JSON schema](/documentation/features/prompt-management/manage-prompts#json-schema-structured-output) — structured output for consistent response formats
 - [Prompt composition](/documentation/features/prompt-management/manage-prompts#prompt-composition) — reference prompts inside other prompts
+- [Prompt merge modes (v1 vs v2)](/documentation/features/prompt-management/manage-prompts#prompt-merge-modes-v1-vs-v2) — control how prompt config and request params are merged
 - [Deployment & versioning](/documentation/features/prompt-management/manage-prompts#deployment--versioning) — version pinning, rollbacks, and overrides
 - [Streaming](/documentation/features/prompt-management/manage-prompts#streaming) — enable streaming for prompt responses
 - [Playground](/documentation/features/prompt-management/manage-prompts#playground) — test and iterate on prompts interactively
