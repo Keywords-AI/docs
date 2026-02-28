@@ -1,0 +1,71 @@
+---
+title: "Braintrust Exporter"
+description: "SDK reference for the Respan Braintrust exporter."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-braintrust
+```
+
+## Classes
+
+### RespanBraintrustExporter
+
+Exports Braintrust logs to Respan by registering as Braintrust's background logger.
+
+```python
+from respan_exporter_braintrust import RespanBraintrustExporter
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL`. |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `install()` | Register as Braintrust's background logger. |
+| `uninstall()` | Unregister from Braintrust. |
+| `log(*args)` | Log items to buffer. |
+| `flush(batch_size)` | Flush buffered items to Respan. |
+
+### Context manager
+
+The exporter supports context manager usage for automatic install/uninstall:
+
+```python
+with RespanBraintrustExporter(api_key="your-api-key") as exporter:
+    # Braintrust logs are automatically sent to Respan
+    pass
+```
+
+## Usage
+
+```python
+import braintrust
+from respan_exporter_braintrust import RespanBraintrustExporter
+
+# Install as background logger
+with RespanBraintrustExporter(api_key="your-api-key"):
+    # Use Braintrust normally
+    experiment = braintrust.init(project="my-project")
+    experiment.log(
+        input="Tell me a joke",
+        output="Why did the AI cross the road?",
+        scores={"humor": 0.8},
+    )
+```
+
+## Internal
+
+- Buffers records and flushes in batches
+- Converts Braintrust record format to Respan span format
+- Handles both root spans and child spans
+
+## Related
+
+- [Braintrust migration guide](/integrations/tracing/braintrust)

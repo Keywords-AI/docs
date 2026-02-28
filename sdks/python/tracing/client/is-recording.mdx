@@ -1,0 +1,29 @@
+---
+title: "is_recording()"
+description: "Check if the current span is actively recording."
+---
+
+## Signature
+
+```python
+is_recording() -> bool
+```
+
+Returns `True` if there is an active span that is recording, `False` otherwise.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, task, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="guarded_task")
+def guarded_task():
+    client = get_client()
+    if client.is_recording():
+        client.add_event("task_running")
+    return "done"
+
+guarded_task()
+```

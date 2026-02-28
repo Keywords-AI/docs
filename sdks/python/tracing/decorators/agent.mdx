@@ -1,0 +1,74 @@
+---
+title: "@agent"
+description: "Mark a function or class as a traced agent span."
+---
+
+## Overview
+
+The `@agent` decorator creates a span representing an autonomous agent. Agent spans set the workflow name context, so all nested tasks and tools appear grouped under this agent in the trace tree.
+
+```python
+from respan_tracing import agent
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `str \| None` | Function name | Display name for the agent span. |
+| `version` | `int \| None` | `None` | Version number for the agent. |
+| `method_name` | `str \| None` | `None` | Required when decorating a class. Specifies which method to use as the entry point. |
+| `processors` | `str \| List[str] \| None` | `None` | Route this span to specific named processors. See [add_processor](/sdks/python/tracing/main/initialize#add_processor). |
+
+## Function usage
+
+```python
+from respan_tracing import RespanTelemetry, agent, task, tool
+from openai import OpenAI
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = OpenAI()
+
+@tool(name="search")
+def search(query: str):
+    return f"Results for: {query}"
+
+@task(name="think")
+def think(context: str):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": context}],
+    )
+    return response.choices[0].message.content
+
+@agent(name="research_agent")
+def research_agent(topic: str):
+    results = search(topic)
+    return think(results)
+
+print(research_agent("OpenTelemetry tracing"))
+```
+
+## Class usage
+
+```python
+from respan_tracing import RespanTelemetry, agent, task
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@agent(name="assistant", method_name="run")
+class Assistant:
+    @task(name="respond")
+    def respond(self, input_text: str):
+        return f"Response: {input_text}"
+
+    def run(self):
+        return self.respond("Hello")
+
+print(Assistant().run())
+```
+
+## Notes
+
+- Agent spans set the workflow name context — nested spans inherit the agent name for grouping
+- Use `@agent` for top-level autonomous entities and `@task` for individual operations within them

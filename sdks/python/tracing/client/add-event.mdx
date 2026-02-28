@@ -1,0 +1,44 @@
+---
+title: "add_event()"
+description: "Add a timestamped event to the current span."
+---
+
+## Signature
+
+```python
+add_event(
+    name: str,
+    attributes: Dict = None,
+    timestamp: int = None,
+) -> bool
+```
+
+Returns `True` if the event was added successfully.
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `name` | `str` | Event name. |
+| `attributes` | `Dict \| None` | Key-value pairs attached to the event. |
+| `timestamp` | `int \| None` | Unix timestamp in nanoseconds. Defaults to current time. |
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, task, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="process_batch")
+def process_batch(items):
+    client = get_client()
+    client.add_event("batch_started", {"item_count": len(items)})
+
+    results = [item * 2 for item in items]
+
+    client.add_event("batch_completed", {"result_count": len(results)})
+    return results
+
+process_batch([1, 2, 3])
+```

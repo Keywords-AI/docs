@@ -213,8 +213,7 @@
               "/integrations/tracing/mastra",
               "/integrations/tracing/agno",
               "/integrations/gateway/langchain",
-              "/integrations/gateway/llama-index",
-              "/integrations/tracing/superagent"
+              "/integrations/gateway/llama-index"
             ]
           },
           {
@@ -246,6 +245,12 @@
             "pages": [
               "/integrations/tracing/baml",
               "/integrations/tracing/instructor"
+            ]
+          },
+          {
+            "group": "Security",
+            "pages": [
+              "/integrations/tracing/superagent"
             ]
           },
           {
@@ -605,104 +610,135 @@
         "tab": "SDKs",
         "groups": [
           {
-            "group": "Python Tracing SDK",
+            "group": "Python",
             "pages": [
               {
-                "group": "Getting Started",
+                "group": "respan-tracing",
                 "pages": [
-                  "/sdks/python-tracing/quickstart",
-                  "/sdks/python-tracing/examples"
+                  {
+                    "group": "Getting Started",
+                    "pages": [
+                      "/sdks/python/tracing/quickstart",
+                      "/sdks/python/tracing/examples"
+                    ]
+                  },
+                  {
+                    "group": "Decorators",
+                    "pages": [
+                      "/sdks/python/tracing/decorators/workflow",
+                      "/sdks/python/tracing/decorators/task",
+                      "/sdks/python/tracing/decorators/agent",
+                      "/sdks/python/tracing/decorators/tool"
+                    ]
+                  },
+                  {
+                    "group": "Client API",
+                    "pages": [
+                      "/sdks/python/tracing/main/initialize",
+                      "/sdks/python/tracing/client/get-client",
+                      "/sdks/python/tracing/client/get-current-trace-id",
+                      "/sdks/python/tracing/client/get-current-span-id",
+                      "/sdks/python/tracing/client/update-current-span",
+                      "/sdks/python/tracing/client/add-event",
+                      "/sdks/python/tracing/client/record-exception",
+                      "/sdks/python/tracing/client/get-context-value",
+                      "/sdks/python/tracing/client/set-context-value",
+                      "/sdks/python/tracing/client/is-recording",
+                      "/sdks/python/tracing/client/get-tracer",
+                      "/sdks/python/tracing/client/flush",
+                      "/sdks/python/tracing/client/get-span-buffer",
+                      "/sdks/python/tracing/client/export-spans"
+                    ]
+                  },
+                  {
+                    "group": "Contexts",
+                    "pages": [
+                      "/sdks/python/tracing/contexts/respan-span-attributes"
+                    ]
+                  },
+                  {
+                    "group": "Instrumentation",
+                    "pages": [
+                      "/sdks/python/tracing/instrumentation/overview"
+                    ]
+                  }
                 ]
               },
               {
-                "group": "Decorators",
+                "group": "Exporters",
                 "pages": [
-                  "/sdks/python-tracing/decorators/workflow",
-                  "/sdks/python-tracing/decorators/task",
-                  "/sdks/python-tracing/decorators/agent",
-                  "/sdks/python-tracing/decorators/tool"
-                ]
-              },
-              {
-                "group": "Client API",
-                "pages": [
-                  "/sdks/python-tracing/main/initialize",
-                  "/sdks/python-tracing/client/get-client",
-                  "/sdks/python-tracing/client/get-current-trace-id",
-                  "/sdks/python-tracing/client/get-current-span-id",
-                  "/sdks/python-tracing/client/update-current-span",
-                  "/sdks/python-tracing/client/add-event",
-                  "/sdks/python-tracing/client/record-exception",
-                  "/sdks/python-tracing/client/get-context-value",
-                  "/sdks/python-tracing/client/set-context-value",
-                  "/sdks/python-tracing/client/is-recording",
-                  "/sdks/python-tracing/client/get-tracer",
-                  "/sdks/python-tracing/client/flush",
-                  "/sdks/python-tracing/client/get-span-buffer",
-                  "/sdks/python-tracing/client/export-spans"
-                ]
-              },
-              {
-                "group": "Contexts",
-                "pages": [
-                  "/sdks/python-tracing/contexts/respan-span-attributes"
-                ]
-              },
-              {
-                "group": "Instrumentation",
-                "pages": [
-                  "/sdks/python-tracing/instrumentation/overview"
+                  "/sdks/python/exporters/openai-agents",
+                  "/sdks/python/exporters/anthropic-agents",
+                  "/sdks/python/exporters/haystack",
+                  "/sdks/python/exporters/agno",
+                  "/sdks/python/exporters/litellm",
+                  "/sdks/python/exporters/braintrust",
+                  "/sdks/python/exporters/langfuse",
+                  "/sdks/python/exporters/superagent"
                 ]
               }
             ]
           },
           {
-            "group": "TypeScript Tracing SDK",
+            "group": "TypeScript",
             "pages": [
               {
-                "group": "Getting Started",
+                "group": "respan-tracing",
                 "pages": [
-                  "/sdks/typescript-tracing/quickstart",
-                  "/sdks/typescript-tracing/examples"
+                  {
+                    "group": "Getting Started",
+                    "pages": [
+                      "/sdks/typescript/tracing/quickstart",
+                      "/sdks/typescript/tracing/examples"
+                    ]
+                  },
+                  {
+                    "group": "Methods",
+                    "pages": [
+                      "/sdks/typescript/tracing/methods/with-workflow",
+                      "/sdks/typescript/tracing/methods/with-task",
+                      "/sdks/typescript/tracing/methods/with-agent",
+                      "/sdks/typescript/tracing/methods/with-tool"
+                    ]
+                  },
+                  {
+                    "group": "Client API",
+                    "pages": [
+                      "/sdks/typescript/tracing/client/initialize",
+                      "/sdks/typescript/tracing/client/get-client",
+                      "/sdks/typescript/tracing/client/get-current-trace-id",
+                      "/sdks/typescript/tracing/client/get-current-span-id",
+                      "/sdks/typescript/tracing/client/update-current-span",
+                      "/sdks/typescript/tracing/client/add-span-event",
+                      "/sdks/typescript/tracing/client/record-span-exception",
+                      "/sdks/typescript/tracing/client/get-context-value",
+                      "/sdks/typescript/tracing/client/set-context-value",
+                      "/sdks/typescript/tracing/client/is-recording",
+                      "/sdks/typescript/tracing/client/get-tracer",
+                      "/sdks/typescript/tracing/client/flush",
+                      "/sdks/typescript/tracing/client/shutdown"
+                    ]
+                  },
+                  {
+                    "group": "Configuration",
+                    "pages": [
+                      "/sdks/typescript/tracing/configuration/respan-params"
+                    ]
+                  },
+                  {
+                    "group": "Instrumentation",
+                    "pages": [
+                      "/sdks/typescript/tracing/instrumentation/overview"
+                    ]
+                  }
                 ]
               },
               {
-                "group": "Methods",
+                "group": "Exporters",
                 "pages": [
-                  "/sdks/typescript-tracing/methods/with-workflow",
-                  "/sdks/typescript-tracing/methods/with-task",
-                  "/sdks/typescript-tracing/methods/with-agent",
-                  "/sdks/typescript-tracing/methods/with-tool"
-                ]
-              },
-              {
-                "group": "Client API",
-                "pages": [
-                  "/sdks/typescript-tracing/client/initialize",
-                  "/sdks/typescript-tracing/client/get-client",
-                  "/sdks/typescript-tracing/client/get-current-trace-id",
-                  "/sdks/typescript-tracing/client/get-current-span-id",
-                  "/sdks/typescript-tracing/client/update-current-span",
-                  "/sdks/typescript-tracing/client/add-span-event",
-                  "/sdks/typescript-tracing/client/record-span-exception",
-                  "/sdks/typescript-tracing/client/get-context-value",
-                  "/sdks/typescript-tracing/client/set-context-value",
-                  "/sdks/typescript-tracing/client/is-recording",
-                  "/sdks/typescript-tracing/client/get-tracer",
-                  "/sdks/typescript-tracing/client/flush",
-                  "/sdks/typescript-tracing/client/shutdown"
-                ]
-              },
-              {
-                "group": "Configuration",
-                "pages": [
-                  "/sdks/typescript-tracing/configuration/respan-params"
-                ]
-              },
-              {
-                "group": "Instrumentation",
-                "pages": [
-                  "/sdks/typescript-tracing/instrumentation/overview"
+                  "/sdks/typescript/exporters/openai-agents",
+                  "/sdks/typescript/exporters/anthropic-agents",
+                  "/sdks/typescript/exporters/vercel"
                 ]
               }
             ]
@@ -854,6 +890,10 @@
       "destination": "/integrations/gateway/litellm"
     },
     {
+      "source": "/integrations/tracing/litellm",
+      "destination": "/integrations/gateway/litellm"
+    },
+    {
       "source": "/integrations/development-frameworks/llm_framework/haystack",
       "destination": "/integrations/tracing/haystack"
     },
@@ -959,15 +999,15 @@
     },
     {
       "source": "/documentation/resources/what-is-llm-observability-and-monitoring",
-      "destination": "/documentation/resources/reference/what-is-llm-observability-and-monitoring"
+      "destination": "/documentation/getting-started/overview"
     },
     {
       "source": "/documentation/resources/automatic-retries",
-      "destination": "/documentation/resources/reference/automatic-retries"
+      "destination": "/documentation/resources/reference/error-handling"
     },
     {
       "source": "/documentation/resources/streaming",
-      "destination": "/documentation/resources/reference/streaming"
+      "destination": "/documentation/getting-started/overview"
     },
     {
       "source": "/documentation/resources/error-handling",
@@ -1291,7 +1331,7 @@
     },
     {
       "source": "/documentation/products/evaluation/experiments/experiments-images",
-      "destination": "/documentation/features/evals/experiments-images"
+      "destination": "/documentation/features/evals/experiments"
     },
     {
       "source": "/documentation/products/experiments_v2/via_ui",
@@ -1299,7 +1339,7 @@
     },
     {
       "source": "/documentation/products/experiments_v2/api-tutorial",
-      "destination": "/documentation/features/evals/experiments_v2/api-tutorial"
+      "destination": "/documentation/features/evals/experiments-v2"
     },
     {
       "source": "/documentation/products/gateway/configuration/models",
@@ -1459,7 +1499,11 @@
     },
     {
       "source": "/documentation/features/observability/traces/integration-frameworks",
-      "destination": "/documentation/features/tracing/traces/integration-frameworks"
+      "destination": "/integrations/overview#agent-frameworks"
+    },
+    {
+      "source": "/documentation/features/tracing/traces/integration-frameworks",
+      "destination": "/integrations/overview#agent-frameworks"
     },
     {
       "source": "/documentation/features/observability/traces/tracing-sdk",
@@ -1728,29 +1772,29 @@
 
     {
       "source": "/tracing-sdk/contexts/keywordsai-span-attributes",
-      "destination": "/sdks/python-tracing/contexts/respan-span-attributes"
+      "destination": "/sdks/python/tracing/contexts/respan-span-attributes"
     },
     {
       "source": "/tracing-sdk/:slug*",
-      "destination": "/sdks/python-tracing/:slug*"
+      "destination": "/sdks/python/tracing/:slug*"
     },
 
     {
       "source": "/tracing-sdk-js/configuration/keywordsai-params",
-      "destination": "/sdks/typescript-tracing/configuration/respan-params"
+      "destination": "/sdks/typescript/tracing/configuration/respan-params"
     },
     {
       "source": "/tracing-sdk-js/:slug*",
-      "destination": "/sdks/typescript-tracing/:slug*"
+      "destination": "/sdks/typescript/tracing/:slug*"
     },
 
     {
       "source": "/python-sdk/quickstart",
-      "destination": "/sdks/python-tracing/quickstart"
+      "destination": "/sdks/python/tracing/quickstart"
     },
     {
       "source": "/python-sdk/examples",
-      "destination": "/sdks/python-tracing/examples"
+      "destination": "/sdks/python/tracing/examples"
     },
     {
       "source": "/python-sdk/logs/overview",
@@ -1862,7 +1906,84 @@
     },
     {
       "source": "/python-sdk/:slug*",
-      "destination": "/sdks/python-tracing/:slug*"
+      "destination": "/sdks/python/tracing/:slug*"
+    },
+
+    {
+      "source": "/sdks/python-tracing/quickstart",
+      "destination": "/sdks/python/tracing/quickstart"
+    },
+    {
+      "source": "/sdks/python-tracing/examples",
+      "destination": "/sdks/python/tracing/examples"
+    },
+    {
+      "source": "/sdks/python-tracing/overview",
+      "destination": "/sdks/python/tracing/overview"
+    },
+    {
+      "source": "/sdks/python-tracing/main/initialize",
+      "destination": "/sdks/python/tracing/main/initialize"
+    },
+    {
+      "source": "/sdks/python-tracing/:slug*",
+      "destination": "/sdks/python/tracing/:slug*"
+    },
+    {
+      "source": "/sdks/typescript-tracing/quickstart",
+      "destination": "/sdks/typescript/tracing/quickstart"
+    },
+    {
+      "source": "/sdks/typescript-tracing/examples",
+      "destination": "/sdks/typescript/tracing/examples"
+    },
+    {
+      "source": "/sdks/typescript-tracing/client/initialize",
+      "destination": "/sdks/typescript/tracing/client/initialize"
+    },
+    {
+      "source": "/sdks/typescript-tracing/configuration/respan-params",
+      "destination": "/sdks/typescript/tracing/configuration/respan-params"
+    },
+    {
+      "source": "/sdks/typescript-tracing/:slug*",
+      "destination": "/sdks/typescript/tracing/:slug*"
+    },
+    {
+      "source": "/sdks/exporters/openai-agents",
+      "destination": "/sdks/python/exporters/openai-agents"
+    },
+    {
+      "source": "/sdks/exporters/anthropic-agents",
+      "destination": "/sdks/python/exporters/anthropic-agents"
+    },
+    {
+      "source": "/sdks/exporters/haystack",
+      "destination": "/sdks/python/exporters/haystack"
+    },
+    {
+      "source": "/sdks/exporters/agno",
+      "destination": "/sdks/python/exporters/agno"
+    },
+    {
+      "source": "/sdks/exporters/litellm",
+      "destination": "/sdks/python/exporters/litellm"
+    },
+    {
+      "source": "/sdks/exporters/braintrust",
+      "destination": "/sdks/python/exporters/braintrust"
+    },
+    {
+      "source": "/sdks/exporters/langfuse",
+      "destination": "/sdks/python/exporters/langfuse"
+    },
+    {
+      "source": "/sdks/exporters/superagent",
+      "destination": "/sdks/python/exporters/superagent"
+    },
+    {
+      "source": "/sdks/exporters/vercel",
+      "destination": "/sdks/typescript/exporters/vercel"
     }
   ]
 }

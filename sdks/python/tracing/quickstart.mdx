@@ -1,0 +1,151 @@
+---
+title: "Quickstart"
+description: "Get started with the respan-tracing Python SDK in under 5 minutes."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+## Installation
+
+<Note>
+Requires **Python 3.9** or later.
+</Note>
+
+```bash
+pip install respan-tracing
+```
+
+## Configure credentials
+
+Set your API key via environment variable or pass it directly to `RespanTelemetry`.
+
+<CodeGroup>
+```bash Environment variables
+export RESPAN_API_KEY="your-api-key"
+export RESPAN_BASE_URL="https://api.respan.ai/api"  # optional, this is the default
+```
+```python Inline
+from respan_tracing import RespanTelemetry
+
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    base_url="https://api.respan.ai/api",  # optional, this is the default
+)
+```
+</CodeGroup>
+
+## Trace a workflow
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="compute")
+def compute(x: int, y: int):
+    return x + y
+
+@workflow(name="math_workflow")
+def math_workflow():
+    result = compute(2, 3)
+    return result
+
+print(math_workflow())  # 5
+```
+
+The `@workflow` decorator creates a root trace, and `@task` creates a child span nested inside it.
+
+## Trace an LLM call
+
+Auto-instrumentation captures OpenAI (and other LLM provider) calls automatically.
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = OpenAI()
+
+@task(name="generate_joke")
+def generate_joke():
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Tell me a joke about tracing"}],
+    )
+    return response.choices[0].message.content
+
+@workflow(name="joke_workflow")
+def joke_workflow():
+    return generate_joke()
+
+print(joke_workflow())
+```
+
+## Class-based workflows
+
+Use the `method_name` parameter to decorate a class and specify the entry point method.
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = OpenAI()
+
+@workflow(name="joke_agent", method_name="run")
+class JokeAgent:
+    @task(name="joke_creation")
+    def create_joke(self):
+        completion = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": "Tell me a joke about AI"}],
+        )
+        return completion.choices[0].message.content
+
+    def run(self):
+        return self.create_joke()
+
+print(JokeAgent().run())
+```
+
+## Add metadata to spans
+
+Use `get_client()` to attach customer identifiers, metadata, and other Respan-specific attributes.
+
+```python
+from respan_tracing import RespanTelemetry, workflow, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="user_workflow")
+def user_workflow(user_id: str):
+    client = get_client()
+    client.update_current_span(
+        respan_params={
+            "customer_identifier": user_id,
+            "metadata": {"source": "quickstart"},
+        }
+    )
+    return "done"
+
+user_workflow("user-123")
+```
+
+## View your traces
+
+Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan dashboard to see your trace tree.
+
+<Frame className="rounded-md">
+<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/overview/trace_tree_v1.png" alt="Agent tracing visualization" />
+</Frame>
+
+## Next steps
+
+- Learn decorators: [workflow](/sdks/python/tracing/decorators/workflow), [task](/sdks/python/tracing/decorators/task), [agent](/sdks/python/tracing/decorators/agent), [tool](/sdks/python/tracing/decorators/tool)
+- Explore the [Client API](/sdks/python/tracing/client/get-client)
+- Configure [Instrumentation](/sdks/python/tracing/instrumentation/overview)
+- See real-world [Examples](/sdks/python/tracing/examples)

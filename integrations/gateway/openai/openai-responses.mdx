@@ -12,10 +12,12 @@ description: A guide to integrating the OpenAI Responses API with Respan.
 
 <Note> This integration is for the **Respan gateway**. </Note>
 
+## What is Responses API?
+
+[Responses API](https://platform.openai.com/docs/api-reference/responses) is OpenAI's most advanced interface for generating model responses. It supports text and image inputs, text outputs, and stateful interactions using the output of previous responses as input. Extend the model's capabilities with built-in tools for file search, web search, computer use, and more.
+
 <Warning>
-
 This integration works exclusively with **OpenAI models** and cannot be used with models from other providers.
-
 </Warning>
 
 <Warning>
@@ -25,12 +27,6 @@ This integration works exclusively with **OpenAI models** and cannot be used wit
 - **Load Balancing**: You cannot distribute traffic across multiple models or credentials.
 - **Prompt Management**: You cannot use prompts stored in Respan directly.
 </Warning>
-
-[Responses API](https://platform.openai.com/docs/api-reference/responses) is OpenAI's most advanced interface for generating model responses. Supports text and image inputs, and text outputs. Create stateful interactions with the model, using the output of previous responses as input. 
-
-Extend the model's capabilities with built-in tools for file search, web search, computer use, and more. Allow the model access to external systems and data using function calling.
-
-This guide will show you how to integrate the Responses API with Respan so you can log LLM calls from Responses API.
 
 ## Quickstart
 
@@ -301,8 +297,6 @@ if __name__ == "__main__":
     test_web_search()
 ```
 </CodeGroup>
-
-
 
 
 

@@ -1,0 +1,60 @@
+---
+title: "respan_span_attributes()"
+description: "Context manager to attach Respan-specific attributes to spans."
+---
+
+## Overview
+
+`respan_span_attributes()` is a context manager that attaches Respan-specific attributes to all spans created within its scope. Use it to set `customer_identifier`, `trace_group_identifier`, and `metadata` without manually calling `update_current_span()` on each span.
+
+```python
+from respan_tracing import respan_span_attributes
+```
+
+## Supported attributes
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `customer_identifier` | `str` | User or customer identifier for filtering in the dashboard. |
+| `trace_group_identifier` | `str` | Group related traces together. |
+| `metadata` | `Dict` | Custom key-value pairs for analytics. |
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task, respan_span_attributes
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="process_data")
+def process_data():
+    return "processed"
+
+@workflow(name="user_pipeline")
+def user_pipeline(user_id: str):
+    with respan_span_attributes({
+        "customer_identifier": user_id,
+        "trace_group_identifier": "experiment-v2",
+        "metadata": {"team": "search", "priority": "high"},
+    }):
+        return process_data()
+
+user_pipeline("user-456")
+```
+
+All spans created inside the `with` block (including `process_data`) will have the Respan attributes attached.
+
+## Nested contexts
+
+Attributes from inner contexts override outer contexts for the same keys.
+
+```python
+@workflow(name="nested_example")
+def nested_example():
+    with respan_span_attributes({"customer_identifier": "user-A"}):
+        # Spans here have customer_identifier="user-A"
+
+        with respan_span_attributes({"customer_identifier": "user-B"}):
+            # Spans here have customer_identifier="user-B"
+            pass
+```

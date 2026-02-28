@@ -1,0 +1,51 @@
+---
+title: "record_exception()"
+description: "Record an exception on the current span and set error status."
+---
+
+## Signature
+
+```python
+record_exception(
+    exception: Exception,
+    attributes: Dict = None,
+    timestamp: int = None,
+    escaped: bool = False,
+) -> bool
+```
+
+Returns `True` if the exception was recorded successfully.
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `exception` | `Exception` | The exception to record. |
+| `attributes` | `Dict \| None` | Additional attributes for the exception event. |
+| `timestamp` | `int \| None` | Unix timestamp in nanoseconds. Defaults to current time. |
+| `escaped` | `bool` | Whether the exception escaped the span's scope. |
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, task, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="validate_input")
+def validate_input(data):
+    client = get_client()
+    try:
+        if not data:
+            raise ValueError("Input data is empty")
+        return data
+    except Exception as e:
+        client.record_exception(e, {"phase": "validation"})
+        return None
+
+validate_input("")
+```
+
+<Note>
+Decorators automatically record unhandled exceptions. Use `record_exception()` when you catch and handle exceptions but still want them visible in the trace.
+</Note>

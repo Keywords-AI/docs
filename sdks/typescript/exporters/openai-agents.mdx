@@ -1,0 +1,60 @@
+---
+title: "OpenAI Agents Exporter"
+description: "SDK reference for the Respan OpenAI Agents exporter for TypeScript."
+---
+
+## Installation
+
+```bash
+npm install @respan/exporter-openai-agents
+```
+
+### Classes
+
+#### RespanTraceProcessor
+
+```typescript
+import { RespanTraceProcessor } from '@respan/exporter-openai-agents';
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | — | Respan API key. |
+| `endpoint` | `string \| undefined` | `undefined` | Ingest endpoint URL. |
+
+#### RespanSpanExporter / RespanOpenAIAgentsTracingExporter
+
+Advanced exporter with full tracing support.
+
+### Span data types
+
+| Type | Description |
+|------|-------------|
+| `ResponseSpanData` | LLM response data |
+| `FunctionSpanData` | Tool/function call data |
+| `GenerationSpanData` | Text generation data |
+| `HandoffSpanData` | Agent-to-agent handoff data |
+| `AgentSpanData` | Agent execution data |
+| `GuardrailSpanData` | Guardrail check data |
+| `CustomSpanData` | Custom span data |
+
+### Usage
+
+```typescript
+import { Agent, run } from '@openai/agents';
+import { RespanTraceProcessor } from '@respan/exporter-openai-agents';
+
+const processor = new RespanTraceProcessor({ apiKey: 'your-api-key' });
+
+const agent = new Agent({
+  name: 'Assistant',
+  instructions: 'You are helpful.',
+});
+
+const result = await run(agent, 'Tell me a joke');
+console.log(result.finalOutput);
+```
+
+## Related
+
+- [OpenAI Agents integration guide](/integrations/tracing/openai-agents-sdk)

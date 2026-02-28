@@ -1,0 +1,57 @@
+---
+title: "get_client()"
+description: "Get the RespanClient for span and trace operations."
+---
+
+## Overview
+
+`get_client()` returns a `RespanClient` instance bound to the singleton tracer. Use it inside decorated functions to read trace/span IDs, update the current span, add events, record exceptions, and control export.
+
+```python
+from respan_tracing import get_client
+```
+
+## Usage
+
+```python
+from respan_tracing import RespanTelemetry, get_client, workflow
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="my_workflow")
+def my_workflow():
+    client = get_client()
+
+    # Read IDs
+    trace_id = client.get_current_trace_id()
+    span_id = client.get_current_span_id()
+
+    # Update span
+    client.update_current_span(
+        respan_params={"customer_identifier": "user-123"}
+    )
+
+    # Add events
+    client.add_event("processing_started", {"items": 10})
+
+    return trace_id
+
+print(my_workflow())
+```
+
+## RespanClient methods
+
+| Method | Description |
+|--------|-------------|
+| [`get_current_trace_id()`](/sdks/python/tracing/client/get-current-trace-id) | Get active trace ID as hex string. |
+| [`get_current_span_id()`](/sdks/python/tracing/client/get-current-span-id) | Get active span ID as hex string. |
+| [`update_current_span()`](/sdks/python/tracing/client/update-current-span) | Update attributes, status, and Respan params on the current span. |
+| [`add_event()`](/sdks/python/tracing/client/add-event) | Add a timestamped event to the current span. |
+| [`record_exception()`](/sdks/python/tracing/client/record-exception) | Record an exception on the current span. |
+| [`get_context_value()`](/sdks/python/tracing/client/get-context-value) | Read a value from the OpenTelemetry context. |
+| [`set_context_value()`](/sdks/python/tracing/client/set-context-value) | Set a value in the OpenTelemetry context. |
+| [`is_recording()`](/sdks/python/tracing/client/is-recording) | Check if the current span is recording. |
+| [`get_tracer()`](/sdks/python/tracing/client/get-tracer) | Get the OpenTelemetry tracer for manual span creation. |
+| [`flush()`](/sdks/python/tracing/client/flush) | Force flush pending spans. |
+| [`get_span_buffer()`](/sdks/python/tracing/client/get-span-buffer) | Get a span buffer for manual batch collection. |
+| [`process_spans()`](/sdks/python/tracing/client/export-spans) | Process collected spans through the processor pipeline. |

@@ -1,0 +1,59 @@
+---
+title: "OpenAI Agents Exporter"
+description: "SDK reference for the Respan OpenAI Agents exporter for Python."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-openai-agents
+```
+
+### Classes
+
+#### RespanTraceProcessor
+
+The main trace processor that hooks into the OpenAI Agents SDK tracing system.
+
+```python
+from respan_exporter_openai_agents import RespanTraceProcessor
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `endpoint` | `str \| None` | `None` | Ingest endpoint URL. |
+
+#### RespanSpanExporter
+
+Exports individual spans to Respan.
+
+```python
+from respan_exporter_openai_agents import RespanSpanExporter
+```
+
+### Helper functions
+
+| Function | Description |
+|----------|-------------|
+| `convert_to_respan_log(item)` | Convert an OpenAI Agents `Trace` or `Span` to Respan log format. |
+
+### Usage
+
+```python
+from agents import Agent, Runner, set_trace_processors
+from respan_exporter_openai_agents import RespanTraceProcessor
+
+# Initialize exporter
+respan_processor = RespanTraceProcessor(api_key="your-api-key")
+set_trace_processors([respan_processor])
+
+# Run agent
+agent = Agent(name="Assistant", instructions="You are helpful.")
+result = Runner.run_sync(agent, "Tell me a joke")
+print(result.final_output)
+```
+
+## Related
+
+- [OpenAI Agents integration guide](/integrations/tracing/openai-agents-sdk)

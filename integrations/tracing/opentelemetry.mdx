@@ -116,18 +116,3 @@ Respan-specific attributes for user tracking and grouping:
 
 All other attributes are preserved in the span's `metadata` and are queryable in the Respan UI. For the full list, see the [OTLP ingest API reference](/apis/observe/traces/otlp-ingest).
 
-## Observability
-
-Once configured, your traces will appear on the [Traces](https://platform.respan.ai/platform/traces) page in Respan.
-
-<Frame className="rounded-md">
-<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/overview/trace_tree_v1.png" alt="Agent tracing visualization" />
-</Frame>
-
-Any framework or library with OTel support works out of the box, including:
-
-- **Python**: Django, Flask, FastAPI, LangChain, LlamaIndex
-- **JS/TS**: Express, Next.js, NestJS
-- **Go, Java, .NET**: All standard OTel SDKs
-
-For Respan's native tracing SDK with built-in `@workflow` and `@task` decorators, see [Respan](/integrations/tracing/respan-native).

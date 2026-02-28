@@ -1,0 +1,85 @@
+---
+title: "@task"
+description: "Trace a single operation within a workflow as a child span."
+---
+
+## Overview
+
+The `@task` decorator creates a child span for a single unit of work — an LLM call, data processing step, validation, or any discrete operation within a workflow.
+
+```python
+from respan_tracing import task
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `str \| None` | Function name | Display name for the task span. |
+| `version` | `int \| None` | `None` | Version number for the task. |
+| `method_name` | `str \| None` | `None` | Required when decorating a class. Specifies which method to use as the entry point. |
+| `processors` | `str \| List[str] \| None` | `None` | Route this span to specific named processors. See [add_processor](/sdks/python/tracing/main/initialize#add_processor). |
+
+## Function usage
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = OpenAI()
+
+@task(name="generate_text")
+def generate_text(prompt: str):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+@task(name="summarize")
+def summarize(text: str):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": f"Summarize: {text}"}],
+    )
+    return response.choices[0].message.content
+
+@workflow(name="content_pipeline")
+def content_pipeline(topic: str):
+    text = generate_text(f"Write about {topic}")
+    return summarize(text)
+
+print(content_pipeline("Python"))
+```
+
+## Class usage
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="agent_run", method_name="run")
+class Agent:
+    @task(name="respond")
+    def respond(self, prompt: str):
+        return f"Echo: {prompt}"
+
+    def run(self):
+        return self.respond("Hello")
+
+print(Agent().run())
+```
+
+## Features
+
+- **Automatic I/O capture** — Function arguments and return values are serialized as span input/output (up to 1MB).
+- **Exception recording** — Exceptions are automatically recorded on the span with error status.
+- **Async support** — Works with `async def` functions and generators.
+
+## Best practices
+
+- Keep tasks small and focused on a single operation
+- Use task names that reflect intent, not implementation details
+- Nest tasks inside workflows for proper trace hierarchy

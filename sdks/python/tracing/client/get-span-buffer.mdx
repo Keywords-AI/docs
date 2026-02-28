@@ -1,0 +1,46 @@
+---
+title: "get_span_buffer()"
+description: "Buffer spans in a context for manual batch collection and export."
+---
+
+## Signature
+
+```python
+get_span_buffer(trace_id: str) -> SpanBuffer
+```
+
+Returns a `SpanBuffer` context manager that routes all spans created within it into a local queue instead of exporting them immediately. This enables manual batch collection and deferred export.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = get_client()
+
+# Collect spans into a buffer
+with client.get_span_buffer("trace-123") as buffer:
+    buffer.create_span("step_1", {"status": "completed"})
+    buffer.create_span("step_2", {"status": "completed"})
+
+    # Inspect buffered spans
+    count = buffer.get_span_count()  # 2
+    spans = buffer.get_all_spans()   # List[ReadableSpan]
+
+# After exiting the context, process the collected spans
+client.process_spans(spans)
+```
+
+## SpanBuffer methods
+
+| Method | Description |
+|--------|-------------|
+| `create_span(name, attributes=None, kind=None)` | Create a span in the buffer. Returns the span ID. |
+| `get_all_spans()` | Get all buffered spans as a list. |
+| `get_span_count()` | Get the number of buffered spans. |
+| `clear_spans()` | Discard all buffered spans. |
+
+<Note>
+All span creation within the buffer context (including decorator-created spans and tracer calls) is buffered. Extract spans with `get_all_spans()` before exiting the context, then use `client.process_spans()` to export them.
+</Note>

@@ -1,0 +1,79 @@
+---
+title: "Langfuse Instrumentor"
+description: "SDK reference for the Respan Langfuse instrumentor."
+---
+
+## Installation
+
+```bash
+pip install respan-instrumentation-langfuse
+```
+
+## Classes
+
+### LangfuseInstrumentor
+
+OpenTelemetry-compliant instrumentor that patches Langfuse's OTLP exporter to redirect traces to Respan.
+
+```python
+from respan_instrumentation_langfuse import LangfuseInstrumentor
+```
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `instrument(**kwargs)` | Enable instrumentation. Must be called BEFORE importing Langfuse. |
+| `uninstrument(**kwargs)` | Disable instrumentation. |
+
+## Important
+
+<Warning>
+`LangfuseInstrumentor().instrument()` must be called **before** importing `langfuse`. The instrumentor patches the OTLP exporter at import time.
+</Warning>
+
+## Usage
+
+```python
+import os
+from respan_instrumentation_langfuse import LangfuseInstrumentor
+
+# Set credentials
+os.environ["RESPAN_API_KEY"] = "your-api-key"
+os.environ["LANGFUSE_PUBLIC_KEY"] = "your-langfuse-public-key"
+os.environ["LANGFUSE_SECRET_KEY"] = "your-langfuse-secret-key"
+
+# Instrument BEFORE importing langfuse
+LangfuseInstrumentor().instrument()
+
+# Now import and use langfuse normally
+from langfuse.decorators import observe
+from openai import OpenAI
+
+client = OpenAI()
+
+@observe()
+def generate_joke():
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": "Tell me a joke"}],
+    )
+    return response.choices[0].message.content
+
+generate_joke()
+```
+
+## How it works
+
+The instrumentor patches Langfuse's internal OTLP HTTP exporter to intercept spans and redirect them to Respan's ingest endpoint. Existing Langfuse decorators (`@observe`, `langfuse.trace()`) continue to work unchanged — the data is simply mirrored to Respan.
+
+## Dependencies
+
+- `langfuse`
+- `opentelemetry-api`
+- `opentelemetry-sdk`
+- `opentelemetry-instrumentation`
+
+## Related
+
+- [Langfuse migration guide](/integrations/tracing/langfuse)

@@ -1,0 +1,62 @@
+---
+title: "Anthropic Agents Exporter"
+description: "SDK reference for the Respan Anthropic Agents exporter for TypeScript."
+---
+
+## Installation
+
+```bash
+npm install @respan/exporter-anthropic-agents
+```
+
+### Classes
+
+#### RespanAnthropicAgentsExporter
+
+```typescript
+import { RespanAnthropicAgentsExporter } from '@respan/exporter-anthropic-agents';
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | — | Respan API key. |
+| `baseUrl` | `string \| undefined` | `undefined` | API base URL. |
+| `endpoint` | `string \| undefined` | `undefined` | Ingest endpoint URL. |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `setEndpoint(endpoint)` | Override ingest endpoint. |
+| `createHooks(existingHooks)` | Create Respan instrumentation hooks. |
+| `withOptions(options)` | Attach hooks to agent options. |
+| `query({prompt, options})` | Wrapped query with async tracking. |
+| `trackMessage({message, sessionId, prompt})` | Track individual messages. |
+
+### Helper
+
+```typescript
+import { instrumentOptions } from '@respan/exporter-anthropic-agents';
+
+// Helper function to attach hooks
+const options = instrumentOptions(exporter, baseOptions);
+```
+
+### Usage
+
+```typescript
+import { RespanAnthropicAgentsExporter } from '@respan/exporter-anthropic-agents';
+
+const exporter = new RespanAnthropicAgentsExporter({
+  apiKey: 'your-api-key',
+});
+
+const options = exporter.withOptions({
+  model: 'claude-sonnet-4-5-20250929',
+  maxTokens: 1024,
+});
+```
+
+## Related
+
+- [Anthropic Agents integration guide](/integrations/tracing/anthropic-agents-sdk)

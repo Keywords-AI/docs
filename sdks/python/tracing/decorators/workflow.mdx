@@ -1,0 +1,87 @@
+---
+title: "@workflow"
+description: "Mark a function or class as a traced workflow (root span)."
+---
+
+## Overview
+
+The `@workflow` decorator creates a root trace span. All nested `@task`, `@agent`, and `@tool` spans are captured as children under this workflow.
+
+```python
+from respan_tracing import workflow
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `str \| None` | Function name | Display name for the workflow span. |
+| `version` | `int \| None` | `None` | Version number for the workflow. |
+| `method_name` | `str \| None` | `None` | Required when decorating a class. Specifies which method to use as the entry point. |
+| `processors` | `str \| List[str] \| None` | `None` | Route this span to specific named processors. See [add_processor](/sdks/python/tracing/main/initialize#add_processor). |
+
+## Function usage
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@task(name="extract")
+def extract():
+    return {"records": [1, 2, 3]}
+
+@task(name="transform")
+def transform(data):
+    return [x * 2 for x in data["records"]]
+
+@workflow(name="data_pipeline")
+def data_pipeline():
+    data = extract()
+    return transform(data)
+
+print(data_pipeline())  # [2, 4, 6]
+```
+
+## Class usage
+
+When decorating a class, use `method_name` to specify the entry point. Calling that method creates the workflow span.
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = OpenAI()
+
+@workflow(name="analysis_workflow", method_name="run")
+class Analyzer:
+    @task(name="analyze")
+    def analyze(self, nums):
+        return sum(nums)
+
+    def run(self):
+        return self.analyze([1, 2, 3])
+
+print(Analyzer().run())  # 6
+```
+
+## Processor routing
+
+Use `processors` to send workflow spans to specific exporters only.
+
+```python
+@workflow(name="debug_workflow", processors="debug")
+def debug_workflow():
+    return "only exported to the 'debug' processor"
+
+@workflow(name="multi_export", processors=["debug", "analytics"])
+def multi_export():
+    return "exported to both 'debug' and 'analytics' processors"
+```
+
+## Best practices
+
+- Use descriptive workflow names for easy navigation in the Traces dashboard
+- Keep workflows coarse-grained — use `@task` for internal steps
+- One workflow per user request or pipeline run

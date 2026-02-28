@@ -1,0 +1,151 @@
+---
+title: "RespanTelemetry"
+description: "Initialize the tracing SDK and configure exporters, instrumentation, and processing."
+---
+
+## Initialize
+
+`RespanTelemetry` is the main entry point for the SDK. It initializes the OpenTelemetry tracer, configures span processors/exporters, and enables auto-instrumentation for supported libraries.
+
+```python
+from respan_tracing import RespanTelemetry
+
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    app_name="my-app",
+)
+```
+
+When `api_key` is provided (or set via `RESPAN_API_KEY` env var), the SDK automatically adds a default processor that exports spans to Respan.
+
+## Constructor parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `app_name` | `str` | `"respan"` | Application name attached to all spans. |
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL` env var, then `https://api.respan.ai/api`. |
+| `log_level` | `str` | `"INFO"` | SDK logging level. One of `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. |
+| `is_batching_enabled` | `bool \| None` | `None` | Enable batch span processing. Falls back to `RESPAN_BATCHING_ENABLED` env var, then `True`. |
+| `instruments` | `Set[Instruments] \| None` | `None` | Specific instruments to enable. `None` enables all available. Pass `set()` to disable all. |
+| `block_instruments` | `Set[Instruments] \| None` | `None` | Instruments to explicitly disable. |
+| `headers` | `Dict[str, str] \| None` | `None` | Additional HTTP headers sent with span exports. |
+| `resource_attributes` | `Dict[str, str] \| None` | `None` | OpenTelemetry resource attributes added to all spans. |
+| `span_postprocess_callback` | `Callable \| None` | `None` | Callback invoked on each span before export. |
+| `is_enabled` | `bool` | `True` | Set to `False` to disable telemetry entirely (no-op mode). |
+
+## Environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `RESPAN_API_KEY` | Respan API key | — |
+| `RESPAN_BASE_URL` | API base URL | `https://api.respan.ai/api` |
+| `RESPAN_LOG_LEVEL` | SDK log level | `INFO` |
+| `RESPAN_BATCHING_ENABLED` | Enable batch processing | `true` |
+
+Constructor parameters take precedence over environment variables.
+
+## Examples
+
+### Minimal setup with env vars
+
+```python
+import os
+from respan_tracing import RespanTelemetry
+
+os.environ["RESPAN_API_KEY"] = "your-api-key"
+
+telemetry = RespanTelemetry()
+```
+
+### Full configuration
+
+```python
+from respan_tracing import RespanTelemetry, Instruments
+
+telemetry = RespanTelemetry(
+    app_name="production-app",
+    api_key="your-api-key",
+    log_level="WARNING",
+    is_batching_enabled=True,
+    instruments={Instruments.OPENAI, Instruments.ANTHROPIC},
+    resource_attributes={"service.version": "1.2.0"},
+)
+```
+
+### Suppress noisy instrumentation
+
+Use `block_instruments` to disable HTTP-level tracing (e.g., `requests`, `urllib3`) that can clutter traces when using multiple LLM providers:
+
+```python
+from respan_tracing import RespanTelemetry
+from respan_tracing.instruments import Instruments
+
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    block_instruments={Instruments.REQUESTS, Instruments.URLLIB3},
+)
+```
+
+### Disabled mode
+
+```python
+telemetry = RespanTelemetry(is_enabled=False)  # No-op, no spans exported
+```
+
+## add_processor()
+
+Add a custom span processor with optional filtering. This lets you route spans to multiple destinations (file, console, external services) alongside the default Respan exporter.
+
+```python
+add_processor(
+    exporter: SpanExporter,
+    name: str | None = None,
+    filter_fn: Callable | None = None,
+    is_batching_enabled: bool | None = None,
+) -> None
+```
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `exporter` | `SpanExporter` | An OpenTelemetry span exporter instance. |
+| `name` | `str \| None` | Processor name. When set, only spans with a matching `processors` decorator param are routed here. |
+| `filter_fn` | `Callable \| None` | Custom filter function. Receives a span, returns `True` to export. |
+| `is_batching_enabled` | `bool \| None` | Override batching for this processor. |
+
+### Route spans to multiple exporters
+
+```python
+from respan_tracing import RespanTelemetry
+from opentelemetry.sdk.trace.export import SpanExporter, SpanExportResult, ConsoleSpanExporter
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+# Add a debug console exporter — only spans with processors="debug"
+telemetry.add_processor(
+    exporter=ConsoleSpanExporter(),
+    name="debug",
+)
+```
+
+Then use `processors` on decorators to route spans:
+
+```python
+from respan_tracing import workflow, task
+
+@task(name="debug_task", processors="debug")
+def debug_task():
+    return "only goes to debug processor"
+
+@task(name="all_task")
+def all_task():
+    return "goes to all processors (default Respan + debug)"
+```
+
+## flush()
+
+Force flush all pending spans to exporters. Useful before process exit or in serverless environments.
+
+```python
+telemetry.flush()
+```

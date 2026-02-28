@@ -1,0 +1,32 @@
+---
+title: "get_tracer()"
+description: "Access the OpenTelemetry tracer for manual span creation."
+---
+
+## Signature
+
+```python
+get_tracer() -> Tracer
+```
+
+Returns the underlying OpenTelemetry `Tracer` instance for creating spans manually when decorators are not sufficient.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = get_client()
+tracer = client.get_tracer()
+
+with tracer.start_as_current_span("custom_operation") as span:
+    span.set_attribute("custom.key", "value")
+    # Your logic here
+    result = 42
+    span.set_attribute("custom.result", result)
+```
+
+<Note>
+Manual spans are exported through the same processor pipeline as decorator-created spans. Prefer decorators for standard use cases and use `get_tracer()` only when you need fine-grained control over span lifecycle.
+</Note>

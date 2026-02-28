@@ -1,0 +1,224 @@
+---
+title: "Quickstart"
+description: "Get started with the @respan/tracing TypeScript SDK"
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+
+<Check>[Give us a star](https://github.com/Repsan/respan) on GitHub!</Check>
+
+The Respan Tracing SDK for TypeScript/JavaScript provides comprehensive observability for your AI applications with automatic instrumentation for OpenAI, Anthropic, and other providers.
+
+## Installation
+
+<Note>
+**Node.js Requirement**: This package requires **Node.js 18** or later.
+</Note>
+
+```bash
+npm install @respan/tracing
+```
+
+## Configure credentials
+
+Set up your environment variables:
+
+```bash .env
+RESPAN_API_KEY=your-api-key
+RESPAN_BASE_URL=https://api.respan.ai
+```
+
+Initialize the SDK:
+
+```typescript
+import { RespanTelemetry } from '@respan/tracing';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY,
+    baseURL: process.env.RESPAN_BASE_URL,
+    appName: 'my-app',
+    logLevel: 'info'
+});
+
+await respanAi.initialize();
+```
+
+## Trace a workflow and task
+
+Use `withWorkflow` and `withTask` to create structured traces:
+
+```typescript
+import { RespanTelemetry } from '@respan/tracing';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY,
+    appName: 'hello-world'
+});
+
+await respanAi.initialize();
+
+// Simple task
+const generateResponse = async (prompt: string) => {
+    return await respanAi.withTask(
+        { name: 'generate_response' },
+        async () => {
+            return `Response to: ${prompt}`;
+        }
+    );
+};
+
+// Workflow with nested task
+const chatWorkflow = async (userMessage: string) => {
+    return await respanAi.withWorkflow(
+        { 
+            name: 'chat_workflow',
+            associationProperties: { 'user_type': 'demo' }
+        },
+        async () => {
+            const response = await generateResponse(userMessage);
+            console.log(`User: ${userMessage}`);
+            console.log(`Assistant: ${response}`);
+            return response;
+        }
+    );
+};
+
+const result = await chatWorkflow('Hello, how are you?');
+console.log(result);
+
+await respanAi.shutdown();
+```
+
+## OpenAI Integration
+
+Automatically instrument OpenAI SDK calls. You must also install the OpenAI instrumentation package:
+
+```bash
+npm install @traceloop/instrumentation-openai
+```
+
+```typescript
+import OpenAI from 'openai';
+import { RespanTelemetry } from '@respan/tracing';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY,
+    appName: 'openai-example',
+    instrumentModules: {
+        openAI: OpenAI,  // Automatically instrument OpenAI
+    }
+});
+
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY
+});
+
+await respanAi.initialize();
+
+await respanAi.withWorkflow(
+    { name: 'ai_chat' },
+    async () => {
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [
+                { role: 'system', content: 'You are a helpful assistant.' },
+                { role: 'user', content: 'Tell me a joke about programming.' }
+            ],
+        });
+
+        console.log(completion.choices[0].message.content);
+    }
+);
+
+await respanAi.shutdown();
+```
+
+<Warning>
+**Next.js users**: Do not initialize `@respan/tracing` inside Next.js's `instrumentation.ts` file. This runs too early in the application lifecycle and interferes with OpenAI instrumentation timing, resulting in broken or missing traces. Instead, create a separate initialization file (e.g., `src/lib/respan-init.ts`) and import it where needed.
+</Warning>
+
+## Agent and Tool Tracing
+
+For agentic workflows, use `withAgent` and `withTool`:
+
+```typescript
+const assistantAgent = async (query: string) => {
+    return await respanAi.withAgent(
+        { 
+            name: 'assistant_agent',
+            associationProperties: { 'agent_type': 'general' }
+        },
+        async () => {
+            // Use a tool within the agent
+            const analysis = await respanAi.withTool(
+                { name: 'query_analyzer' },
+                async () => {
+                    return {
+                        intent: query.includes('?') ? 'question' : 'statement',
+                        complexity: query.split(' ').length > 10 ? 'high' : 'low'
+                    };
+                }
+            );
+            
+            const response = await respanAi.withTool(
+                { name: 'response_generator' },
+                async () => {
+                    return `Response based on analysis: ${JSON.stringify(analysis)}`;
+                }
+            );
+            
+            return { analysis, response };
+        }
+    );
+};
+
+const result = await assistantAgent('Can you explain quantum computing?');
+console.log(result);
+```
+
+## Configuration Options
+
+<ParamField body="apiKey" type="string" required>
+  Your Respan API key
+</ParamField>
+
+<ParamField body="baseURL" type="string" default="https://api.respan.ai">
+  Respan API base URL
+</ParamField>
+
+<ParamField body="appName" type="string">
+  Name of your application for tracing identification
+</ParamField>
+
+<ParamField body="instrumentModules" type="object">
+  Modules to automatically instrument
+  
+  <Accordion title="Supported modules">
+  ```typescript
+  {
+    openAI: OpenAI,      // OpenAI SDK
+    anthropic: Anthropic  // Anthropic SDK
+  }
+  ```
+  </Accordion>
+</ParamField>
+
+<ParamField body="disableBatch" type="boolean" default={false}>
+  If `true`, sends spans immediately instead of batching
+</ParamField>
+
+<ParamField body="logLevel" type="string" default="warn">
+  Logging level: `"debug"`, `"info"`, `"warn"`, `"error"`
+</ParamField>
+
+## Next Steps
+
+- Explore [comprehensive examples](/sdks/typescript/tracing/examples)
+- Learn about [multi-provider tracing](/sdks/typescript/tracing/examples#multi-provider-tracing)
+- Understand [span management](/sdks/typescript/tracing/examples#span-management)
+- View [all examples on GitHub](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/respan-tracing-sdk)

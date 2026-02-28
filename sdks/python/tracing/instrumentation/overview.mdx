@@ -1,0 +1,130 @@
+---
+title: "Instrumentation"
+description: "Auto-instrument supported LLM providers, vector databases, and frameworks."
+---
+
+## Overview
+
+`respan-tracing` auto-instruments supported libraries to capture LLM calls, vector DB queries, and framework operations as spans — no code changes required. When a supported library is installed, its calls are automatically traced.
+
+## Configure
+
+```python
+from respan_tracing import RespanTelemetry, Instruments
+```
+
+### Enable all (default)
+
+```python
+telemetry = RespanTelemetry(api_key="your-api-key")
+# All installed libraries are auto-instrumented
+```
+
+### Enable specific instruments only
+
+```python
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    instruments={Instruments.OPENAI, Instruments.ANTHROPIC},
+)
+```
+
+### Block specific instruments
+
+```python
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    block_instruments={Instruments.REQUESTS, Instruments.URLLIB3},
+)
+```
+
+### Disable all auto-instrumentation
+
+```python
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    instruments=set(),
+)
+```
+
+## Available instruments
+
+### AI/ML providers
+
+| Instrument | Library |
+|------------|---------|
+| `Instruments.OPENAI` | `openai` |
+| `Instruments.ANTHROPIC` | `anthropic` |
+| `Instruments.COHERE` | `cohere` |
+| `Instruments.MISTRAL` | `mistralai` |
+| `Instruments.OLLAMA` | `ollama` |
+| `Instruments.GROQ` | `groq` |
+| `Instruments.TOGETHER` | `together` |
+| `Instruments.REPLICATE` | `replicate` |
+| `Instruments.TRANSFORMERS` | `transformers` |
+
+### Cloud AI services
+
+| Instrument | Library |
+|------------|---------|
+| `Instruments.BEDROCK` | `boto3` (Bedrock) |
+| `Instruments.SAGEMAKER` | `boto3` (SageMaker) |
+| `Instruments.VERTEXAI` | `google-cloud-aiplatform` |
+| `Instruments.GOOGLE_GENERATIVEAI` | `google-generativeai` |
+| `Instruments.WATSONX` | `ibm-watsonx-ai` |
+| `Instruments.ALEPHALPHA` | `aleph-alpha-client` |
+
+### Vector databases
+
+| Instrument | Library |
+|------------|---------|
+| `Instruments.PINECONE` | `pinecone` |
+| `Instruments.QDRANT` | `qdrant-client` |
+| `Instruments.CHROMA` | `chromadb` |
+| `Instruments.MILVUS` | `pymilvus` |
+| `Instruments.WEAVIATE` | `weaviate-client` |
+| `Instruments.LANCEDB` | `lancedb` |
+| `Instruments.MARQO` | `marqo` |
+
+### Frameworks
+
+| Instrument | Library |
+|------------|---------|
+| `Instruments.LANGCHAIN` | `langchain` |
+| `Instruments.LLAMA_INDEX` | `llama-index` |
+| `Instruments.HAYSTACK` | `haystack` |
+| `Instruments.CREW` | `crewai` |
+| `Instruments.MCP` | `mcp` |
+
+### Infrastructure
+
+| Instrument | Library |
+|------------|---------|
+| `Instruments.REDIS` | `redis` |
+| `Instruments.REQUESTS` | `requests` |
+| `Instruments.URLLIB3` | `urllib3` |
+| `Instruments.PYMYSQL` | `pymysql` |
+| `Instruments.THREADING` | `threading` (stdlib) |
+
+<Note>
+`THREADING` is always enabled by default for proper context propagation across threads. It can be explicitly blocked with `block_instruments`.
+</Note>
+
+## Environment variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `RESPAN_API_KEY` | Respan API key | — |
+| `RESPAN_BASE_URL` | API base URL | `https://api.respan.ai/api` |
+| `RESPAN_LOG_LEVEL` | SDK log level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) | `INFO` |
+| `RESPAN_BATCHING_ENABLED` | Enable batch span processing (`true` / `false`) | `true` |
+
+## Troubleshooting
+
+If you see warnings like `Failed to initialize Requests instrumentation`, install the optional OpenTelemetry instrumentations:
+
+```bash
+pip install opentelemetry-instrumentation-requests opentelemetry-instrumentation-urllib3
+```
+
+This is optional — tracing works without them. Only needed if your app uses `requests` or `urllib3` and you want those calls traced.

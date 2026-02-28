@@ -1,0 +1,82 @@
+---
+title: "Agno Exporter"
+description: "SDK reference for the Respan Agno exporter."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-agno
+```
+
+## Classes
+
+### RespanAgnoExporter
+
+Core exporter that converts Agno traces to Respan format.
+
+```python
+from respan_exporter_agno import RespanAgnoExporter
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL`. |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `export(trace_or_spans)` | Export traces to Respan. |
+| `export_trace(trace_or_spans)` | Alias for `export()`. |
+| `build_payload(trace_or_spans)` | Build Respan payload from traces. |
+
+### RespanAgnoInstrumentor
+
+OpenTelemetry instrumentor that patches Agno's span processors to send data to Respan.
+
+```python
+from respan_exporter_agno import RespanAgnoInstrumentor
+```
+
+### Class method
+
+| Method | Description |
+|--------|-------------|
+| `instrument(api_key, endpoint, base_url, environment, customer_identifier)` | Initialize and enable instrumentation. |
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. |
+| `endpoint` | `str \| None` | `None` | Ingest endpoint URL. |
+| `base_url` | `str \| None` | `None` | API base URL. |
+| `environment` | `str \| None` | `None` | Environment label. |
+| `customer_identifier` | `str \| None` | `None` | Default customer identifier. |
+
+## Usage
+
+```python
+from agno.agent import Agent
+from agno.models.openai import OpenAIChat
+from respan_exporter_agno import RespanAgnoInstrumentor
+
+# Initialize instrumentation
+RespanAgnoInstrumentor.instrument(api_key="your-api-key")
+
+# Use Agno normally
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    instructions="You are helpful.",
+)
+agent.print_response("Tell me a joke")
+```
+
+## Internal features
+
+- Span deduplication cache (10k max by default)
+- Automatic conversion from Agno trace format to Respan spans
+
+## Related
+
+- [Agno integration guide](/integrations/tracing/agno)

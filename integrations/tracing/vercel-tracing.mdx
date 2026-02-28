@@ -1,6 +1,6 @@
 ---
 title: "Vercel AI"
-description: "Trace and route your Vercel AI SDK applications with Respan."
+description: "Trace Vercel AI SDK calls and route LLM requests through the Respan gateway."
 ---
 
 <Accordion title="Set up Respan">
@@ -9,80 +9,47 @@ description: "Trace and route your Vercel AI SDK applications with Respan."
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
-## What is Vercel AI?
+## What is Vercel AI SDK?
 
-The [Vercel AI SDK](https://ai-sdk.dev/) is a TypeScript toolkit for building AI-powered applications with [Next.js](https://nextjs.org/). This guide shows how to set up Respan with Vercel AI for both tracing and gateway routing.
+The [Vercel AI SDK](https://sdk.vercel.ai/) is a TypeScript toolkit for building AI-powered applications with Next.js, React, and other frameworks. It provides unified APIs for text generation, streaming, tool use, and structured outputs across multiple LLM providers.
 
-- [Example repo](https://github.com/Repsan/respan-example-projects/tree/main/vercel_ai_next_openai)
-- [Deployed demo](https://respan.agent-blocks.com/)
+<Check>
+Example project: [GitHub Link](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/vercel-tracing)
+</Check>
 
 ## Setup
 
 <Steps>
 <Step title="Install packages">
 
-<CodeGroup>
-```bash npm
-npm install @respan/exporter-vercel @vercel/otel
+```bash
+npm install @respan/exporter-vercel @vercel/otel ai @ai-sdk/openai
 ```
-```bash yarn
-yarn add @respan/exporter-vercel @vercel/otel
-```
-```bash pnpm
-pnpm add @respan/exporter-vercel @vercel/otel
-```
-```bash bun
-bun add @respan/exporter-vercel @vercel/otel
-```
-</CodeGroup>
 
 </Step>
 
 <Step title="Set environment variables">
 
-Add your Respan credentials and your provider key to `.env.local`:
-
-<Tabs>
-<Tab title="OpenAI">
-```bash .env.local
-OPENAI_API_KEY=your_openai_api_key_here
-RESPAN_API_KEY=your_respan_api_key_here
-RESPAN_BASE_URL=https://api.respan.ai
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
-</Tab>
-<Tab title="Anthropic">
-```bash .env.local
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-RESPAN_API_KEY=your_respan_api_key_here
-RESPAN_BASE_URL=https://api.respan.ai
-```
-</Tab>
-<Tab title="Google Gemini">
-```bash .env.local
-GOOGLE_GENERATIVE_AI_API_KEY=your_google_api_key_here
-RESPAN_API_KEY=your_respan_api_key_here
-RESPAN_BASE_URL=https://api.respan.ai
-```
-</Tab>
-</Tabs>
 
 </Step>
 
-<Step title="Set up OpenTelemetry instrumentation">
+<Step title="Create instrumentation file">
 
-Create `instrumentation.ts` in your project root (where `package.json` lives):
+Create `instrumentation.ts` in your project root (Next.js) or entry point:
 
-```typescript instrumentation.ts
-import { registerOTel } from "@vercel/otel";
-import { RespanExporter } from "@respan/exporter-vercel";
+```typescript
+import { registerOTel } from '@vercel/otel';
+import { RespanExporter } from '@respan/exporter-vercel';
 
 export function register() {
   registerOTel({
-    serviceName: "next-app",
+    serviceName: 'my-app',
     traceExporter: new RespanExporter({
-      apiKey: process.env.RESPAN_API_KEY,
-      baseUrl: process.env.RESPAN_BASE_URL,
-      debug: true,
+      apiKey: process.env.RESPAN_API_KEY!,
     }),
   });
 }
@@ -90,296 +57,179 @@ export function register() {
 
 </Step>
 
-<Step title="Enable telemetry in your route">
+<Step title="Enable telemetry in AI calls">
 
-In your API route (e.g. `app/api/chat/route.ts`), enable telemetry:
+```typescript
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 
-<Tabs>
-<Tab title="OpenAI">
-```typescript app/api/chat/route.ts
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
-
-export const maxDuration = 30;
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: openai("gpt-4o"),
-    messages,
-    experimental_telemetry: {
-      isEnabled: true,
-      metadata: {
-        customer_identifier: "customer_from_metadata",
-      },
-    },
-  });
-
-  return result.toDataStreamResponse();
-}
+const result = await generateText({
+  model: openai('gpt-4o-mini'),
+  prompt: 'Tell me a joke about AI',
+  experimental_telemetry: { isEnabled: true },
+});
+console.log(result.text);
 ```
-</Tab>
-<Tab title="Anthropic">
-```typescript app/api/chat/route.ts
-import { anthropic } from "@ai-sdk/anthropic";
-import { streamText } from "ai";
 
-export const maxDuration = 30;
+<Accordion title="Using Vercel AI Gateway?">
+If you're already routing requests through the [Vercel AI Gateway](https://vercel.com/docs/ai-gateway), no extra configuration is needed — the `RespanExporter` from Step 3 automatically exports all traced spans, including those routed through the Vercel AI Gateway.
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: anthropic("claude-3-5-sonnet-20240620"),
-    messages,
-    experimental_telemetry: { isEnabled: true },
-  });
-
-  return result.toDataStreamResponse();
-}
-```
-</Tab>
-<Tab title="Google Gemini">
-```typescript app/api/chat/route.ts
-import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
-
-export const maxDuration = 30;
-
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: google("gemini-2.0-flash"),
-    messages,
-    experimental_telemetry: { isEnabled: true },
-  });
-
-  return result.toDataStreamResponse();
-}
-```
-</Tab>
-</Tabs>
+Just make sure `experimental_telemetry: { isEnabled: true }` is set on your AI calls.
+</Accordion>
 
 </Step>
 
-<Step title="Run and verify">
+<Step title="View your trace">
 
-Start your dev server and make some chat requests:
-
-<CodeGroup>
-```bash pnpm
-pnpm dev
-```
-```bash yarn
-yarn dev
-```
-```bash npm
-npm run dev
-```
-</CodeGroup>
-
-Open the [Traces page](https://platform.respan.ai/platform/traces) to confirm requests are being traced.
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your AI calls.
 
 </Step>
 </Steps>
 
 ## Configuration
 
-The `RespanExporter` constructor accepts:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | `RESPAN_API_KEY` env var | Respan API key. |
+| `baseUrl` | `string` | `"https://api.respan.ai"` | API base URL. |
+| `debug` | `boolean` | `false` | Enable debug logging for troubleshooting. |
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `apiKey` | Yes | Your Respan API key. |
-| `baseUrl` | No | Respan API base URL. Defaults to `https://api.respan.ai`. |
-| `debug` | No | Enable debug logging. Defaults to `false`. |
+See the [Vercel Exporter SDK reference](/sdks/typescript/exporters/vercel) for the full API.
+
+<Note>
+**Next.js streaming routes**: If your AI calls use streaming (`streamText`), set `maxDuration` in your route handler to avoid Vercel's default timeout:
+
+```typescript
+// app/api/chat/route.ts
+export const maxDuration = 30;
+```
+</Note>
 
 ## Attributes
 
-Attach Respan-specific parameters to your traces via the `experimental_telemetry` option on any AI SDK call.
+Pass metadata and customer identifiers through the telemetry config or request headers.
 
-### Via metadata
+### Via telemetry metadata
 
 ```typescript
-experimental_telemetry: {
-  isEnabled: true,
-  metadata: {
-    customer_identifier: "user_123",
-    thread_id: "conversation_456",
+const result = await generateText({
+  model: openai('gpt-4o-mini'),
+  prompt: 'Hello',
+  experimental_telemetry: {
+    isEnabled: true,
+    metadata: {
+      customer_identifier: 'user-123',
+      thread_identifier: 'thread-abc',
+    },
   },
-}
+});
 ```
 
-### Via header
-
-Encode parameters as a base64 JSON header for full control:
+### Via request headers
 
 ```typescript
-experimental_telemetry: {
-  isEnabled: true,
+const result = await generateText({
+  model: openai('gpt-4o-mini'),
+  prompt: 'Hello',
+  experimental_telemetry: { isEnabled: true },
   headers: {
-    "X-Data-Respan-Params": Buffer.from(
-      JSON.stringify({
-        customer_identifier: "user_123",
-        thread_id: "conversation_456",
-        metadata: { session: "abc" },
-      })
-    ).toString("base64"),
+    'X-Respan-Customer-Identifier': 'user-123',
   },
-}
+});
 ```
-
-### Supported attributes
 
 | Attribute | Description |
-|---|---|
-| `customer_identifier` | Customer or user identifier |
-| `thread_id` | Thread or conversation identifier |
-| `metadata` | Custom key-value pairs attached to the trace |
-| `prompt_unit_price` | Custom input token price |
-| `completion_unit_price` | Custom output token price |
+|-----------|-------------|
+| `customer_identifier` | User/customer identifier for filtering. |
+| `thread_identifier` | Conversation thread ID. |
 
-## Gateway
+## Respan Gateway
 
-Route LLM calls through the Respan gateway for automatic logging, fallbacks, and cost optimization. Override the `baseURL` in your provider SDK to point at Respan.
-
-### Compatibility
-
-| SDK helper          | Works via Respan? | Switch models? |
-| ------------------- | ----------------- | -------------- |
-| `@ai-sdk/openai`    | Yes               | Yes            |
-| `@ai-sdk/anthropic` | Yes (Anthropic models only) | No  |
-| `@ai-sdk/google`    | Yes               | Yes            |
-
-### Gateway examples
+Route LLM calls through the Respan gateway with the Vercel AI SDK to access 250+ models.
 
 <Tabs>
 <Tab title="OpenAI">
 ```typescript
-import { createOpenAI } from '@ai-sdk/openai'
-import { streamText } from 'ai'
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 
-const client = createOpenAI({
+const openai = createOpenAI({
+  apiKey: process.env.RESPAN_API_KEY!,
   baseURL: 'https://api.respan.ai/api',
-  apiKey: process.env.RESPAN_API_KEY,
-  compatibility: 'strict',
-})
-
-const { textStream } = await streamText({
-  model: client.chat('gpt-4o'),
-  messages: [{ role: 'user', content: 'Hello!' }],
-})
-
-for await (const textPart of textStream) {
-  console.log(textPart)
-}
-```
-
-Using the Responses API:
-
-```typescript
-import { createOpenAI } from "@ai-sdk/openai";
-import { generateText, tool } from "ai";
-import { z } from "zod";
-
-const client = createOpenAI({
-  baseURL: "https://api.respan.ai/api",
-  apiKey: process.env.RESPAN_API_KEY,
 });
 
 const result = await generateText({
-  model: client.responses('gpt-4o-mini'),
-  prompt: 'What happened in San Francisco last week?',
-  tools: {
-    web_search_preview: client.tools.webSearchPreview({
-      searchContextSize: 'high',
-      userLocation: {
-        type: 'approximate',
-        city: 'San Francisco',
-        region: 'California',
-      },
-    }),
-  },
+  model: openai('gpt-4o-mini'),
+  prompt: 'Tell me a joke',
+  experimental_telemetry: { isEnabled: true },
 });
-
-console.log(result.text);
 ```
 </Tab>
-
 <Tab title="Anthropic">
 ```typescript
 import { createAnthropic } from '@ai-sdk/anthropic';
-import { streamText, convertToCoreMessages } from 'ai';
+import { generateText } from 'ai';
 
 const anthropic = createAnthropic({
-  baseURL: "https://api.respan.ai/api/anthropic/v1",
-  apiKey: process.env.RESPAN_API_KEY,
+  apiKey: process.env.RESPAN_API_KEY!,
+  baseURL: 'https://api.respan.ai/api/anthropic',
 });
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = await streamText({
-    model: anthropic('claude-3-5-sonnet-20240620'),
-    messages: convertToCoreMessages(messages),
-  });
-
-  return result.toDataStreamResponse();
-}
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-5-20250929'),
+  prompt: 'Tell me a joke',
+  experimental_telemetry: { isEnabled: true },
+});
 ```
 </Tab>
-
 <Tab title="Google Gemini">
 ```typescript
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
 const google = createGoogleGenerativeAI({
-  baseURL: "https://api.respan.ai/api/google/",
-  apiKey: process.env.RESPAN_API_KEY,
+  apiKey: process.env.RESPAN_API_KEY!,
+  baseURL: 'https://api.respan.ai/api/google/gemini',
 });
 
-const { text } = await generateText({
-  model: google("gemini-2.0-flash"),
-  prompt: "Hello, how are you?",
-  temperature: 0.5,
+const result = await generateText({
+  model: google('gemini-1.5-pro'),
+  prompt: 'Tell me a joke',
+  experimental_telemetry: { isEnabled: true },
 });
-
-console.log(text);
 ```
 </Tab>
 </Tabs>
 
-### Passing Respan parameters via gateway
+## Troubleshooting
 
-To attach Respan parameters (like `customer_identifier`) when using the gateway, encode them as a base64 header:
+<AccordionGroup>
+<Accordion title="Missing @vercel/otel dependencies">
+The `@vercel/otel` package may have broken peer dependencies. If you see missing module errors on startup, install them directly:
 
-```typescript
-const respanHeaderContent = {
-  customer_identifier: "customer_123",
-  // other params...
-}
-const encoded = Buffer.from(JSON.stringify(respanHeaderContent)).toString('base64');
-
-const client = createOpenAI({
-  baseURL: "https://api.respan.ai/api",
-  apiKey: process.env.RESPAN_API_KEY,
-  compatibility: "strict",
-  headers: {
-    "X-Data-Respan-Params": encoded,
-  },
-});
+```bash
+npm install @opentelemetry/api-logs
 ```
 
-## Observability
+If this fails, pin your package manager version in `package.json`:
 
-With this integration, Respan auto-captures:
+```json
+{
+  "packageManager": "yarn@4.9.2"
+}
+```
+</Accordion>
 
-- **AI model calls** -- requests made via the Vercel AI SDK
-- **Token usage** -- input and output token counts
-- **Performance metrics** -- latency and throughput
-- **Errors** -- failed requests and error details
-- **Custom metadata** -- additional context attached via telemetry metadata/headers
+<Accordion title="No traces appearing">
+1. Verify `experimental_telemetry: { isEnabled: true }` is set on every AI SDK call
+2. Check that `instrumentation.ts` is in your project root (same level as `package.json`)
+3. Enable debug mode to see exporter logs:
 
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).
+```typescript
+new RespanExporter({
+  apiKey: process.env.RESPAN_API_KEY!,
+  debug: true,
+})
+```
+</Accordion>
+</AccordionGroup>

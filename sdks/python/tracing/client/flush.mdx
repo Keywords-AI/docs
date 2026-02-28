@@ -1,0 +1,36 @@
+---
+title: "flush()"
+description: "Force flush all pending spans to exporters."
+---
+
+## Signature
+
+```python
+flush() -> None
+```
+
+Flushes all pending spans through the processor pipeline to exporters. Available on both `RespanTelemetry` and `RespanClient`.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, get_client, workflow
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="quick_task")
+def quick_task():
+    return "done"
+
+quick_task()
+
+# Flush via telemetry instance
+telemetry.flush()
+
+# Or flush via client
+get_client().flush()
+```
+
+<Note>
+Use `flush()` before process exit or in serverless/Lambda environments to ensure all spans are exported. In long-running applications with batch processing enabled, spans are flushed automatically at regular intervals.
+</Note>

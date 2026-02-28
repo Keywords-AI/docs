@@ -18,7 +18,7 @@ To observe your AI agents, start by setting up tracing. Traces capture the full 
 We provide different ways to get started. See the [agent tracing quickstart](/documentation/getting-started/quickstart/tracing) for a hands-on walkthrough:
 
 - **[Tracing SDK](/documentation/features/tracing/traces/tracing-sdk)**: install the SDK and add `@workflow` / `@task` decorators to your code. LLM calls are auto-captured. Works with any framework or custom code.
-- **[Framework integrations](/documentation/features/tracing/traces/integration-frameworks)**: if you're already using OpenAI Agents SDK, Vercel AI SDK, Mastra, LangGraph, or other frameworks, use our pre-built exporters for zero-effort tracing.
+- **[Framework integrations](/integrations/overview#agent-frameworks)**: if you're already using OpenAI Agents SDK, Vercel AI SDK, Mastra, LangGraph, or other frameworks, use our pre-built exporters for zero-effort tracing.
 - **[Manual ingestion](/documentation/features/tracing/traces/manual-ingestion)**: send traces directly via the OTLP endpoint or JSON ingest API if you have existing telemetry pipelines.
 
 Once tracing is set up, you can pass [tracing parameters](/documentation/features/tracing/traces/span-parameters) to enrich your spans:

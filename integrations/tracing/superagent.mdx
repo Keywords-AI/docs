@@ -1,138 +1,88 @@
 ---
-title: Superagent
-description: "Send Superagent (safety-agent) guard, redact, scan, and test calls to Respan traces."
+title: "Superagent"
+description: "Trace Superagent safety operations (guard, redact, scan, test) with Respan."
 ---
 
-## Overview
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
 
-Use `respan-exporter-superagent` to wrap the [Superagent](https://superagent.sh/) Python SDK (`safety-agent`). Each call to `guard`, `redact`, `scan`, or `test` is executed as usual and a log is exported to Respan Traces so you can observe safety checks in your Respan dashboard.
+## What is Superagent?
 
-## Quickstart
+[Superagent](https://www.superagent.sh/) is a safety guardrails platform that provides `guard`, `redact`, `scan`, and `test` operations for LLM applications. The Respan exporter wraps these calls to capture them as tool spans.
 
-### Step 1: Get a Respan API key
+## Setup
 
-Create an API key in your Respan dashboard.
-
-### Step 2: Install packages
+<Steps>
+<Step title="Install packages">
 
 ```bash
 pip install safety-agent respan-exporter-superagent
 ```
 
-### Step 3: Set environment variables
+</Step>
 
-Create a `.env` or export environment variables:
+<Step title="Set environment variables">
 
-```bash .env
-# Required for Respan export
-RESPAN_API_KEY=your-respan-api-key
-
-# Optional (default: Respan tracing ingest endpoint)
-RESPAN_ENDPOINT=https://api.respan.ai/api/v1/traces/ingest
-
-# Required by safety-agent for usage tracking
-SUPERAGENT_API_KEY=your-superagent-api-key
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
 ```
 
-### Step 4: Create a client and call Superagent
+</Step>
 
-Use `create_client` from `respan_exporter_superagent` instead of `safety_agent`. The client supports the same methods as the Superagent SDK; each call is logged to Respan when `respan_params` is provided (or when you rely on defaults).
-
-<CodeGroup>
-```python Python
-import os
-import asyncio
-from respan_exporter_superagent import create_client
-
-
-async def main() -> None:
-    client = create_client(
-        api_key=os.getenv("RESPAN_API_KEY"),
-        endpoint=os.getenv("RESPAN_ENDPOINT"),  # optional
-    )
-
-    result = await client.guard(
-        input="hello",
-        respan_params={
-            "span_workflow_name": "wf",
-            "span_name": "sp",
-            "customer_identifier": "user-123",
-        },
-    )
-    print(result)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-</CodeGroup>
-
-### Step 5: View your trace
-
-Open the Traces page in your Respan dashboard. Logs appear as tool spans with `integration: superagent` and `method: guard` (or `redact`, `scan`, `test`) in metadata.
-
-## Supported methods
-
-The Respan Superagent client wraps the same methods as the Superagent SDK:
-
-| Method   | Description |
-|----------|-------------|
-| `guard`  | Run guard model on input (e.g. content safety). |
-| `redact` | Redact PII/sensitive data. |
-| `scan`   | Scan content. |
-| `test`   | Run tests. |
-
-Pass Superagent-specific arguments (e.g. `model`, `text`, `repo`) as keyword arguments; pass `respan_params` to control how the call is logged to Respan.
-
-## Respan parameters
-
-Use `respan_params` on any method to set span and trace fields in Respan:
-
-- **span_workflow_name** – Workflow name (default: `"superagent"`).
-- **span_name** – Span name (default: `"superagent.<method>"`).
-- **customer_identifier** – User or tenant ID for filtering.
-- **disable_log** – Set to `True` to skip sending this call to Respan.
-- **log_type** – Log type (default: `"tool"`).
-- **trace_unique_id**, **trace_name**, **span_unique_id**, **span_parent_id**, **session_identifier**, **metadata** – Optional trace/span and metadata fields.
-
-Example:
+<Step title="Use the Respan client">
 
 ```python
-result = await client.redact(
-    input="My email is john@example.com",
-    model="openai/gpt-4o-mini",
-    respan_params={
-        "span_workflow_name": "pii_redaction",
-        "span_name": "redact_step",
-        "customer_identifier": "user-456",
-    },
+from respan_exporter_superagent import create_client
+
+# Create a Respan-instrumented Superagent client
+client = create_client(api_key="your-api-key")
+
+# Operations are automatically traced
+result = await client.guard(
+    respan_params={"customer_identifier": "user-123"},
+    input="Check this content for safety",
 )
+print(result)
 ```
 
-## Disable logging for a call
+</Step>
 
-To call Superagent without exporting to Respan for that call:
+<Step title="View your trace">
+
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your safety operations.
+
+</Step>
+</Steps>
+
+## Configuration
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str` | `RESPAN_API_KEY` env var | Respan API key. |
+| `base_url` | `str \| None` | `None` | API base URL. |
+
+See the [Superagent Exporter SDK reference](/sdks/python/exporters/superagent) for the full API.
+
+## Attributes
+
+Pass Respan-specific params to each operation:
 
 ```python
 result = await client.guard(
-    input="sensitive input",
-    respan_params={"disable_log": True},
+    respan_params={
+        "customer_identifier": "user-123",
+        "metadata": {"source": "api", "version": "2.0"},
+    },
+    input="Check this content",
 )
 ```
 
-## Using an existing Superagent client
+| Attribute | Description |
+|-----------|-------------|
+| `customer_identifier` | User/customer identifier. |
+| `metadata` | Custom key-value pairs. |
+| `disable_log` | Set `True` to skip logging this call. |
 
-You can wrap an existing `safety_agent` client so only Respan export is added:
-
-```python
-from safety_agent import create_client as superagent_create_client
-from respan_exporter_superagent import create_client
-
-superagent_client = superagent_create_client()
-client = create_client(
-    api_key=os.getenv("RESPAN_API_KEY"),
-    client=superagent_client,
-)
-
-result = await client.guard(input="hello", respan_params={"span_name": "my_guard"})
-```

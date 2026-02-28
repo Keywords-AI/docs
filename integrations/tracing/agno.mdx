@@ -1,6 +1,6 @@
 ---
 title: "Agno"
-description: "Send Agno agent traces to Respan with OpenTelemetry instrumentation."
+description: "Trace Agno AI agent workflows with Respan."
 ---
 
 <Accordion title="Set up Respan">
@@ -11,16 +11,7 @@ description: "Send Agno agent traces to Respan with OpenTelemetry instrumentatio
 
 ## What is Agno?
 
-[Agno](https://www.agno.com/) is a Python framework for building AI agents with built-in OpenInference instrumentation. Use the Respan Agno exporter to capture Agno spans (via OpenInference + OpenTelemetry) and send them to Respan tracing.
-
-<Note>Make sure you have an OpenTelemetry `TracerProvider` with a `SpanProcessor` configured before running your agent (otherwise spans will not be exported).</Note>
-
-<Frame className="rounded-md">
-  <img
-    src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/Agno/How+Agno+Integration+Working.png"
-    alt="How Respan Agno integration works"
-  />
-</Frame>
+[Agno](https://github.com/agno-agi/agno) is a Python framework for building AI agents with built-in reasoning, tool use, and OpenInference instrumentation. The Respan exporter captures Agno's trace data and sends it to Respan.
 
 ## Setup
 
@@ -35,88 +26,53 @@ pip install agno openinference-instrumentation-agno respan-exporter-agno
 
 <Step title="Set environment variables">
 
-```bash .env
-RESPAN_API_KEY=your-respan-api-key
-RESPAN_BASE_URL=https://api.respan.ai/api
-
-# If calling OpenAI directly (without Respan gateway):
-OPENAI_API_KEY=your-openai-api-key
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 
 </Step>
 
-<Step title="Instrument and run an agent">
+<Step title="Initialize and run">
 
 ```python
-import os
 from agno.agent import Agent
 from agno.models.openai import OpenAIChat
-from openinference.instrumentation.agno import AgnoInstrumentor
-from opentelemetry import trace as trace_api
-from opentelemetry.sdk import trace as trace_sdk
-from opentelemetry.sdk.trace.export import SimpleSpanProcessor
-from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from respan_exporter_agno import RespanAgnoInstrumentor
 
-def main():
-    respan_api_key = os.getenv("RESPAN_API_KEY")
-    base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+# Initialize Respan instrumentation
+RespanAgnoInstrumentor.instrument(api_key="your-api-key")
 
-    # Set up TracerProvider
-    tracer_provider = trace_api.get_tracer_provider()
-    if not isinstance(tracer_provider, trace_sdk.TracerProvider):
-        tracer_provider = trace_sdk.TracerProvider()
-        trace_api.set_tracer_provider(tracer_provider)
-    tracer_provider.add_span_processor(SimpleSpanProcessor(InMemorySpanExporter()))
-
-    # Export Agno spans to Respan
-    RespanAgnoInstrumentor().instrument(
-        api_key=respan_api_key,
-        base_url=base_url,
-        passthrough=False,
-    )
-
-    # Create Agno spans (OpenInference)
-    AgnoInstrumentor().instrument()
-
-    agent = Agent(
-        name="Respan Agno Quickstart Agent",
-        model=OpenAIChat(
-            id=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            api_key=respan_api_key,
-            base_url=base_url,
-        ),
-    )
-
-    agent.run("hello from Respan Agno exporter quickstart")
-    tracer_provider.force_flush()
-
-if __name__ == "__main__":
-    main()
+# Create and run agent
+agent = Agent(
+    model=OpenAIChat(id="gpt-4o-mini"),
+    instructions="You are a helpful assistant.",
+)
+agent.print_response("Tell me a joke about AI")
 ```
 
 </Step>
 
 <Step title="View your trace">
 
-Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan dashboard.
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your agent trace.
 
 <Frame className="rounded-md">
-  <img
-    src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/Agno/Agno+quickstart.png"
-    alt="Agno quickstart tracing in Respan"
-  />
+<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/integrations/tracing/agno/agno-trace.png" alt="Agno agent trace" />
 </Frame>
 
 </Step>
 </Steps>
 
-## Observability
+## Configuration
 
-With this integration, Respan auto-captures:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str` | `RESPAN_API_KEY` env var | Respan API key. |
+| `endpoint` | `str \| None` | `None` | Custom ingest endpoint URL. |
+| `base_url` | `str \| None` | `None` | API base URL. |
+| `environment` | `str \| None` | `None` | Environment label. |
+| `customer_identifier` | `str \| None` | `None` | Default customer identifier. |
 
-- **Agent runs** -- each agent execution as a span
-- **LLM calls** -- model, input/output messages, token usage
-- **Errors** -- failed runs and error details
+See the [Agno Exporter SDK reference](/sdks/python/exporters/agno) for the full API.
 
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).

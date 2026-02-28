@@ -1,0 +1,69 @@
+---
+title: "Anthropic Agents Exporter"
+description: "SDK reference for the Respan Anthropic Agents exporter for Python."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-anthropic-agents
+```
+
+### Classes
+
+#### RespanAnthropicAgentsExporter
+
+Main exporter that hooks into the Anthropic Agent SDK via lifecycle hooks.
+
+```python
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL`. |
+| `endpoint` | `str \| None` | `None` | Ingest endpoint URL. |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `create_hooks(existing_hooks)` | Create Respan instrumentation hooks to attach to agent options. |
+| `with_options(options)` | Attach Respan hooks to agent SDK options. Returns modified options. |
+| `query(prompt, options)` | Wrapped Claude query with automatic tracking. |
+| `track_message(message, session_id, prompt)` | Track individual messages. |
+
+### Hook callbacks
+
+The exporter captures agent lifecycle events:
+
+| Hook | Captures |
+|------|----------|
+| `on_user_prompt_submit` | User prompts |
+| `on_pre_tool_use` | Tool call inputs |
+| `on_post_tool_use` | Tool call results |
+| `on_subagent_stop` | Sub-agent completions |
+| `on_stop` | Agent run completions |
+
+### Usage
+
+```python
+from claude_agent_sdk import create_agent
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+
+exporter = RespanAnthropicAgentsExporter(api_key="your-api-key")
+
+options = exporter.with_options({
+    "model": "claude-sonnet-4-5-20250929",
+    "max_tokens": 1024,
+})
+
+agent = create_agent(options)
+result = agent.query("Tell me a joke")
+print(result)
+```
+
+## Related
+
+- [Anthropic Agents integration guide](/integrations/tracing/anthropic-agents-sdk)

@@ -1,6 +1,6 @@
 ---
 title: "OpenAI Agents"
-description: "Build multi-agent workflows with the OpenAI Agents SDK and send traces to Respan."
+description: "Trace OpenAI Agents SDK workflows, tool calls, and handoffs with Respan."
 ---
 
 <Accordion title="Set up Respan">
@@ -9,15 +9,13 @@ description: "Build multi-agent workflows with the OpenAI Agents SDK and send tr
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
-## What is OpenAI Agents?
+## What is OpenAI Agents SDK?
 
-<Note>This integration is for **agent tracing**. For the OpenAI gateway integration, see [OpenAI SDK](/integrations/gateway/openai/openai-sdk).</Note>
+The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is a lightweight framework for building multi-agent workflows with tools, handoffs, and guardrails. It provides a built-in tracing system that captures agent runs, LLM generations, tool calls, and agent-to-agent handoffs.
 
-The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is a lightweight framework for building multi-agent workflows with tools, handoffs, and guardrails. Respan captures every agent run as a trace so you can debug and optimize your workflows.
-
-<Frame className="rounded-md">
-<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/documentation/get-started/trace_start_tree_v0.png" alt="Agent tracing visualization" />
-</Frame>
+<Check>
+Example project: [GitHub Link](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/openai-agents-sdk)
+</Check>
 
 ## Setup
 
@@ -37,73 +35,46 @@ npm install @openai/agents @respan/exporter-openai-agents
 
 <Step title="Set environment variables">
 
-<CodeGroup>
-```bash Python
-OPENAI_API_KEY=your-openai-api-key
-RESPAN_API_KEY=your-respan-api-key
-RESPAN_OAIA_TRACING_ENDPOINT=https://api.respan.ai/api/openai/v1/traces/ingest
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
-```bash JavaScript
-OPENAI_API_KEY=your-openai-api-key
-RESPAN_API_KEY=your-respan-api-key
-RESPAN_BASE_URL=https://api.respan.ai/api
-```
-</CodeGroup>
 
 </Step>
 
-<Step title="Initialize the exporter and run an agent">
+<Step title="Initialize and run">
 
 <CodeGroup>
 ```python Python
-import asyncio
-import os
-from agents import Agent, Runner
-from agents.tracing import set_trace_processors, trace
+from agents import Agent, Runner, set_trace_processors
 from respan_exporter_openai_agents import RespanTraceProcessor
 
-set_trace_processors([
-    RespanTraceProcessor(
-        api_key=os.getenv("RESPAN_API_KEY"),
-        endpoint=os.getenv("RESPAN_OAIA_TRACING_ENDPOINT"),
-    ),
-])
+# Set up Respan trace processor
+respan_processor = RespanTraceProcessor()
+set_trace_processors([respan_processor])
 
-async def main():
-    agent = Agent(
-        name="Assistant",
-        instructions="You only respond in haikus.",
-    )
+# Create and run agent
+agent = Agent(
+    name="Joke Agent",
+    instructions="You are a helpful assistant that tells jokes.",
+)
 
-    with trace("Hello world test"):
-        result = await Runner.run(agent, "Tell me about recursion in programming.")
-        print(result.final_output)
-
-asyncio.run(main())
+result = Runner.run_sync(agent, "Tell me a joke about AI")
+print(result.final_output)
 ```
 ```typescript JavaScript
-import { Agent, BatchTraceProcessor, run, setTraceProcessors, withTrace } from '@openai/agents';
-import { RespanOpenAIAgentsTracingExporter } from '@respan/exporter-openai-agents';
+import { Agent, run, setTraceProcessors } from '@openai/agents';
+import { RespanTraceProcessor } from '@respan/exporter-openai-agents';
 
-setTraceProcessors([
-  new BatchTraceProcessor(
-    new RespanOpenAIAgentsTracingExporter(),
-  ),
-]);
+setTraceProcessors([new RespanTraceProcessor({ apiKey: process.env.RESPAN_API_KEY! })]);
 
-async function main() {
-  const agent = new Agent({
-    name: 'Assistant',
-    instructions: 'You only respond in haikus.',
-  });
+const agent = new Agent({
+  name: 'Joke Agent',
+  instructions: 'You are a helpful assistant that tells jokes.',
+});
 
-  const result = await withTrace('Hello World', async () => {
-    return run(agent, 'Tell me about recursion in programming.');
-  });
-  console.log(result.finalOutput);
-}
-
-main().catch(console.error);
+const result = await run(agent, 'Tell me a joke about AI');
+console.log(result.finalOutput);
 ```
 </CodeGroup>
 
@@ -111,194 +82,211 @@ main().catch(console.error);
 
 <Step title="View your trace">
 
-Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan dashboard. Your trace should appear within a few seconds.
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your agent trace tree.
+
+<Frame className="rounded-md">
+<img width="100%" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/integrations/tracing/openai-agents/openai-agents-trace.png" alt="OpenAI Agents trace" />
+</Frame>
 
 </Step>
 </Steps>
 
 ## Configuration
 
-The Python exporter accepts these constructor parameters:
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str` | `RESPAN_API_KEY` env var | Respan API key. |
+| `endpoint` | `str \| None` | `None` | Custom ingest endpoint URL. |
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `api_key` | Yes | Your Respan API key. Falls back to `RESPAN_API_KEY`. |
-| `endpoint` | Yes | Ingest endpoint URL. Falls back to `RESPAN_OAIA_TRACING_ENDPOINT`. |
-
-The JavaScript exporter reads `RESPAN_API_KEY` and `RESPAN_BASE_URL` from environment variables. You can also pass metadata on a per-trace basis:
-
-```typescript
-await withTrace("My Trace", async () => {
-  return run(agent, "Hello");
-}, {
-  metadata: { foo: "bar" }
-});
-```
+See the OpenAI Agents Exporter SDK reference for [Python](/sdks/python/exporters/openai-agents) or [TypeScript](/sdks/typescript/exporters/openai-agents).
 
 ## Tool calls
 
-Agents can use tools to perform specific tasks. Tool calls are automatically captured in the trace.
+Tool calls are automatically captured as spans with inputs, outputs, and timing.
 
 <CodeGroup>
 ```python Python
-import asyncio
-import os
-from agents import Agent, Runner, function_tool
-from agents.tracing import set_trace_processors
+from agents import Agent, Runner, set_trace_processors, function_tool
 from respan_exporter_openai_agents import RespanTraceProcessor
 
-set_trace_processors([
-    RespanTraceProcessor(
-        api_key=os.getenv("RESPAN_API_KEY"),
-        endpoint=os.getenv("RESPAN_OAIA_TRACING_ENDPOINT"),
-    ),
-])
+set_trace_processors([RespanTraceProcessor()])
 
 @function_tool
 def get_weather(city: str) -> str:
-    return f"The weather in {city} is sunny."
+    return f"The weather in {city} is sunny, 72°F"
 
 agent = Agent(
-    name="Hello world",
-    instructions="You are a helpful agent.",
+    name="Weather Agent",
+    instructions="Help users check the weather.",
     tools=[get_weather],
 )
 
-async def main():
-    result = await Runner.run(agent, input="What's the weather in Tokyo?")
-    print(result.final_output)
-
-asyncio.run(main())
+result = Runner.run_sync(agent, "What's the weather in San Francisco?")
+print(result.final_output)
 ```
 ```typescript JavaScript
-import { Agent, BatchTraceProcessor, run, setTraceProcessors, tool, withTrace } from '@openai/agents';
-import { RespanOpenAIAgentsTracingExporter } from '@respan/exporter-openai-agents';
+import { Agent, run, setTraceProcessors, tool } from '@openai/agents';
+import { RespanTraceProcessor } from '@respan/exporter-openai-agents';
 import { z } from 'zod';
 
-setTraceProcessors([
-  new BatchTraceProcessor(
-    new RespanOpenAIAgentsTracingExporter(),
-  ),
-]);
+setTraceProcessors([new RespanTraceProcessor({ apiKey: process.env.RESPAN_API_KEY! })]);
 
 const getWeather = tool({
   name: 'get_weather',
-  description: 'Get the weather for a city.',
+  description: 'Get weather for a city',
   parameters: z.object({ city: z.string() }),
-  execute: async ({ city }) => ({
-    city,
-    temperatureRange: '14-20C',
-    conditions: 'Sunny with wind.',
-  }),
+  execute: async ({ city }) => `The weather in ${city} is sunny, 72°F`,
 });
 
 const agent = new Agent({
-  name: "Hello world",
-  instructions: "You are a helpful agent.",
+  name: 'Weather Agent',
+  instructions: 'Help users check the weather.',
   tools: [getWeather],
 });
 
-async function main() {
-  const result = await withTrace("Weather query", async () => {
-    return run(agent, "What's the weather in Tokyo?");
-  });
-  console.log(result.finalOutput);
-}
-
-main().catch(console.error);
+const result = await run(agent, "What's the weather in San Francisco?");
+console.log(result.finalOutput);
 ```
 </CodeGroup>
 
 ## Handoffs
 
-Agents can hand off conversations to other specialized agents. Handoff events are captured in the trace.
+Agent-to-agent handoffs are traced with full context.
 
-<CodeGroup>
-```python Python
-import asyncio
-import os
-from agents import Agent, Runner
-from agents.tracing import set_trace_processors
+```python
+from agents import Agent, Runner, set_trace_processors
 from respan_exporter_openai_agents import RespanTraceProcessor
 
-set_trace_processors([
-    RespanTraceProcessor(
-        api_key=os.getenv("RESPAN_API_KEY"),
-        endpoint=os.getenv("RESPAN_OAIA_TRACING_ENDPOINT"),
-    ),
-])
+set_trace_processors([RespanTraceProcessor()])
+
+billing_agent = Agent(
+    name="Billing Agent",
+    instructions="Handle billing questions.",
+)
+
+support_agent = Agent(
+    name="Support Agent",
+    instructions="Route billing questions to the billing agent.",
+    handoffs=[billing_agent],
+)
+
+result = Runner.run_sync(support_agent, "I have a billing question")
+print(result.final_output)
+```
+
+## Agents as tools
+
+Instead of handoffs (where the new agent takes over), you can use agents as tools — the tool agent runs independently and returns its result to the caller:
+
+```python
+from agents import Agent, Runner, set_trace_processors, trace
+from respan_exporter_openai_agents import RespanTraceProcessor
+
+set_trace_processors([RespanTraceProcessor()])
 
 spanish_agent = Agent(
-    name="Spanish agent",
-    instructions="You only speak Spanish.",
+    name="spanish_agent",
+    instructions="You translate the user's message to Spanish",
 )
 
-english_agent = Agent(
-    name="English agent",
-    instructions="You only speak English",
+french_agent = Agent(
+    name="french_agent",
+    instructions="You translate the user's message to French",
 )
 
-triage_agent = Agent(
-    name="Triage agent",
-    instructions="Handoff to the appropriate agent based on the language of the request.",
-    handoffs=[spanish_agent, english_agent],
+orchestrator = Agent(
+    name="orchestrator",
+    instructions="You are a translation agent. Use the provided tools to translate.",
+    tools=[
+        spanish_agent.as_tool(
+            tool_name="translate_to_spanish",
+            tool_description="Translate to Spanish",
+        ),
+        french_agent.as_tool(
+            tool_name="translate_to_french",
+            tool_description="Translate to French",
+        ),
+    ],
 )
 
-async def main():
-    result = await Runner.run(triage_agent, input="Hola, ¿cómo estás?")
+with trace("Translation orchestrator"):
+    result = Runner.run_sync(orchestrator, "Translate 'hello' to Spanish and French")
     print(result.final_output)
-
-asyncio.run(main())
 ```
-```typescript JavaScript
-import { Agent, BatchTraceProcessor, run, setTraceProcessors, withTrace } from '@openai/agents';
-import { RespanOpenAIAgentsTracingExporter } from '@respan/exporter-openai-agents';
 
-setTraceProcessors([
-  new BatchTraceProcessor(
-    new RespanOpenAIAgentsTracingExporter(),
-  ),
-]);
+## Guardrails
 
-const spanishAgent = new Agent({
-  name: "Spanish agent",
-  instructions: "You only speak Spanish.",
-});
+Run input guardrails in parallel with the agent to quickly reject invalid inputs:
 
-const englishAgent = new Agent({
-  name: "English agent",
-  instructions: "You only speak English",
-});
+```python
+from agents import (
+    Agent, Runner, set_trace_processors,
+    input_guardrail, GuardrailFunctionOutput,
+    InputGuardrailTripwireTriggered, RunContextWrapper,
+)
+from pydantic import BaseModel
+from respan_exporter_openai_agents import RespanTraceProcessor
 
-const triageAgent = new Agent({
-  name: "Triage agent",
-  instructions: "Handoff to the appropriate agent based on the language of the request.",
-  handoffs: [spanishAgent, englishAgent],
-});
+set_trace_processors([RespanTraceProcessor()])
 
-async function main() {
-  const result = await withTrace("Handoff Example", async () => {
-    return run(triageAgent, "Hola, ¿cómo estás?");
-  });
-  console.log(result.finalOutput);
-}
+class MathHomeworkOutput(BaseModel):
+    is_math_homework: bool
+    reasoning: str
 
-main().catch(console.error);
+guardrail_agent = Agent(
+    name="Guardrail check",
+    instructions="Check if the user is asking you to do their math homework.",
+    output_type=MathHomeworkOutput,
+)
+
+@input_guardrail
+async def math_guardrail(context, agent, input):
+    result = await Runner.run(guardrail_agent, input, context=context.context)
+    output = result.final_output_as(MathHomeworkOutput)
+    return GuardrailFunctionOutput(
+        output_info=output,
+        tripwire_triggered=output.is_math_homework,
+    )
+
+agent = Agent(
+    name="Support Agent",
+    instructions="You are a customer support agent.",
+    input_guardrails=[math_guardrail],
+)
+
+try:
+    result = await Runner.run(agent, "Solve for x: 2x + 5 = 11")
+except InputGuardrailTripwireTriggered:
+    print("Guardrail triggered — input rejected")
 ```
-</CodeGroup>
 
-## Observability
+## Dynamic system prompts
 
-With this integration, Respan auto-captures:
+Use a function for `instructions` to customize prompts based on runtime context:
 
-- **Agent runs** -- each agent execution as a span
-- **LLM calls** -- model, input/output messages, token usage
-- **Tool calls** -- function name, arguments, return value
-- **Handoffs** -- which agent transferred control and to whom
-- **Errors** -- failed runs and error details
+```python
+from agents import Agent, Runner, RunContextWrapper, set_trace_processors
+from respan_exporter_openai_agents import RespanTraceProcessor
 
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).
+set_trace_processors([RespanTraceProcessor()])
 
-<Frame>
-<img src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai-agents-metadata.png" alt="OpenAI Agents SDK trace in Respan" />
-</Frame>
+class CustomContext:
+    def __init__(self, style: str):
+        self.style = style
+
+def custom_instructions(
+    run_context: RunContextWrapper[CustomContext], agent: Agent
+) -> str:
+    if run_context.context.style == "haiku":
+        return "Only respond in haikus."
+    elif run_context.context.style == "pirate":
+        return "Respond as a pirate."
+    return "Respond normally."
+
+agent = Agent(name="Chat agent", instructions=custom_instructions)
+
+result = await Runner.run(
+    agent, "Tell me a joke.", context=CustomContext(style="pirate")
+)
+print(result.final_output)
+```

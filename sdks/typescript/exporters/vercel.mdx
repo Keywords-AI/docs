@@ -1,0 +1,75 @@
+---
+title: "Vercel AI Exporter"
+description: "SDK reference for the Respan Vercel AI exporter."
+---
+
+## Installation
+
+```bash
+npm install @respan/exporter-vercel
+```
+
+## Classes
+
+### RespanExporter
+
+OpenTelemetry `SpanExporter` implementation that converts Vercel AI SDK spans to Respan format.
+
+```typescript
+import { RespanExporter } from '@respan/exporter-vercel';
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | — | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `baseUrl` | `string \| undefined` | `"https://api.respan.ai"` | API base URL. |
+
+## Methods
+
+| Method | Description |
+|--------|-------------|
+| `export(spans, resultCallback)` | Export OpenTelemetry spans to Respan. |
+
+### Internal processing
+
+The exporter automatically:
+
+- Deduplicates AI SDK spans
+- Parses model information, prompt messages, and tool calls
+- Extracts token usage and cost data
+- Maps Vercel AI metadata to Respan span attributes
+- Handles streaming response data
+
+## Usage
+
+```typescript
+// instrumentation.ts
+import { registerOTel } from '@vercel/otel';
+import { RespanExporter } from '@respan/exporter-vercel';
+
+export function register() {
+  registerOTel({
+    serviceName: 'my-app',
+    traceExporter: new RespanExporter({
+      apiKey: process.env.RESPAN_API_KEY!,
+    }),
+  });
+}
+```
+
+Then enable telemetry in your AI SDK calls:
+
+```typescript
+import { generateText } from 'ai';
+import { openai } from '@ai-sdk/openai';
+
+const result = await generateText({
+  model: openai('gpt-4o-mini'),
+  prompt: 'Tell me a joke',
+  experimental_telemetry: { isEnabled: true },
+});
+```
+
+## Related
+
+- [Vercel AI integration guide](/integrations/tracing/vercel-tracing)

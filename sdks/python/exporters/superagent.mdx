@@ -1,0 +1,83 @@
+---
+title: "Superagent Exporter"
+description: "SDK reference for the Respan Superagent exporter."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-superagent
+```
+
+## Classes
+
+### RespanSuperagentClient
+
+Wrapper around the Superagent (safety-agent) SDK that automatically exports operations to Respan as tool spans.
+
+```python
+from respan_exporter_superagent import create_client
+```
+
+### Factory function
+
+| Function | Description |
+|----------|-------------|
+| `create_client(**kwargs)` | Create a `RespanSuperagentClient` instance. |
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. |
+
+### Methods
+
+All methods accept an optional `respan_params` dict for attaching metadata.
+
+| Method | Description |
+|--------|-------------|
+| `guard(respan_params, **kwargs)` | Run guardrail check. |
+| `redact(respan_params, **kwargs)` | Redact sensitive content. |
+| `scan(respan_params, **kwargs)` | Scan for security issues. |
+| `test(respan_params, **kwargs)` | Test guardrail configuration. |
+
+### respan_params
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `customer_identifier` | `str` | User/customer identifier. |
+| `metadata` | `Dict` | Custom key-value pairs. |
+| `disable_log` | `bool` | Set `True` to skip logging this call. |
+
+## Usage
+
+```python
+from respan_exporter_superagent import create_client
+
+client = create_client(api_key="your-api-key")
+
+# Operations are automatically logged as tool spans
+result = await client.guard(
+    respan_params={"customer_identifier": "user-123"},
+    input="Check this content for safety",
+)
+```
+
+### Wrapping an existing client
+
+```python
+from safety_agent import SafetyAgent
+from respan_exporter_superagent import RespanSuperagentClient
+
+existing_client = SafetyAgent(api_key="safety-agent-key")
+respan_client = RespanSuperagentClient(
+    client=existing_client,
+    api_key="your-respan-key",
+)
+
+result = await respan_client.scan(input="Check this content")
+```
+
+## Related
+
+- [Superagent integration guide](/integrations/tracing/superagent)

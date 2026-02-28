@@ -1,0 +1,80 @@
+---
+title: "LiteLLM Exporter"
+description: "SDK reference for the Respan LiteLLM callback exporter."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-litellm
+```
+
+## Classes
+
+### RespanLiteLLMCallback
+
+LiteLLM-native callback handler that sends completion logs to Respan.
+
+```python
+from respan_exporter_litellm import RespanLiteLLMCallback
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL`. |
+
+### Methods
+
+| Method | Description |
+|--------|-------------|
+| `log_success_event(kwargs, response_obj, start_time, end_time)` | Log a successful LLM completion. |
+| `log_failure_event(kwargs, response_obj, start_time, end_time)` | Log a failed LLM completion. |
+| `async_log_success_event(kwargs, response_obj, start_time, end_time)` | Async version of success logging. |
+| `async_log_failure_event(kwargs, response_obj, start_time, end_time)` | Async version of failure logging. |
+
+### Helper functions
+
+| Function | Description |
+|----------|-------------|
+| `register_litellm_callbacks(name)` | Register Respan callbacks on the LiteLLM instance. |
+
+### NamedCallbackRegistry
+
+Named registry for managing LiteLLM callbacks.
+
+## Usage
+
+```python
+import litellm
+from respan_exporter_litellm import RespanLiteLLMCallback
+
+# Register callback
+respan_callback = RespanLiteLLMCallback(api_key="your-api-key")
+litellm.callbacks = [respan_callback]
+
+# Use LiteLLM normally — all calls are automatically logged
+response = litellm.completion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Tell me a joke"}],
+)
+print(response.choices[0].message.content)
+```
+
+### Async usage
+
+```python
+import litellm
+from respan_exporter_litellm import RespanLiteLLMCallback
+
+litellm.callbacks = [RespanLiteLLMCallback(api_key="your-api-key")]
+
+response = await litellm.acompletion(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "Tell me a joke"}],
+)
+```
+
+## Related
+
+- [LiteLLM integration guide](/integrations/gateway/litellm)

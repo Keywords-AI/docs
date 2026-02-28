@@ -10,29 +10,21 @@ description: "Use Anthropic SDK through Respan"
 </Accordion>
 
 
-[Anthropic](https://www.anthropic.com/) SDK integration for routing Claude requests through Respan gateway.
-
 <Note> This integration is for the **Respan gateway**. </Note>
+
+## What is Anthropic SDK?
+
+The [Anthropic](https://www.anthropic.com/) SDK lets you call Claude models directly using Anthropic's native API. By pointing `base_url` to Respan, all requests are routed through the gateway for logging and observability.
+
 <Warning>
-This is only a pass-through integration. So with this integration, some features are not available.
+This is a pass-through integration. Some features are not available: [user rate limits](/documentation/features/user-analytics/customer-identifier#rate-limits), [fallbacks](/documentation/features/gateway/advanced-configuration#fallback-models), [load balancing](/documentation/features/gateway/advanced-configuration#load-balancing), and direct [prompt management](/documentation/features/prompt-management/quickstart) (use the [Prompts API](/apis/develop/prompts/create-prompts) instead).
 </Warning>
 
 <Warning>
 **Default max_tokens**: Anthropic requests sent through Respan have a default of 4096 max_tokens. Make sure to explicitly set `max_tokens` in your requests if you need a different value.
 </Warning>
 
-## Pros and Cons
-
-### Pros
-- **Easy Setup**: Only 2 lines of code to integrate.
-- **Use Claude's `Thinking` Feature**: You can use the `Thinking` feature from `Claude 3.7 Sonnet` or Claude 4 models.
-
-### Cons
-- **No Direct Prompt Access**: You can't fetch prompts stored in Respan directly. You'll need to use the [Prompts API](/apis/develop/prompts/create-prompts) instead.
-- **Limited Gateway Features**: You can't use features like [user rate limits](/documentation/features/user-analytics/customer-identifier#rate-limits), [fallbacks](/documentation/features/gateway/advanced-configuration#fallback-models) or [load balancing](/documentation/features/gateway/advanced-configuration#load-balancing). 
-
-
-## Integration examples
+## Quickstart
 
 <CodeGroup>
 ```python Python
@@ -93,7 +85,9 @@ console.log(msg);
 ```
 </CodeGroup>
 
-## Extra Headers
+## Supported parameters
+
+### Extra Headers
 
 You can pass additional headers to be sent with your LLM requests using the `extra_headers` parameter. This is useful for sending custom headers required by specific models or configurations.
 
@@ -155,11 +149,11 @@ console.log(msg);
 **Extra Headers**: The `extra_headers` parameter allows you to pass additional headers that will be sent with your LLM request. This is particularly useful for accessing beta features like Claude Sonnet 4's 1M token context window using the `anthropic-beta: context-1m-2025-08-07` header.
 </Note>
 
-## Respan parameters
+### Respan parameters
 
-To use [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters), you can pass them in the `metadata` parameter. In the above example, `customer_identifier` is a Respan parameter. These parameters will take precedence over the Anthropic parameters if they are conflicting.
+To use [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters), pass them in the `metadata` parameter under the `respan_params` key. These parameters take precedence over Anthropic parameters if they conflict.
 
-## Nested Metadata for Respan Parameters
+### Nested metadata
 
 You can pass multiple Respan-specific parameters using a nested metadata structure. This allows you to include `custom_identifier`, `customer_identifier`, and additional custom metadata all in one structure:
 

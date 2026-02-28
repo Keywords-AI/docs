@@ -1,6 +1,6 @@
 ---
 title: "LangGraph"
-description: "Trace your LangGraph workflows with Respan for full graph execution visibility."
+description: "Trace LangGraph stateful agent workflows with Respan."
 ---
 
 <Accordion title="Set up Respan">
@@ -11,7 +11,7 @@ description: "Trace your LangGraph workflows with Respan for full graph executio
 
 ## What is LangGraph?
 
-[LangGraph](https://www.langchain.com/langgraph) is a Python framework for building stateful, multi-step agent workflows as graphs. The Respan integration uses the Respan tracing SDK to capture your graph execution. Each node and LLM call is recorded as a span so you can see the full workflow in chronological order.
+[LangGraph](https://langchain-ai.github.io/langgraph/) is a Python framework for building stateful, multi-step agent workflows as graphs. Nodes represent operations (LLM calls, tools, routing), and edges define the flow between them.
 
 ## Setup
 
@@ -26,94 +26,70 @@ pip install langgraph langchain-anthropic respan-tracing
 
 <Step title="Set environment variables">
 
-```bash .env
-ANTHROPIC_API_KEY=your-anthropic-api-key
-RESPAN_API_KEY=your-respan-api-key
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
 
 </Step>
 
-<Step title="Initialize Respan tracing">
+<Step title="Initialize Respan and build a graph">
 
 ```python
-from respan_tracing.main import RespanTelemetry
-from respan_tracing.decorators import task, workflow
-
-ktl = RespanTelemetry()
-```
-
-</Step>
-
-<Step title="Build your graph with traced nodes">
-
-```python
-from typing import Annotated
-from typing_extensions import TypedDict
+from respan_tracing import RespanTelemetry, workflow, task
 from langgraph.graph import StateGraph, START, END
-from langgraph.graph.message import add_messages
 from langchain_anthropic import ChatAnthropic
+from typing import TypedDict
+
+# Initialize Respan — auto-instruments LangChain/Anthropic calls
+telemetry = RespanTelemetry()
+
+llm = ChatAnthropic(model="claude-sonnet-4-5-20250929")
 
 class State(TypedDict):
-    messages: Annotated[list, add_messages]
+    topic: str
+    joke: str
 
-llm = ChatAnthropic(model="claude-3-5-sonnet-20240620", temperature=0)
+@task(name="generate_joke")
+def generate_joke(state: State) -> dict:
+    response = llm.invoke(f"Tell me a joke about {state['topic']}")
+    return {"joke": response.content}
 
-@task(name="chatbot_response")
-def chatbot_respond(state: State):
-    return {"messages": [llm.invoke(state["messages"])]}
+@task(name="review_joke")
+def review_joke(state: State) -> dict:
+    response = llm.invoke(f"Rate this joke: {state['joke']}")
+    return {"review": response.content}
 
-graph_builder = StateGraph(State)
-graph_builder.add_node("chatbot", chatbot_respond)
-graph_builder.add_edge(START, "chatbot")
-graph_builder.add_edge("chatbot", END)
-graph = graph_builder.compile()
-```
+# Build graph
+graph = StateGraph(State)
+graph.add_node("generate", generate_joke)
+graph.add_node("review", review_joke)
+graph.add_edge(START, "generate")
+graph.add_edge("generate", "review")
+graph.add_edge("review", END)
 
-</Step>
+app = graph.compile()
 
-<Step title="Run the graph inside a workflow">
+@workflow(name="joke_graph")
+def run_graph():
+    return app.invoke({"topic": "AI tracing"})
 
-```python
-def stream_graph_updates(user_input: str):
-    for event in graph.stream({"messages": [{"role": "user", "content": user_input}]}):
-        for value in event.values():
-            print("Assistant:", value["messages"][-1].content)
-
-@workflow(name="chatbot_qa")
-def chatbot_qa():
-    while True:
-        try:
-            user_input = input("User: ")
-            if user_input.lower() in ["quit", "exit", "q"]:
-                print("Goodbye!")
-                break
-            stream_graph_updates(user_input)
-        except:
-            user_input = "What do you know about LangGraph?"
-            print("User: " + user_input)
-            stream_graph_updates(user_input)
-            break
-
-if __name__ == "__main__":
-    chatbot_qa()
+result = run_graph()
+print(result)
 ```
 
 </Step>
 
 <Step title="View your trace">
 
-Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan dashboard.
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see the graph execution.
 
 </Step>
 </Steps>
 
-## Observability
+## Configuration
 
-With this integration, Respan auto-captures:
+LangGraph uses the `respan-tracing` SDK for instrumentation. `Instruments.LANGCHAIN` auto-captures LangChain operations.
 
-- **Graph execution** -- the full workflow as a trace
-- **Node calls** -- each graph node as a span
-- **LLM calls** -- model, input/output messages, token usage
-- **Errors** -- failed nodes and error details
+See the [Python Tracing SDK reference](/sdks/python/tracing/main/initialize) for configuration options.
 
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).

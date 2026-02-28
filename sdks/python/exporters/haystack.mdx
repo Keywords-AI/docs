@@ -1,0 +1,97 @@
+---
+title: "Haystack Exporter"
+description: "SDK reference for the Respan Haystack exporter components."
+---
+
+## Installation
+
+```bash
+pip install respan-exporter-haystack
+```
+
+## Classes
+
+### RespanConnector
+
+Haystack component that connects pipelines to Respan for tracing.
+
+```python
+from respan_exporter_haystack import RespanConnector
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API base URL. Falls back to `RESPAN_BASE_URL`. |
+
+### RespanTracer
+
+Tracing support for Haystack pipeline execution.
+
+```python
+from respan_exporter_haystack import RespanTracer
+```
+
+### RespanGenerator
+
+Gateway component that routes LLM calls through the Respan gateway.
+
+```python
+from respan_exporter_haystack import RespanGenerator
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. |
+| `model` | `str` | — | Model to use (e.g., `"gpt-4o-mini"`). |
+| `base_url` | `str \| None` | `"https://api.respan.ai/api"` | Gateway base URL. |
+
+### RespanChatGenerator
+
+Chat-specific gateway component.
+
+```python
+from respan_exporter_haystack import RespanChatGenerator
+```
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str \| None` | `None` | Respan API key. |
+| `model` | `str` | — | Model to use. |
+| `base_url` | `str \| None` | `"https://api.respan.ai/api"` | Gateway base URL. |
+
+## Usage
+
+### Tracing
+
+```python
+from haystack import Pipeline
+from haystack.components.generators import OpenAIGenerator
+from respan_exporter_haystack import RespanConnector
+
+pipeline = Pipeline()
+pipeline.add_component("respan", RespanConnector(api_key="your-api-key"))
+pipeline.add_component("llm", OpenAIGenerator(model="gpt-4o-mini"))
+pipeline.connect("respan", "llm")
+
+result = pipeline.run({"respan": {"prompt": "Tell me a joke"}})
+```
+
+### Gateway
+
+```python
+from haystack import Pipeline
+from respan_exporter_haystack import RespanGenerator
+
+pipeline = Pipeline()
+pipeline.add_component("llm", RespanGenerator(
+    api_key="your-api-key",
+    model="gpt-4o-mini",
+))
+
+result = pipeline.run({"llm": {"prompt": "Tell me a joke"}})
+```
+
+## Related
+
+- [Haystack integration guide](/integrations/tracing/haystack)

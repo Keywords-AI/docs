@@ -11,7 +11,13 @@ description: "Trace your LLM workflows using the Respan tracing SDK."
 
 ## What is Respan Tracing?
 
-The [Respan tracing SDK](https://pypi.org/project/respan-tracing/) uses OpenTelemetry under the hood. Add the `respan_tracing` package to your project and annotate your workflows with `@workflow` and `@task` decorators to get full trace visibility.
+The [Respan tracing SDK](https://pypi.org/project/respan-tracing/) is a Python library built on [OpenTelemetry](https://opentelemetry.io/) that captures telemetry for LLM applications. Add `@workflow`, `@task`, `@agent`, and `@tool` decorators to your code to get full trace visibility with auto-instrumented LLM calls.
+
+<Check>
+Example projects:
+- [Python](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/respan-tracing-sdk)
+- [TypeScript](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/respan-tracing-sdk)
+</Check>
 
 ## Setup
 
@@ -37,13 +43,13 @@ npm install @respan/tracing
 
 <CodeGroup>
 ```bash Python
-RESPAN_BASE_URL="https://api.respan.ai/api"
-RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export RESPAN_BASE_URL="https://api.respan.ai/api"  # optional, this is the default
 ```
 ```bash JavaScript
-RESPAN_BASE_URL="https://api.respan.ai/api"
-RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
-OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export RESPAN_BASE_URL="https://api.respan.ai/api"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 ```
 </CodeGroup>
 
@@ -53,16 +59,10 @@ OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
 
 <CodeGroup>
 ```python Python
-import os
+from respan_tracing import RespanTelemetry, workflow, task
 from openai import OpenAI
-from respan_tracing.decorators import workflow, task
-from respan_tracing.main import RespanTelemetry
 
-# Initialize Respan Telemetry
-os.environ["RESPAN_API_KEY"] = "YOUR_RESPAN_API_KEY"
-k_tl = RespanTelemetry()
-
-# Initialize OpenAI client
+telemetry = RespanTelemetry()
 client = OpenAI()
 
 @task(name="joke_creation")
@@ -77,8 +77,7 @@ def create_joke():
 
 @workflow(name="simple_joke_workflow")
 def joke_workflow():
-    joke = create_joke()
-    return joke
+    return create_joke()
 
 if __name__ == "__main__":
     result = joke_workflow()
@@ -88,14 +87,12 @@ if __name__ == "__main__":
 import { RespanTelemetry } from '@respan/tracing';
 import OpenAI from 'openai';
 
-// Initialize Respan Telemetry
 const respanAi = new RespanTelemetry({
     apiKey: process.env.RESPAN_API_KEY || "",
     appName: 'test-app',
-    disableBatch: true  // For testing, disable batching
+    disableBatch: true
 });
 
-// Initialize OpenAI client
 const openai = new OpenAI();
 
 async function createJoke() {
@@ -117,8 +114,7 @@ async function simpleJokeWorkflow() {
     return await respanAi.withWorkflow(
         { name: 'simple_joke_workflow' },
         async () => {
-            const joke = await createJoke();
-            return joke;
+            return await createJoke();
         }
     );
 }
@@ -145,22 +141,136 @@ Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan
 </Step>
 </Steps>
 
-<Note>
-Optional HTTP instrumentation: if you see logs like `Failed to initialize Requests instrumentation`, install the OpenTelemetry instrumentations:
-```bash
-pip install opentelemetry-instrumentation-requests opentelemetry-instrumentation-urllib3
+## Configuration
+
+### Python SDK
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `app_name` | `str` | `"respan"` | Application name attached to all spans. |
+| `api_key` | `str \| None` | `None` | API key. Falls back to `RESPAN_API_KEY` env var. |
+| `base_url` | `str \| None` | `None` | API URL. Falls back to `RESPAN_BASE_URL`, then `https://api.respan.ai/api`. |
+| `log_level` | `str` | `"INFO"` | SDK log level: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. |
+| `is_batching_enabled` | `bool \| None` | `True` | Enable batch span processing. |
+| `instruments` | `Set[Instruments] \| None` | `None` (all) | Specific instruments to enable. Pass `set()` to disable all. |
+| `block_instruments` | `Set[Instruments] \| None` | `None` | Instruments to explicitly disable. |
+| `is_enabled` | `bool` | `True` | Set `False` for no-op mode. |
+
+See [RespanTelemetry reference](/sdks/python/tracing/main/initialize) for the full parameter list.
+
+### JavaScript SDK
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | — | API key. |
+| `appName` | `string` | `"respan"` | Application name. |
+| `baseURL` | `string` | `"https://api.respan.ai"` | API base URL. |
+| `disableBatch` | `boolean` | `false` | Disable batch processing (useful for testing). |
+| `logLevel` | `string` | `"warn"` | SDK log level: `"debug"`, `"info"`, `"warn"`, `"error"`. |
+| `instrumentModules` | `object` | — | Modules to auto-instrument (e.g., `{ openAI: OpenAI }`). |
+
+## Attributes
+
+Attach Respan-specific attributes to spans for filtering and grouping in the dashboard.
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `customer_identifier` | `str` | User or customer identifier. |
+| `customer_email` | `str` | Customer email address. |
+| `customer_name` | `str` | Customer display name. |
+| `trace_group_identifier` | `str` | Group related traces (e.g., by experiment or session). |
+| `metadata` | `Dict` | Custom key-value pairs for analytics. |
+
+<CodeGroup>
+```python Python (update_current_span)
+from respan_tracing import get_client, workflow
+
+@workflow(name="my_workflow")
+def my_workflow(user_id: str):
+    client = get_client()
+    client.update_current_span(
+        respan_params={
+            "customer_identifier": user_id,
+            "trace_group_identifier": "pipeline-v2",
+            "metadata": {"env": "production"},
+        }
+    )
+    return "done"
 ```
-This is optional; tracing works without them. Add only if your app uses `requests` or `urllib3`.
-</Note>
+```python Python (context manager)
+from respan_tracing import workflow, respan_span_attributes
 
-## Observability
+@workflow(name="my_workflow")
+def my_workflow(user_id: str):
+    with respan_span_attributes({
+        "customer_identifier": user_id,
+        "trace_group_identifier": "pipeline-v2",
+        "metadata": {"env": "production"},
+    }):
+        return "done"
+```
+</CodeGroup>
 
-With this integration, Respan auto-captures:
+## Gateway
 
-- **Workflows** -- each `@workflow`-decorated function as a root trace
-- **Tasks** -- each `@task`-decorated function as a span
-- **LLM calls** -- model, input/output messages, token usage
-- **Performance metrics** -- latency per step
-- **Errors** -- failed tasks and error details
+Route LLM calls through the Respan gateway to use 250+ models with a single API key, while capturing full observability data.
 
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).
+<CodeGroup>
+```python Python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry()
+
+# Point OpenAI client to Respan gateway
+client = OpenAI(
+    api_key="YOUR_RESPAN_API_KEY",
+    base_url="https://api.respan.ai/api",
+)
+
+@task(name="generate")
+def generate(prompt: str):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+@workflow(name="gateway_workflow")
+def gateway_workflow():
+    return generate("Hello from the gateway!")
+
+gateway_workflow()
+```
+```typescript JavaScript
+import { RespanTelemetry } from '@respan/tracing';
+import OpenAI from 'openai';
+
+const respanAi = new RespanTelemetry({
+    apiKey: process.env.RESPAN_API_KEY || "",
+    appName: 'gateway-app',
+});
+
+// Point OpenAI client to Respan gateway
+const openai = new OpenAI({
+    apiKey: process.env.RESPAN_API_KEY,
+    baseURL: 'https://api.respan.ai/api',
+});
+
+async function main() {
+    return await respanAi.withWorkflow(
+        { name: 'gateway_workflow' },
+        async () => {
+            const completion = await openai.chat.completions.create({
+                model: 'gpt-4o-mini',
+                messages: [{ role: 'user', content: 'Hello from the gateway!' }],
+            });
+            return completion.choices[0].message.content;
+        }
+    );
+}
+
+main().catch(console.error);
+```
+</CodeGroup>
+

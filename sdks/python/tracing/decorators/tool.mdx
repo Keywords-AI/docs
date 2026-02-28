@@ -1,0 +1,80 @@
+---
+title: "@tool"
+description: "Trace a tool execution within an agent or workflow."
+---
+
+## Overview
+
+The `@tool` decorator creates a span for a tool operation — a discrete callable used by agents (search, calculator, API call, file read). Tool spans inherit the current entity path and appear nested under the nearest agent, workflow, or task.
+
+```python
+from respan_tracing import tool
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `name` | `str \| None` | Function name | Display name for the tool span. |
+| `version` | `int \| None` | `None` | Version number for the tool. |
+| `method_name` | `str \| None` | `None` | Required when decorating a class. Specifies which method to use as the entry point. |
+| `processors` | `str \| List[str] \| None` | `None` | Route this span to specific named processors. See [add_processor](/sdks/python/tracing/main/initialize#add_processor). |
+
+## Function usage
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task, tool
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@tool(name="web_search")
+def web_search(query: str):
+    return f"Search results for: {query}"
+
+@tool(name="calculator")
+def calculator(expression: str):
+    return eval(expression)
+
+@task(name="research")
+def research(topic: str):
+    return web_search(topic)
+
+@workflow(name="research_workflow")
+def research_workflow():
+    data = research("Python tracing")
+    count = calculator("2 + 3")
+    return {"data": data, "count": count}
+
+print(research_workflow())
+```
+
+## Class usage
+
+```python
+from respan_tracing import RespanTelemetry, agent, tool
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@agent(name="analysis", method_name="run")
+class Analyzer:
+    @tool(name="tokenize")
+    def tokenize(self, text: str):
+        return text.split()
+
+    @tool(name="count_words")
+    def count_words(self, text: str):
+        return len(text.split())
+
+    def run(self):
+        tokens = self.tokenize("respan tracing sdk")
+        count = self.count_words("respan tracing sdk")
+        return {"tokens": tokens, "count": count}
+
+print(Analyzer().run())
+```
+
+## Notes
+
+- Tool spans automatically capture function arguments as input and return values as output
+- Exceptions inside tools are recorded on the span with error status
+- Use `@tool` for operations that agents call, and `@task` for broader processing steps

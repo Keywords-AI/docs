@@ -1,0 +1,64 @@
+---
+title: "update_current_span()"
+description: "Update name, status, attributes, and Respan params on the current span."
+---
+
+## Signature
+
+```python
+update_current_span(
+    respan_params: Dict | RespanParams = None,
+    attributes: Dict = None,
+    status: Status | StatusCode = None,
+    status_description: str = None,
+    name: str = None,
+) -> bool
+```
+
+Returns `True` if the span was updated successfully, `False` otherwise.
+
+## Parameters
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `respan_params` | `Dict \| RespanParams` | Respan-specific parameters: `customer_identifier`, `customer_email`, `customer_name`, `trace_group_identifier`, `metadata`. |
+| `attributes` | `Dict` | Custom OpenTelemetry span attributes. |
+| `status` | `Status \| StatusCode` | Span status (`StatusCode.OK`, `StatusCode.ERROR`, etc.). |
+| `status_description` | `str` | Human-readable status description. |
+| `name` | `str` | Override the span display name. |
+
+## Respan params
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `customer_identifier` | `str` | User or customer identifier. Appears in the Respan dashboard for filtering. |
+| `customer_email` | `str` | Customer email address. |
+| `customer_name` | `str` | Customer display name. |
+| `trace_group_identifier` | `str` | Group related traces together (e.g., by experiment, session, or pipeline). |
+| `metadata` | `Dict` | Custom key-value pairs for analytics and filtering. |
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, workflow, get_client
+from opentelemetry.trace import StatusCode
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="process")
+def process(user_id: str):
+    client = get_client()
+    client.update_current_span(
+        respan_params={
+            "customer_identifier": user_id,
+            "trace_group_identifier": "pipeline-a",
+            "metadata": {"env": "production", "version": "2.1"},
+        },
+        attributes={"custom.step": "validation"},
+        status=StatusCode.OK,
+        name="process.success",
+    )
+    return "ok"
+
+process("user-123")
+```

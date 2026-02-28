@@ -1,0 +1,29 @@
+---
+title: "get_current_trace_id()"
+description: "Return the active trace ID as a hex string."
+---
+
+## Signature
+
+```python
+get_current_trace_id() -> Optional[str]
+```
+
+Returns the current trace ID as a 32-character hex string, or `None` when no span is active.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, get_client, workflow
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="trace_demo")
+def trace_demo():
+    client = get_client()
+    trace_id = client.get_current_trace_id()
+    print(f"Trace ID: {trace_id}")  # e.g. "0af7651916cd43dd8448eb211c80319c"
+    return trace_id
+
+trace_demo()
+```

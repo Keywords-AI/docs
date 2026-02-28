@@ -1,0 +1,35 @@
+---
+title: "process_spans()"
+description: "Process collected spans through the processor pipeline."
+---
+
+## Signature
+
+```python
+process_spans(spans: SpanBuffer | List[ReadableSpan]) -> bool
+```
+
+Processes spans through the configured processor pipeline (including the default Respan exporter and any custom processors). Returns `True` on success.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+client = get_client()
+
+# Collect spans with a buffer
+with client.get_span_buffer("trace-xyz") as buffer:
+    buffer.create_span("validation", {"result": "pass"})
+    buffer.create_span("processing", {"items": 42})
+    collected = buffer.get_all_spans()
+
+# Process all collected spans at once
+success = client.process_spans(collected)
+print(f"Export successful: {success}")
+```
+
+<Note>
+Use `process_spans()` with spans collected from `get_span_buffer()`. For standard workflows using decorators, spans are exported automatically — you don't need to call this method.
+</Note>

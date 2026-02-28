@@ -1,0 +1,30 @@
+---
+title: "get_context_value()"
+description: "Read a value from the current OpenTelemetry context."
+---
+
+## Signature
+
+```python
+get_context_value(key: str) -> Any
+```
+
+Returns the value for the given key from the current OpenTelemetry context, or `None` if not found.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, workflow, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="context_demo")
+def context_demo():
+    client = get_client()
+    client.set_context_value("custom.key", "my_value")
+    value = client.get_context_value("custom.key")
+    print(value)  # "my_value"
+    return value
+
+context_demo()
+```

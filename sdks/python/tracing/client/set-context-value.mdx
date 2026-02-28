@@ -1,0 +1,33 @@
+---
+title: "set_context_value()"
+description: "Set a value in the current OpenTelemetry context."
+---
+
+## Signature
+
+```python
+set_context_value(key: str, value: Any) -> bool
+```
+
+Returns `True` if the value was set successfully.
+
+## Example
+
+```python
+from respan_tracing import RespanTelemetry, workflow, get_client
+
+telemetry = RespanTelemetry(api_key="your-api-key")
+
+@workflow(name="set_context")
+def set_context():
+    client = get_client()
+    client.set_context_value("session.id", "abc-123")
+    client.set_context_value("user.tier", "premium")
+
+    # Read it back
+    session = client.get_context_value("session.id")
+    print(session)  # "abc-123"
+    return True
+
+set_context()
+```

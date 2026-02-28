@@ -1,0 +1,103 @@
+---
+title: "Python Tracing SDK"
+description: "Observe and debug LLM workflows using the respan-tracing Python SDK."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+## Overview
+
+`respan-tracing` is a Python SDK built on [OpenTelemetry](https://opentelemetry.io/) that captures telemetry for your LLM applications. It records workflows, tasks, agents, and tools as hierarchical spans, tracks timings and errors, and sends traces to Respan for visualization and debugging.
+
+```bash
+pip install respan-tracing
+```
+
+## Core concepts
+
+| Concept | Description |
+|---------|-------------|
+| **Workflow** | An end-to-end agent run. Creates a root trace span. |
+| **Task** | A single operation within a workflow (LLM call, data processing, validation). |
+| **Agent** | An autonomous entity with decision-making capabilities. Sets workflow name context for nested spans. |
+| **Tool** | A callable operation used by agents or tasks (search, calculator, API call). |
+| **Trace** | The full tree of spans sent to Respan for visualization. |
+
+## Public API
+
+### Initialization
+
+| Export | Description |
+|--------|-------------|
+| `RespanTelemetry` | Main entry point. Initializes tracing, configures exporters, and enables auto-instrumentation. |
+| `get_client()` | Returns a `RespanClient` bound to the singleton tracer for span operations. |
+
+### Decorators
+
+| Decorator | Description |
+|-----------|-------------|
+| `@workflow` | Marks a function or class as a traced workflow (root span). |
+| `@task` | Marks a function or class as a traced task (child span). |
+| `@agent` | Marks a function or class as a traced agent span. |
+| `@tool` | Marks a function or class as a traced tool span. |
+
+All decorators accept `name`, `version`, `method_name`, and `processors` parameters.
+
+### Context managers
+
+| Export | Description |
+|--------|-------------|
+| `respan_span_attributes()` | Attaches Respan-specific attributes (`customer_identifier`, `metadata`, etc.) to spans within the context. |
+
+### Instrumentation
+
+| Export | Description |
+|--------|-------------|
+| `Instruments` | Enum of 30+ supported auto-instrumentations (OpenAI, Anthropic, LangChain, vector DBs, etc.). |
+
+### Types
+
+| Export | Description |
+|--------|-------------|
+| `RespanParams` | Pydantic model for Respan-specific parameters (`customer_identifier`, `trace_group_identifier`, `metadata`). |
+
+## Quick example
+
+```python
+from respan_tracing import RespanTelemetry, workflow, task
+from openai import OpenAI
+
+telemetry = RespanTelemetry(
+    api_key="your-api-key",
+    app_name="my-app",
+)
+
+client = OpenAI()
+
+@task(name="generate_joke")
+def generate_joke(topic: str):
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": f"Tell me a joke about {topic}"}],
+    )
+    return response.choices[0].message.content
+
+@workflow(name="joke_workflow")
+def joke_workflow():
+    return generate_joke("tracing")
+
+result = joke_workflow()
+print(result)
+```
+
+## Next steps
+
+- Start with the [Quickstart](/sdks/python/tracing/quickstart)
+- Learn decorators: [workflow](/sdks/python/tracing/decorators/workflow), [task](/sdks/python/tracing/decorators/task), [agent](/sdks/python/tracing/decorators/agent), [tool](/sdks/python/tracing/decorators/tool)
+- Explore the [Client API](/sdks/python/tracing/client/get-client)
+- Configure [Instrumentation](/sdks/python/tracing/instrumentation/overview)
+- Use [Contexts](/sdks/python/tracing/contexts/respan-span-attributes)

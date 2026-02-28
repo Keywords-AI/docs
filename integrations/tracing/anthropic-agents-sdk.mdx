@@ -1,6 +1,6 @@
 ---
 title: "Anthropic Agents"
-description: "Build agent workflows with the Anthropic Agent SDK and send traces to Respan."
+description: "Trace Anthropic Agent SDK workflows, tool calls, and sub-agents with Respan."
 ---
 
 <Accordion title="Set up Respan">
@@ -9,9 +9,15 @@ description: "Build agent workflows with the Anthropic Agent SDK and send traces
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
-## What is Anthropic Agents?
+## What is Anthropic Agent SDK?
 
-The [Anthropic Agent SDK](https://github.com/anthropics/anthropic-sdk-python) enables building agent workflows powered by Claude. Use the Respan exporter to capture telemetry from agent runs and send traces to Respan.
+The [Anthropic Agent SDK](https://github.com/anthropics/anthropic-agent-sdk) (`claude-agent-sdk`) is a framework for building agent workflows powered by Claude. It supports tool use, sub-agent delegation, and structured conversations. The Respan exporter hooks into the SDK's lifecycle events to capture full trace data.
+
+<Check>
+Example projects:
+- [Python](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/anthropic-agents-sdk)
+- [TypeScript](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/anthropic-agents-sdk)
+</Check>
 
 ## Setup
 
@@ -20,10 +26,10 @@ The [Anthropic Agent SDK](https://github.com/anthropics/anthropic-sdk-python) en
 
 <CodeGroup>
 ```bash Python
-pip install respan-exporter-anthropic-agents
+pip install claude-agent-sdk respan-exporter-anthropic-agents
 ```
 ```bash JavaScript
-npm install @respan/exporter-anthropic-agents
+npm install @anthropic-ai/claude-agent-sdk @respan/exporter-anthropic-agents
 ```
 </CodeGroup>
 
@@ -31,62 +37,49 @@ npm install @respan/exporter-anthropic-agents
 
 <Step title="Set environment variables">
 
-```bash .env
-RESPAN_API_KEY=your-respan-api-key
-# Optional (default: https://api.respan.ai)
-RESPAN_BASE_URL=https://api.respan.ai
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export RESPAN_BASE_URL="https://api.respan.ai/api"
+export ANTHROPIC_API_KEY="YOUR_ANTHROPIC_API_KEY"
 ```
-
-`RESPAN_BASE_URL` is the single base URL for all Respan services. The exporter automatically appends `/api/v1/traces/ingest` to build the full endpoint.
 
 </Step>
 
-<Step title="Initialize the exporter and run an agent">
+<Step title="Initialize and run">
 
 <CodeGroup>
 ```python Python
-import asyncio
-from claude_agent_sdk import ClaudeAgentOptions
-from respan_exporter_anthropic_agents.respan_anthropic_agents_exporter import (
-    RespanAnthropicAgentsExporter,
-)
+from claude_agent_sdk import create_agent
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
 
 exporter = RespanAnthropicAgentsExporter()
 
-async def main():
-    options = exporter.with_options(
-        options=ClaudeAgentOptions(
-            allowed_tools=["Read", "Glob", "Grep"],
-            permission_mode="acceptEdits",
-        )
-    )
+options = exporter.with_options({
+    "model": "claude-sonnet-4-5-20250929",
+    "max_tokens": 1024,
+})
 
-    async for message in exporter.query(
-        prompt="Analyze this repository and summarize architecture.",
-        options=options,
-    ):
-        print(message)
-
-asyncio.run(main())
+agent = create_agent(options)
+result = agent.query("Tell me a joke about AI")
+print(result)
 ```
 ```typescript JavaScript
-import { RespanAnthropicAgentsExporter } from "@respan/exporter-anthropic-agents";
+import { RespanAnthropicAgentsExporter } from '@respan/exporter-anthropic-agents';
 
-const exporter = new RespanAnthropicAgentsExporter();
+const exporter = new RespanAnthropicAgentsExporter({
+  apiKey: process.env.RESPAN_API_KEY!,
+});
 
-async function main() {
-  for await (const message of exporter.query({
-    prompt: "Review this repository and summarize architecture.",
-    options: {
-      allowedTools: ["Read", "Glob", "Grep"],
-      permissionMode: "acceptEdits",
-    },
-  })) {
-    console.log(message);
-  }
-}
+const options = exporter.withOptions({
+  model: 'claude-sonnet-4-5-20250929',
+  maxTokens: 1024,
+});
 
-main().catch(console.error);
+const result = await exporter.query({
+  prompt: 'Tell me a joke about AI',
+  options,
+});
+console.log(result);
 ```
 </CodeGroup>
 
@@ -94,73 +87,100 @@ main().catch(console.error);
 
 <Step title="View your trace">
 
-Open the [Traces page](https://platform.respan.ai/platform/traces) in the Respan dashboard. Your trace should appear within a few seconds.
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your agent trace.
 
 </Step>
 </Steps>
 
 ## Configuration
 
-All configuration can be passed directly to the constructor (takes priority over environment variables).
+### Python
 
-<Tabs>
-<Tab title="Python">
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `api_key` | `str` | `RESPAN_API_KEY` env var | Respan API key. |
+| `base_url` | `str` | `RESPAN_BASE_URL` env var | API base URL. |
+| `endpoint` | `str \| None` | `None` | Custom ingest endpoint URL. |
+
+### JavaScript
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `apiKey` | `string` | — | Respan API key. |
+| `baseUrl` | `string \| undefined` | `undefined` | API base URL. |
+| `endpoint` | `string \| undefined` | `undefined` | Custom ingest endpoint URL. |
+
+See the Anthropic Agents Exporter SDK reference for [Python](/sdks/python/exporters/anthropic-agents) or [TypeScript](/sdks/typescript/exporters/anthropic-agents).
+
+## Wrapped query
+
+The simplest integration pattern — `exporter.query()` handles tracing hooks automatically:
 
 ```python
+from claude_agent_sdk import ClaudeAgentOptions
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+
+exporter = RespanAnthropicAgentsExporter()
+
+async for message in exporter.query(
+    prompt="Name three primary colors.",
+    options=ClaudeAgentOptions(
+        permission_mode="bypassPermissions",
+        max_turns=1,
+    ),
+):
+    print(type(message).__name__)
+```
+
+## Tool use
+
+Tool calls are automatically captured as child spans with inputs and outputs:
+
+```python
+from claude_agent_sdk import ClaudeAgentOptions
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+
+exporter = RespanAnthropicAgentsExporter()
+
+async for message in exporter.query(
+    prompt="List the Python files in the current directory.",
+    options=ClaudeAgentOptions(
+        permission_mode="bypassPermissions",
+        max_turns=3,
+        allowed_tools=["Read", "Glob", "Grep"],
+    ),
+):
+    print(type(message).__name__)
+```
+
+## Respan Gateway
+
+Route Claude API calls through the Respan gateway — only a single `RESPAN_API_KEY` is needed for both the LLM call and trace export:
+
+```python
+from claude_agent_sdk import ClaudeAgentOptions
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+
+RESPAN_API_KEY = "YOUR_RESPAN_API_KEY"
+
 exporter = RespanAnthropicAgentsExporter(
-    api_key="your_respan_key",       # Overrides RESPAN_API_KEY
-    base_url="https://api.respan.ai", # Overrides RESPAN_BASE_URL
-    endpoint="https://custom/ingest", # Full endpoint URL (overrides base_url)
-    timeout_seconds=15,
-    max_retries=3,
-    base_delay_seconds=1.0,
-    max_delay_seconds=30.0,
+    api_key=RESPAN_API_KEY,
+    base_url="https://api.respan.ai/api",
 )
+
+options = ClaudeAgentOptions(
+    permission_mode="bypassPermissions",
+    max_turns=1,
+    env={
+        "ANTHROPIC_BASE_URL": "https://api.respan.ai/api",
+        "ANTHROPIC_AUTH_TOKEN": RESPAN_API_KEY,
+        "ANTHROPIC_API_KEY": RESPAN_API_KEY,
+    },
+)
+
+async for message in exporter.query(
+    prompt="Tell me a joke about AI",
+    options=options,
+):
+    print(type(message).__name__)
 ```
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `api_key` | No | Your Respan API key. Overrides `RESPAN_API_KEY`. |
-| `base_url` | No | Base URL for Respan services. Overrides `RESPAN_BASE_URL`. Defaults to `https://api.respan.ai`. |
-| `endpoint` | No | Full endpoint URL. Overrides `base_url`. |
-| `timeout_seconds` | No | Request timeout in seconds. |
-| `max_retries` | No | Maximum number of retry attempts. |
-| `base_delay_seconds` | No | Base delay between retries. |
-| `max_delay_seconds` | No | Maximum delay between retries. |
-
-</Tab>
-
-<Tab title="JavaScript">
-
-```typescript
-const exporter = new RespanAnthropicAgentsExporter({
-  apiKey: "your_respan_key",
-  endpoint: "https://api.respan.ai/api/v1/traces/ingest",
-  timeoutMs: 15000,
-  maxRetries: 3,
-  baseDelaySeconds: 1,
-  maxDelaySeconds: 30,
-});
-```
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `apiKey` | No | Your Respan API key. Overrides `RESPAN_API_KEY`. |
-| `endpoint` | No | Full ingest endpoint URL. |
-| `timeoutMs` | No | Request timeout in milliseconds. |
-| `maxRetries` | No | Maximum number of retry attempts. |
-| `baseDelaySeconds` | No | Base delay between retries. |
-| `maxDelaySeconds` | No | Maximum delay between retries. |
-
-</Tab>
-</Tabs>
-
-## Observability
-
-With this integration, Respan auto-captures:
-
-- **Agent runs** -- each agent execution as a span
-- **LLM calls** -- model, input/output messages, token usage
-- **Errors** -- failed runs and error details
-
-View traces on the [Traces page](https://platform.respan.ai/platform/traces).
