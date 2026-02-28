@@ -118,7 +118,7 @@ Specify how much to penalize new tokens based on whether they appear in the text
 </ParamField>
 
 <ParamField path="deploy" type="boolean">
-   Whether to deploy this version as the live version Default is `false`.
+   Whether to deploy this version as the live version. Default is `false`. A newer version must exist to deploy a previous version. For example, to deploy v2, v3 must already exist.
 </ParamField>
 
 <RequestExample>
@@ -152,7 +152,7 @@ headers = {
     "Content-Type": "application/json"
 }
 
-response = requests.post(url, headers=headers, json=data)
+response = requests.patch(url, headers=headers, json=data)
 print(response.json())
 ```
 
@@ -160,7 +160,7 @@ print(response.json())
 // Define the function with TypeScript
 
 fetch('https://api.respan.ai/api/prompts/<prompt_id>/versions/', {
-  method: 'POST',
+  method: 'PATCH',
   headers: {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
