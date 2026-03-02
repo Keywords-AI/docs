@@ -1,6 +1,6 @@
 ---
 title: "Create version"
-api: "POST https://api.respan.ai/api/prompts/<prompt_id>/versions/"
+api: "POST https://api.respan.ai/api/prompts/{prompt_id}/versions/"
 ---
 
 You can create a prompt version by sending a POST request to the prompt versions endpoint. The request should include the list of messages for the prompt version, the model you want to use, and other optional parameters. After you created a prompt version, you can deploy it as the live version by setting the `deploy` parameter to `true`. 
@@ -110,7 +110,7 @@ Specify how much to penalize new tokens based on whether they appear in the text
 ```Python Python
 import requests
 
-url = "https://api.respan.ai/api/prompts/<prompt_id>/versions/"
+url = "https://api.respan.ai/api/prompts/{prompt_id}/versions/"
 api_key = "YOUR_RESPAN_API_KEY" # Replace with your actual Respan API key
 data = {
 "description": "A description of the prompt version",
@@ -160,7 +160,7 @@ print(response.json())
 ```TypeScript TypeScript
 // Define the function with TypeScript
 
-fetch('https://api.respan.ai/api/prompts/<prompt_id>/versions/', {
+fetch('https://api.respan.ai/api/prompts/{prompt_id}/versions/', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',

@@ -9,6 +9,19 @@ description: "Trace Agno AI agent workflows with Respan."
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
 ## What is Agno?
 
 [Agno](https://github.com/agno-agi/agno) is a Python framework for building AI agents with built-in reasoning, tool use, and OpenInference instrumentation. The Respan exporter captures Agno's trace data and sends it to Respan.

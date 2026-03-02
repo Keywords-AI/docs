@@ -1,6 +1,6 @@
 ---
 title: Delete custom provider
-api: DELETE https://api.respan.ai/api/providers/{pk}/
+api: DELETE https://api.respan.ai/api/providers/{provider_id}/
 ---
 
 Delete a specific custom provider from your organization.
@@ -14,7 +14,7 @@ Delete a specific custom provider from your organization.
 
 ## Path parameters
 
-<ParamField path="pk" type="integer" required>
+<ParamField path="provider_id" type="integer" required>
   The provider's primary key ID to delete.
   
   <Accordion title="Example">

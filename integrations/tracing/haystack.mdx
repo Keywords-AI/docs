@@ -1,12 +1,25 @@
 ---
 title: "Haystack"
-description: "Trace and route Haystack pipelines with Respan."
+description: "Trace Haystack pipelines with Respan."
 ---
 
 <Accordion title="Set up Respan">
 1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
 2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
 </Accordion>
 
 ## What is Haystack?
@@ -92,23 +105,6 @@ result = pipeline.run({
 | `customer_identifier` | User/customer identifier. |
 | `metadata` | Custom key-value pairs. |
 
-## Gateway
-
-Use `RespanGenerator` to route LLM calls through the Respan gateway.
-
-```python
-from haystack import Pipeline
-from respan_exporter_haystack import RespanGenerator
-
-pipeline = Pipeline()
-pipeline.add_component("llm", RespanGenerator(
-    api_key="your-api-key",
-    model="gpt-4o-mini",
-))
-
-result = pipeline.run({"llm": {"prompt": "Tell me a joke"}})
-```
-
 ## Prompts
 
 Use Respan-managed prompts in Haystack pipelines:
@@ -123,4 +119,8 @@ generator = RespanGenerator(
     prompt_version=1,
 )
 ```
+
+<Note>
+Looking for gateway integration? See [Gateway > Haystack](/integrations/gateway/haystack).
+</Note>
 

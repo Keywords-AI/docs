@@ -9,6 +9,19 @@ description: "Trace Superagent safety operations (guard, redact, scan, test) wit
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
 ## What is Superagent?
 
 [Superagent](https://www.superagent.sh/) is a safety guardrails platform that provides `guard`, `redact`, `scan`, and `test` operations for LLM applications. The Respan exporter wraps these calls to capture them as tool spans.

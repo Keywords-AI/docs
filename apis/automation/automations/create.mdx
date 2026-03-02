@@ -1,6 +1,6 @@
 ---
 title: "Create automation"
-api: "POST https://api.respan.ai/automation/automations/"
+api: "POST https://api.respan.ai/api/automations/"
 ---
 
 Creates an online evaluation automation that automatically runs evaluators on spans matching specified conditions.
@@ -49,7 +49,7 @@ Authorization: Bearer YOUR_API_KEY
 ```python Python
 import requests
 
-url = "https://api.respan.ai/automation/automations/"
+url = "https://api.respan.ai/api/automations/"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
@@ -75,7 +75,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/automations/" \
+curl -X POST "https://api.respan.ai/api/automations/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -120,7 +120,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/automations/" \
+curl -X POST "https://api.respan.ai/api/automations/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -164,7 +164,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/automations/" \
+curl -X POST "https://api.respan.ai/api/automations/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -208,7 +208,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/automations/" \
+curl -X POST "https://api.respan.ai/api/automations/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

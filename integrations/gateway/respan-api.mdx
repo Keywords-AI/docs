@@ -1,0 +1,361 @@
+---
+title: "Respan API"
+description: "Route LLM calls through the Respan gateway using the API directly."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+## Overview
+
+The Respan gateway provides an OpenAI-compatible API endpoint that gives you access to 250+ models from all major providers through a single API key and base URL.
+
+| Endpoint | Base URL |
+|----------|----------|
+| OpenAI-compatible | `https://api.respan.ai/api/` |
+| Anthropic proxy | `https://api.respan.ai/api/anthropic/` |
+| Google Gemini proxy | `https://api.respan.ai/api/google/gemini` |
+
+<Info>
+**Environment Switching**: Respan doesn't support an `env` parameter in API calls. To switch between environments (test/production), use different API keys — one for your test environment and another for production. Manage keys in [API Keys settings](https://platform.respan.ai/platform/api/api-keys).
+</Info>
+
+## Quickstart
+
+### Step 1: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+### Step 2: Make a request
+
+<CodeGroup>
+```python Python
+import requests
+
+def demo_call(input,
+              model="gpt-4o-mini",
+              token="YOUR_RESPAN_API_KEY"
+              ):
+    headers = {
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {token}',
+    }
+
+    data = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': input}],
+    }
+
+    response = requests.post(
+        'https://api.respan.ai/api/chat/completions',
+        headers=headers,
+        json=data,
+    )
+    return response
+
+messages = "Say 'Hello World'"
+print(demo_call(messages).json())
+```
+
+```typescript TypeScript
+fetch('https://api.respan.ai/api/chat/completions', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_RESPAN_API_KEY'
+  },
+  body: JSON.stringify({
+    model: 'gpt-4o-mini',
+    messages: [{role: 'user', content: "Say 'Hello World'"}]
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));
+```
+
+```bash cURL
+curl -X POST "https://api.respan.ai/api/chat/completions" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_RESPAN_API_KEY" \
+  -d '{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+```
+
+```go Go
+package main
+
+import (
+  "bytes"
+  "net/http"
+)
+
+func main() {
+  url := "https://api.respan.ai/api/chat/completions"
+
+  payload := []byte(`{
+    "model": "gpt-4o-mini",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }`)
+
+  client := &http.Client{}
+  req, err := http.NewRequest("POST", url, bytes.NewBuffer(payload))
+  if err != nil {
+    panic(err)
+  }
+
+  req.Header.Add("Content-Type", "application/json")
+  req.Header.Add("Authorization", "Bearer YOUR_RESPAN_API_KEY")
+
+  res, err := client.Do(req)
+  if err != nil {
+    panic(err)
+  }
+  defer res.Body.Close()
+}
+```
+
+```php PHP
+<?php
+  $ch = curl_init();
+
+  curl_setopt($ch, CURLOPT_URL, "https://api.respan.ai/api/chat/completions");
+  curl_setopt($ch, CURLOPT_POST, 1);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+    "Content-Type: application/json",
+    "Authorization: Bearer YOUR_RESPAN_API_KEY",
+  ));
+  curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(array(
+    "model" => "gpt-4o-mini",
+    "messages" => array(["role" => "user", "content" => "Hello"]),
+  )));
+
+  $response = curl_exec($ch);
+  curl_close($ch);
+?>
+```
+</CodeGroup>
+
+### Step 3: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+## Switch models
+
+Change the `model` parameter to use any supported provider through the same endpoint:
+
+```python
+# OpenAI
+model = "gpt-4o"
+# Anthropic
+# model = "claude-sonnet-4-5-20250929"
+# Google
+# model = "gemini-1.5-pro"
+# DeepSeek
+# model = "deepseek-chat"
+
+response = requests.post(
+    'https://api.respan.ai/api/chat/completions',
+    headers=headers,
+    json={'model': model, 'messages': [{'role': 'user', 'content': 'Hello'}]},
+)
+```
+
+Browse the [full model list](https://platform.respan.ai/platform/models) to see all available models.
+
+## OpenAI-compatible parameters
+
+All standard [OpenAI chat completion parameters](/apis/develop/gateway/chat-completions#openai-compatible-parameters) are supported:
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `messages` | `array` | List of messages in OpenAI format (`role` + `content`). |
+| `model` | `string` | Model to use (e.g. `gpt-4o-mini`, `claude-sonnet-4-5-20250929`). |
+| `stream` | `boolean` | Stream back partial progress token by token. |
+| `temperature` | `number` | Controls randomness (0-2). |
+| `max_tokens` | `number` | Maximum tokens to generate. |
+| `top_p` | `number` | Nucleus sampling threshold. |
+| `frequency_penalty` | `number` | Penalize tokens by existing frequency. |
+| `presence_penalty` | `number` | Penalize tokens by whether they appear in text so far. |
+| `stop` | `array` | Stop sequences. |
+| `tools` | `array` | List of tools/functions the model may call. |
+| `tool_choice` | `string\|object` | Controls tool selection (`none`, `auto`, or specific tool). |
+| `response_format` | `object` | Force JSON output (`json_object`, `json_schema`, or `text`). |
+| `n` | `number` | Number of completions to generate. |
+| `logprobs` | `boolean` | Return log probabilities of output tokens. |
+
+## Respan parameters
+
+Pass Respan-specific parameters in the request body alongside OpenAI parameters. When using the OpenAI SDK, pass them via `extra_body`.
+
+### Observability
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `customer_identifier` | `string` | Tag to identify the user. See [customer identifier](/documentation/features/user-analytics/customer-identifier). |
+| `metadata` | `object` | Custom key-value pairs for filtering and search. See [custom properties](/documentation/features/tracing/logs/log-parameters#custom-properties). |
+| `custom_identifier` | `string` | Extra indexed tag (shows as "Custom ID" in spans). |
+| `disable_log` | `boolean` | When `true`, only metrics are recorded — input/output messages are omitted. |
+| `request_breakdown` | `boolean` | Returns a summarization of the response (tokens, cost, latency). |
+
+<Accordion title="Example">
+```json
+{
+  "model": "gpt-4o-mini",
+  "messages": [{"role": "user", "content": "Hello"}],
+  "customer_identifier": "user_123",
+  "metadata": {"session_id": "abc123", "team": "ml"},
+  "custom_identifier": "feature-x"
+}
+```
+</Accordion>
+
+### Reliability
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `fallback_models` | `array` | Backup models ranked by priority. See [fallback models](/documentation/features/gateway/advanced-configuration#fallback-models). |
+| `load_balance_group` | `object` | Balance requests across models. See [load balancing](/documentation/features/gateway/advanced-configuration#load-balancing). |
+| `retry_params` | `object` | Configure retries (`retry_enabled`, `num_retries`, `retry_after`). See [retries](/documentation/features/gateway/advanced-configuration#retries). |
+
+<Accordion title="Example">
+```json
+{
+  "model": "gpt-4o-mini",
+  "messages": [{"role": "user", "content": "Hello"}],
+  "fallback_models": ["gemini-1.5-pro", "claude-sonnet-4-5-20250929"],
+  "retry_params": {
+    "retry_enabled": true,
+    "num_retries": 3,
+    "retry_after": 1
+  }
+}
+```
+</Accordion>
+
+### Caching
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `cache_enabled` | `boolean` | Enable response caching. See [caches](/documentation/features/gateway/advanced-configuration#caches). |
+| `cache_ttl` | `number` | Cache time-to-live in seconds (default: 30 days). |
+| `cache_options` | `object` | Set `cache_by_customer: true` to scope cache per customer. |
+
+### Credentials
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `customer_credentials` | `object` | Pass your customer's provider API keys. See [provider keys](/documentation/admin/llm_provider_keys). |
+| `credential_override` | `object` | One-off credential overrides for specific models (e.g. Azure deployments). |
+| `model_name_map` | `object` | Map default model names to custom Azure deployment names. |
+
+<Accordion title="Credential override example">
+```json
+{
+  "model": "azure/gpt-4o",
+  "credential_override": {
+    "azure/gpt-4o": {
+      "api_key": "your-azure-key",
+      "api_base": "your-azure-base-url",
+      "api_version": "2024-02-01"
+    }
+  }
+}
+```
+</Accordion>
+
+### Prompt management
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `prompt` | `object` | Use a Respan-managed prompt template. See [prompt management](/documentation/features/prompt-management/manage-prompts). |
+
+<Accordion title="Prompt example">
+```json
+{
+  "model": "gpt-4o-mini",
+  "messages": [],
+  "prompt": {
+    "prompt_id": "your-prompt-id",
+    "variables": {
+      "user_name": "Sarah"
+    }
+  }
+}
+```
+</Accordion>
+
+## Response format
+
+```json
+{
+  "id": "chatcmpl-e1b9665b-c354-41c5-bbe5-178bd0b69773",
+  "object": "chat.completion",
+  "created": 1761546960,
+  "model": "claude-sonnet-4-5-20250929",
+  "choices": [
+    {
+      "index": 0,
+      "finish_reason": "stop",
+      "message": {
+        "role": "assistant",
+        "content": "I'm doing well, thank you for asking! How can I help you today?"
+      }
+    }
+  ],
+  "usage": {
+    "completion_tokens": 20,
+    "prompt_tokens": 2619,
+    "total_tokens": 2639,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": 0,
+      "audio_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": 0
+    },
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cached_tokens": 2601,
+      "cache_creation_tokens": 0
+    },
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 2601
+  }
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+<Card title="Full API reference" href="/apis/develop/gateway/chat-completions">
+  Complete parameter documentation
+</Card>
+<Card title="Gateway setup" href="/documentation/features/gateway/setup">
+  Choose models and configure the gateway
+</Card>
+<Card title="Advanced configuration" href="/documentation/features/gateway/advanced-configuration">
+  Load balancing, retries, fallbacks, and caching
+</Card>
+<Card title="Prompt management" href="/documentation/features/prompt-management/manage-prompts">
+  Manage and version your prompts
+</Card>
+</CardGroup>

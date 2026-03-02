@@ -1,13 +1,13 @@
 ---
 title: "Retrieve API key"
-api: "GET https://api.respan.ai/api/temporary-keys/{{temporary_api_key_id}}/"
+api: "GET https://api.respan.ai/api/temporary-keys/{id}/"
 ---
 
 You can retrieve a temporary API key by sending a GET request to the temporary keys endpoint.
 
 ## Path parameters
 
-<ParamField path="temporary_api_key_id" type="string">
+<ParamField path="id" type="string">
   The ID of the temporary API key to retrieve.
 </ParamField>
 

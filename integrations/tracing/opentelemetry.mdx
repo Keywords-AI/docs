@@ -9,6 +9,19 @@ description: "Send traces from any OpenTelemetry-instrumented application to Res
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
 ## What is OpenTelemetry?
 
 [OpenTelemetry (OTel)](https://opentelemetry.io/) is an open-source observability framework for generating, collecting, and exporting telemetry data. If your application is already instrumented with OTel, you can send traces directly to Respan without installing any additional SDK — just configure Respan as your OTLP exporter endpoint.

@@ -1,0 +1,104 @@
+---
+title: "Vercel AI SDK"
+description: "Route AI SDK (Vercel) calls through the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## What is AI SDK?
+
+The [AI SDK](https://ai-sdk.dev/) (by Vercel) is a TypeScript toolkit for building AI-powered applications with Next.js, React, and other frameworks. Route LLM calls through the Respan gateway to access 250+ models with a single API key.
+
+## Quickstart
+
+### Step 1: Install packages
+
+```bash
+npm install ai @ai-sdk/openai
+```
+
+### Step 2: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+### Step 3: Point the provider to the Respan gateway
+
+<Tabs>
+<Tab title="OpenAI">
+```typescript
+import { createOpenAI } from '@ai-sdk/openai';
+import { generateText } from 'ai';
+
+const openai = createOpenAI({
+  apiKey: process.env.RESPAN_API_KEY!,
+  baseURL: 'https://api.respan.ai/api',
+});
+
+const result = await generateText({
+  model: openai('gpt-4o-mini'),
+  prompt: 'Tell me a joke',
+});
+```
+</Tab>
+<Tab title="Anthropic">
+```typescript
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { generateText } from 'ai';
+
+const anthropic = createAnthropic({
+  apiKey: process.env.RESPAN_API_KEY!,
+  baseURL: 'https://api.respan.ai/api/anthropic',
+});
+
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-5-20250929'),
+  prompt: 'Tell me a joke',
+});
+```
+</Tab>
+<Tab title="Google Gemini">
+```typescript
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
+
+const google = createGoogleGenerativeAI({
+  apiKey: process.env.RESPAN_API_KEY!,
+  baseURL: 'https://api.respan.ai/api/google/gemini',
+});
+
+const result = await generateText({
+  model: google('gemini-1.5-pro'),
+  prompt: 'Tell me a joke',
+});
+```
+</Tab>
+</Tabs>
+
+### Step 4: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+<Note>
+Looking for tracing integration? See [Tracing > Vercel AI SDK](/integrations/tracing/vercel-tracing).
+</Note>

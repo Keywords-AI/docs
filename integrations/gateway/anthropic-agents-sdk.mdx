@@ -1,0 +1,81 @@
+---
+title: "Claude Agent SDK"
+description: "Route Claude Agent SDK calls through the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## What is Claude Agent SDK?
+
+The [Claude Agent SDK](https://github.com/anthropics/anthropic-agent-sdk) (`claude-agent-sdk`) is a framework for building agent workflows powered by Claude. Route Claude API calls through the Respan gateway so only a single `RESPAN_API_KEY` is needed for both the LLM call and trace export.
+
+## Quickstart
+
+### Step 1: Install packages
+
+```bash
+pip install claude-agent-sdk respan-exporter-anthropic-agents
+```
+
+### Step 2: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+### Step 3: Point the agent to the Respan gateway
+
+```python
+from claude_agent_sdk import ClaudeAgentOptions
+from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
+
+RESPAN_API_KEY = "YOUR_RESPAN_API_KEY"
+
+exporter = RespanAnthropicAgentsExporter(
+    api_key=RESPAN_API_KEY,
+    base_url="https://api.respan.ai/api",
+)
+
+options = ClaudeAgentOptions(
+    permission_mode="bypassPermissions",
+    max_turns=1,
+    env={
+        "ANTHROPIC_BASE_URL": "https://api.respan.ai/api",
+        "ANTHROPIC_AUTH_TOKEN": RESPAN_API_KEY,
+        "ANTHROPIC_API_KEY": RESPAN_API_KEY,
+    },
+)
+
+async for message in exporter.query(
+    prompt="Tell me a joke about AI",
+    options=options,
+):
+    print(type(message).__name__)
+```
+
+### Step 4: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+<Note>
+Looking for tracing integration? See [Tracing > Claude Agent SDK](/integrations/tracing/anthropic-agents-sdk).
+</Note>

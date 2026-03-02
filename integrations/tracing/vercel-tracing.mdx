@@ -1,6 +1,6 @@
 ---
-title: "Vercel AI"
-description: "Trace Vercel AI SDK calls and route LLM requests through the Respan gateway."
+title: "Vercel AI SDK"
+description: "Trace AI SDK (Vercel) calls with Respan."
 ---
 
 <Accordion title="Set up Respan">
@@ -9,9 +9,22 @@ description: "Trace Vercel AI SDK calls and route LLM requests through the Respa
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
 </Accordion>
 
-## What is Vercel AI SDK?
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
 
-The [Vercel AI SDK](https://sdk.vercel.ai/) is a TypeScript toolkit for building AI-powered applications with Next.js, React, and other frameworks. It provides unified APIs for text generation, streaming, tool use, and structured outputs across multiple LLM providers.
+## What is AI SDK?
+
+The [AI SDK](https://ai-sdk.dev/) (by Vercel) is a TypeScript toolkit for building AI-powered applications with Next.js, React, and other frameworks. It provides unified APIs for text generation, streaming, tool use, and structured outputs across multiple LLM providers.
 
 <Check>
 Example project: [GitHub Link](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/vercel-tracing)
@@ -143,64 +156,6 @@ const result = await generateText({
 | `customer_identifier` | User/customer identifier for filtering. |
 | `thread_identifier` | Conversation thread ID. |
 
-## Respan Gateway
-
-Route LLM calls through the Respan gateway with the Vercel AI SDK to access 250+ models.
-
-<Tabs>
-<Tab title="OpenAI">
-```typescript
-import { createOpenAI } from '@ai-sdk/openai';
-import { generateText } from 'ai';
-
-const openai = createOpenAI({
-  apiKey: process.env.RESPAN_API_KEY!,
-  baseURL: 'https://api.respan.ai/api',
-});
-
-const result = await generateText({
-  model: openai('gpt-4o-mini'),
-  prompt: 'Tell me a joke',
-  experimental_telemetry: { isEnabled: true },
-});
-```
-</Tab>
-<Tab title="Anthropic">
-```typescript
-import { createAnthropic } from '@ai-sdk/anthropic';
-import { generateText } from 'ai';
-
-const anthropic = createAnthropic({
-  apiKey: process.env.RESPAN_API_KEY!,
-  baseURL: 'https://api.respan.ai/api/anthropic',
-});
-
-const result = await generateText({
-  model: anthropic('claude-sonnet-4-5-20250929'),
-  prompt: 'Tell me a joke',
-  experimental_telemetry: { isEnabled: true },
-});
-```
-</Tab>
-<Tab title="Google Gemini">
-```typescript
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText } from 'ai';
-
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.RESPAN_API_KEY!,
-  baseURL: 'https://api.respan.ai/api/google/gemini',
-});
-
-const result = await generateText({
-  model: google('gemini-1.5-pro'),
-  prompt: 'Tell me a joke',
-  experimental_telemetry: { isEnabled: true },
-});
-```
-</Tab>
-</Tabs>
-
 ## Troubleshooting
 
 <AccordionGroup>
@@ -233,3 +188,7 @@ new RespanExporter({
 ```
 </Accordion>
 </AccordionGroup>
+
+<Note>
+Looking for gateway integration? See [Gateway > Vercel AI SDK](/integrations/gateway/vercel).
+</Note>

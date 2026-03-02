@@ -1,6 +1,6 @@
 ---
 title: "Create condition"
-api: "POST https://api.respan.ai/automation/conditions/"
+api: "POST https://api.respan.ai/api/conditions/"
 ---
 
 Creates a new automation condition that defines which spans should trigger evaluations.
@@ -67,7 +67,7 @@ The `condition_policy` object contains:
 ```python Python
 import requests
 
-url = "https://api.respan.ai/automation/conditions/"
+url = "https://api.respan.ai/api/conditions/"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
@@ -95,7 +95,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/conditions/" \
+curl -X POST "https://api.respan.ai/api/conditions/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -149,7 +149,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/conditions/" \
+curl -X POST "https://api.respan.ai/api/conditions/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -207,7 +207,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X POST "https://api.respan.ai/automation/conditions/" \
+curl -X POST "https://api.respan.ai/api/conditions/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

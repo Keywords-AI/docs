@@ -32,7 +32,8 @@
             "group": "Get started",
             "pages": [
               "/documentation/getting-started/overview",
-              "/documentation/getting-started/quickstart/tracing"
+              "/documentation/getting-started/quickstart/tracing",
+              "/documentation/getting-started/ask-ai"
             ]
           },
           {
@@ -190,136 +191,121 @@
         "tab": "Integrations",
         "groups": [
           {
-            "group": "Ecosystem",
+            "group": "Overview",
             "pages": [
               "/integrations/overview"
             ]
           },
           {
-            "group": "Respan native",
-            "pages": [
-              "/integrations/tracing/respan-native",
-              "/integrations/tracing/opentelemetry"
-            ]
-          },
-          {
-            "group": "Agent frameworks",
-            "pages": [
-              "/integrations/tracing/openai-agents-sdk",
-              "/integrations/tracing/anthropic-agents-sdk",
-              "/integrations/tracing/vercel-tracing",
-              "/integrations/tracing/langgraph",
-              "/integrations/tracing/haystack",
-              "/integrations/tracing/mastra",
-              "/integrations/tracing/agno",
-              "/integrations/gateway/langchain",
-              "/integrations/gateway/llama-index"
-            ]
-          },
-          {
-            "group": "LLM SDKs",
+            "group": "Tracing",
             "pages": [
               {
-                "group": "OpenAI SDK",
+                "group": "Native",
                 "pages": [
-                  "/integrations/gateway/openai/openai-sdk",
-                  "/integrations/gateway/openai/openai-responses"
+                  "/integrations/tracing/respan-native",
+                  "/integrations/tracing/opentelemetry"
                 ]
               },
-              "/integrations/gateway/anthropic",
-              "/integrations/gateway/google_genai",
-              "/integrations/gateway/litellm",
-              "/integrations/gateway/ruby_llm"
+              {
+                "group": "Integrations",
+                "pages": [
+                  "/integrations/tracing/openai-agents-sdk",
+                  "/integrations/tracing/anthropic-agents-sdk",
+                  "/integrations/tracing/vercel-tracing",
+                  "/integrations/tracing/langgraph",
+                  "/integrations/tracing/haystack",
+                  "/integrations/tracing/mastra",
+                  "/integrations/tracing/agno",
+                  "/integrations/tracing/baml",
+                  "/integrations/tracing/instructor",
+                  "/integrations/tracing/superagent",
+                  "/integrations/tracing/langfuse",
+                  "/integrations/tracing/braintrust"
+                ]
+              }
             ]
           },
           {
-            "group": "Memory",
+            "group": "Gateway",
             "pages": [
-              "/integrations/memory/mem0",
-              "/integrations/memory/hyperspell",
-              "/integrations/memory/cognee"
+              {
+                "group": "Native",
+                "pages": [
+                  "/integrations/gateway/respan-api"
+                ]
+              },
+              {
+                "group": "Integrations",
+                "pages": [
+                  "/integrations/gateway/openai/openai-sdk",
+                  "/integrations/gateway/anthropic",
+                  "/integrations/gateway/google_genai",
+                  "/integrations/gateway/langchain",
+                  "/integrations/gateway/litellm",
+                  "/integrations/gateway/llama-index",
+                  "/integrations/gateway/ruby_llm",
+                  "/integrations/gateway/vercel",
+                  "/integrations/gateway/haystack",
+                  "/integrations/gateway/anthropic-agents-sdk",
+                  "/integrations/gateway/baml"
+                ]
+              }
             ]
           },
           {
-            "group": "Structured output",
+            "group": "LLM Providers",
             "pages": [
-              "/integrations/tracing/baml",
-              "/integrations/tracing/instructor"
+              {
+                "group": "Model providers",
+                "pages": [
+                  "/integrations/providers/openai",
+                  "/integrations/providers/anthropic",
+                  "/integrations/providers/gemini",
+                  "/integrations/providers/mistral",
+                  "/integrations/providers/baseten",
+                  "/integrations/providers/fireworks",
+                  "/integrations/providers/groq",
+                  "/integrations/providers/perplexity",
+                  "/integrations/providers/replicate",
+                  "/integrations/providers/together",
+                  "/integrations/providers/xAI",
+                  "/integrations/providers/ai21labs",
+                  "/integrations/providers/cohere",
+                  "/integrations/providers/deepseek",
+                  "/integrations/providers/inference",
+                  "/integrations/providers/moonshot",
+                  "/integrations/providers/nebius",
+                  "/integrations/providers/nextbit",
+                  "/integrations/providers/novita",
+                  "/integrations/providers/openrouter",
+                  "/integrations/providers/parasail",
+                  "/integrations/providers/reducto"
+                ]
+              },
+              {
+                "group": "Cloud providers",
+                "pages": [
+                  "/integrations/providers/bedrock",
+                  "/integrations/providers/vertex",
+                  "/integrations/providers/azure"
+                ]
+              },
+              "/integrations/providers/custom"
             ]
           },
           {
-            "group": "Security",
-            "pages": [
-              "/integrations/tracing/superagent"
-            ]
-          },
-          {
-            "group": "Analytics",
-            "pages": [
-              "/integrations/analytics/posthog",
-              "/integrations/analytics/moda"
-            ]
-          },
-          {
-            "group": "Coding agents",
+            "group": "Dev Tools",
             "pages": [
               "/integrations/dev-tools/cursor",
-              "/integrations/dev-tools/claude-code"
-            ]
-          },
-          {
-            "group": "Search",
-            "pages": [
-              "/integrations/dev-tools/linkup"
-            ]
-          },
-          {
-            "group": "Voice",
-            "pages": [
-              "/integrations/others/assemblyai"
-            ]
-          },
-          {
-            "group": "Automation",
-            "pages": [
-              "/integrations/others/zapier"
-            ]
-          },
-          {
-            "group": "Migrate",
-            "pages": [
-              "/integrations/tracing/langfuse",
-              "/integrations/tracing/braintrust"
-            ]
-          },
-          {
-            "group": "Providers",
-            "pages": [
-              "/integrations/providers/openai",
-              "/integrations/providers/anthropic",
-              "/integrations/providers/openrouter",
-              "/integrations/providers/groq",
-              "/integrations/providers/fireworks",
-              "/integrations/providers/together",
-              "/integrations/providers/perplexity",
-              "/integrations/providers/azure",
-              "/integrations/providers/vertex",
-              "/integrations/providers/gemini",
-              "/integrations/providers/bedrock",
-              "/integrations/providers/nebius",
-              "/integrations/providers/novita",
-              "/integrations/providers/xAI",
-              "/integrations/providers/ai21labs",
-              "/integrations/providers/baseten",
-              "/integrations/providers/cohere",
-              "/integrations/providers/deepseek",
-              "/integrations/providers/inference",
-              "/integrations/providers/mistral",
-              "/integrations/providers/moonshot",
-              "/integrations/providers/nextbit",
-              "/integrations/providers/parasail",
-              "/integrations/providers/replicate",
-              "/integrations/providers/reducto"
+              "/integrations/dev-tools/claude-code",
+              "/integrations/dev-tools/linkup",
+              "/integrations/dev-tools/posthog",
+              "/integrations/dev-tools/moda",
+              "/integrations/dev-tools/mem0",
+              "/integrations/dev-tools/hyperspell",
+              "/integrations/dev-tools/cognee",
+              "/integrations/dev-tools/assemblyai",
+              "/integrations/dev-tools/zapier"
             ]
           }
         ]
@@ -850,12 +836,36 @@
       "destination": "/integrations/tracing/anthropic-agents-sdk"
     },
     {
-      "source": "/integrations/gateway/vercel",
-      "destination": "/integrations/tracing/vercel-tracing"
+      "source": "/integrations/gateway/openai/openai-responses",
+      "destination": "/integrations/gateway/openai/openai-sdk#responses-api"
     },
     {
-      "source": "/integrations/gateway/haystack",
-      "destination": "/integrations/tracing/haystack"
+      "source": "/integrations/analytics/posthog",
+      "destination": "/integrations/dev-tools/posthog"
+    },
+    {
+      "source": "/integrations/analytics/moda",
+      "destination": "/integrations/dev-tools/moda"
+    },
+    {
+      "source": "/integrations/memory/mem0",
+      "destination": "/integrations/dev-tools/mem0"
+    },
+    {
+      "source": "/integrations/memory/hyperspell",
+      "destination": "/integrations/dev-tools/hyperspell"
+    },
+    {
+      "source": "/integrations/memory/cognee",
+      "destination": "/integrations/dev-tools/cognee"
+    },
+    {
+      "source": "/integrations/others/assemblyai",
+      "destination": "/integrations/dev-tools/assemblyai"
+    },
+    {
+      "source": "/integrations/others/zapier",
+      "destination": "/integrations/dev-tools/zapier"
     },
     {
       "source": "/integrations/others/baml",
@@ -875,7 +885,7 @@
     },
     {
       "source": "/integrations/development-frameworks/llm_framework/openai/openai-responses",
-      "destination": "/integrations/gateway/openai/openai-responses"
+      "destination": "/integrations/gateway/openai/openai-sdk#responses-api"
     },
     {
       "source": "/integrations/development-frameworks/llm_framework/anthropic",
@@ -947,15 +957,15 @@
     },
     {
       "source": "/integrations/development-frameworks/mem0",
-      "destination": "/integrations/memory/mem0"
+      "destination": "/integrations/dev-tools/mem0"
     },
     {
       "source": "/integrations/others/cognee",
-      "destination": "/integrations/memory/cognee"
+      "destination": "/integrations/dev-tools/cognee"
     },
     {
       "source": "/integrations/providers/assemblyai",
-      "destination": "/integrations/others/assemblyai"
+      "destination": "/integrations/dev-tools/assemblyai"
     },
     {
       "source": "/integrations/development-frameworks/baml",
@@ -963,7 +973,7 @@
     },
     {
       "source": "/integrations/others/posthog",
-      "destination": "/integrations/analytics/posthog"
+      "destination": "/integrations/dev-tools/posthog"
     },
     {
       "source": "/integrations/development-frameworks/tracing/agno",
@@ -1499,11 +1509,7 @@
     },
     {
       "source": "/documentation/features/observability/traces/integration-frameworks",
-      "destination": "/integrations/overview#agent-frameworks"
-    },
-    {
-      "source": "/documentation/features/tracing/traces/integration-frameworks",
-      "destination": "/integrations/overview#agent-frameworks"
+      "destination": "/documentation/features/tracing/traces/integration-frameworks"
     },
     {
       "source": "/documentation/features/observability/traces/tracing-sdk",
@@ -1682,7 +1688,7 @@
     },
     {
       "source": "/integration/development-frameworks/llm_framework/openai/openai-responses",
-      "destination": "/integrations/gateway/openai/openai-responses"
+      "destination": "/integrations/gateway/openai/openai-sdk#responses-api"
     },
     {
       "source": "/integration/development-frameworks/llm_framework/anthropic",
@@ -1714,7 +1720,7 @@
     },
     {
       "source": "/integration/development-frameworks/mem0",
-      "destination": "/integrations/memory/mem0"
+      "destination": "/integrations/dev-tools/mem0"
     },
     {
       "source": "/integration/development-frameworks/baml",
@@ -1722,19 +1728,19 @@
     },
     {
       "source": "/integration/others/cognee",
-      "destination": "/integrations/memory/cognee"
+      "destination": "/integrations/dev-tools/cognee"
     },
     {
       "source": "/integration/providers/assemblyai",
-      "destination": "/integrations/others/assemblyai"
+      "destination": "/integrations/dev-tools/assemblyai"
     },
     {
       "source": "/integration/analytics/posthog",
-      "destination": "/integrations/analytics/posthog"
+      "destination": "/integrations/dev-tools/posthog"
     },
     {
       "source": "/integration/dev-tools/zapier",
-      "destination": "/integrations/others/zapier"
+      "destination": "/integrations/dev-tools/zapier"
     },
     {
       "source": "/integration/dev-tools/:slug*",

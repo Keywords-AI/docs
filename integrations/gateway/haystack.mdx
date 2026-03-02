@@ -1,0 +1,91 @@
+---
+title: "Haystack"
+description: "Route Haystack pipeline LLM calls through the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## What is Haystack?
+
+[Haystack](https://haystack.deepset.ai/) is a Python framework for building production-ready LLM pipelines. Use the `RespanGenerator` component to route LLM calls through the Respan gateway.
+
+## Quickstart
+
+### Step 1: Install packages
+
+```bash
+pip install respan-exporter-haystack haystack-ai
+```
+
+### Step 2: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+### Step 3: Use RespanGenerator in your pipeline
+
+```python
+from haystack import Pipeline
+from respan_exporter_haystack import RespanGenerator
+
+pipeline = Pipeline()
+pipeline.add_component("llm", RespanGenerator(
+    api_key="your-api-key",
+    model="gpt-4o-mini",
+))
+
+result = pipeline.run({"llm": {"prompt": "Tell me a joke"}})
+print(result)
+```
+
+### Step 4: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+## Prompts
+
+Use Respan-managed prompts with the gateway:
+
+```python
+from respan_exporter_haystack import RespanGenerator
+
+generator = RespanGenerator(
+    api_key="your-api-key",
+    model="gpt-4o-mini",
+    prompt_id="your-prompt-id",
+    prompt_version=1,
+)
+```
+
+## Configuration
+
+| Component | Description |
+|-----------|-------------|
+| `RespanGenerator` | Routes LLM calls through the Respan gateway. |
+| `RespanChatGenerator` | Chat-specific gateway component. |
+
+See the [Haystack Exporter SDK reference](/sdks/python/exporters/haystack) for the full API.
+
+<Note>
+Looking for tracing integration? See [Tracing > Haystack](/integrations/tracing/haystack).
+</Note>

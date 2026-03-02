@@ -1,13 +1,13 @@
 ---
 title: "Update API key"
-api: "PATCH https://api.respan.ai/api/temporary-keys/{{temporary_api_key_id}}/"
+api: "PATCH https://api.respan.ai/api/temporary-keys/{id}/"
 ---
 
 You can update a temporary API key by sending a PUT request to the temporary keys endpoint.
 
 ## Path parameters
 
-<ParamField path="temporary_api_key_id" type="string">
+<ParamField path="id" type="string">
   The ID of the temporary API key to update.
 </ParamField>
 

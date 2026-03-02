@@ -1,6 +1,6 @@
 ---
 title: "Update prompt version"
-api: "PATCH https://api.respan.ai/api/prompts/<prompt_id>/versions/<prompt_version_id>/"
+api: "PATCH https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/"
 ---
 
 You can update a prompt version by sending a PATCH request to the prompt version endpoint. The request should include the name of the prompt version, and the list of fallback models, load balance models, tools, and whether to deploy this version as the live version.
@@ -125,7 +125,7 @@ Specify how much to penalize new tokens based on whether they appear in the text
 ```Python Python
 import requests
 
-url = "https://api.respan.ai/api/prompts/<prompt_id>/versions/"
+url = "https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/"
 api_key = "YOUR_RESPAN_API_KEY" # Replace with your actual Respan API key
 data = {
 "description": "A description of the prompt version",
@@ -159,7 +159,7 @@ print(response.json())
 ```TypeScript TypeScript
 // Define the function with TypeScript
 
-fetch('https://api.respan.ai/api/prompts/<prompt_id>/versions/', {
+fetch('https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/', {
   method: 'PATCH',
   headers: {
     'Content-Type': 'application/json',

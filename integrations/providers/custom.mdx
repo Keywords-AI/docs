@@ -1,0 +1,93 @@
+---
+title: "Custom Provider"
+description: "Set up a custom or self-hosted LLM provider with the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This section is for **Respan LLM gateway** users. </Note>
+
+Use Respan Gateway to route requests to your own self-hosted or custom LLM provider while keeping unified observability (logs, cost, latency, and reliability metrics) in Respan.
+
+## Prerequisites
+
+- A **Respan API key**
+- A running LLM endpoint that exposes an OpenAI-compatible API
+
+## Setup
+
+<Steps>
+<Step title="Create a custom provider">
+
+Go to **Settings > Integrations** on [platform.respan.ai](https://platform.respan.ai/platform/api/integrations) and click **Add Custom Provider**.
+
+Provide:
+- **Provider name** — A display name (e.g. "My vLLM Server")
+- **Base URL** — The endpoint of your LLM server (e.g. `https://my-vllm.example.com/v1`)
+- **API key** — The authentication key for your server (if required)
+
+</Step>
+
+<Step title="Create a custom model">
+
+After creating the provider, add a custom model:
+- **Model name** — The model identifier your server expects (e.g. `meta-llama/Llama-3-70b`)
+- **Provider** — Select your custom provider from the dropdown
+
+</Step>
+
+<Step title="Use the model via the gateway">
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="YOUR_RESPAN_API_KEY",
+    base_url="https://api.respan.ai/api/",
+)
+
+response = client.chat.completions.create(
+    model="my-custom-model-name",
+    messages=[{"role": "user", "content": "Hello!"}],
+)
+print(response.choices[0].message.content)
+```
+
+</Step>
+
+<Step title="Verify">
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your requests routed through the custom provider.
+
+</Step>
+</Steps>
+
+## API
+
+You can also manage custom providers and models programmatically:
+
+<CardGroup cols={2}>
+<Card title="Custom Providers API" href="/apis/manage/models/custom-providers/list">
+  Create, list, update, and delete custom providers
+</Card>
+<Card title="Custom Models API" href="/apis/manage/models/custom-models/list">
+  Create, list, update, and delete custom models
+</Card>
+</CardGroup>

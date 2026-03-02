@@ -1,12 +1,25 @@
 ---
 title: "BAML"
-description: "Trace and route BAML structured outputs with Respan."
+description: "Trace BAML structured outputs with Respan."
 ---
 
 <Accordion title="Set up Respan">
 1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
 2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
 </Accordion>
 
 ## What is BAML?
@@ -115,21 +128,7 @@ When using the Respan gateway, pass attributes as headers in your BAML client co
 X-Respan-Customer-Identifier: user-123
 ```
 
-## Gateway
-
-Route BAML LLM calls through the Respan gateway by updating your BAML client configuration:
-
-```
-// clients.baml
-client<llm> OpenAIGateway {
-  provider openai
-  options {
-    model "gpt-4o-mini"
-    api_key env.RESPAN_API_KEY
-    base_url "https://api.respan.ai/api"
-  }
-}
-```
-
-Then register this client in your BAML config to route calls through the Respan gateway.
+<Note>
+Looking for gateway integration? See [Gateway > BAML](/integrations/gateway/baml).
+</Note>
 

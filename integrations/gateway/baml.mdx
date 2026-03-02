@@ -1,0 +1,77 @@
+---
+title: "BAML"
+description: "Route BAML structured output calls through the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## What is BAML?
+
+[BAML](https://docs.boundaryml.com/) is a domain-specific language for building reliable LLM functions with structured outputs. Route BAML LLM calls through the Respan gateway by updating your BAML client configuration.
+
+## Quickstart
+
+### Step 1: Install BAML
+
+```bash
+pip install baml-py
+```
+
+### Step 2: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+### Step 3: Update your BAML client configuration
+
+Point your BAML client to the Respan gateway in `clients.baml`:
+
+```
+// clients.baml
+client<llm> OpenAIGateway {
+  provider openai
+  options {
+    model "gpt-4o-mini"
+    api_key env.RESPAN_API_KEY
+    base_url "https://api.respan.ai/api"
+  }
+}
+```
+
+Register this client in your BAML config to route calls through the Respan gateway.
+
+### Step 4: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+## Attributes
+
+Pass Respan attributes as headers in your BAML client configuration:
+
+```
+X-Respan-Customer-Identifier: user-123
+```
+
+<Note>
+Looking for tracing integration? See [Tracing > BAML](/integrations/tracing/baml).
+</Note>

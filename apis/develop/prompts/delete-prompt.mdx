@@ -1,6 +1,6 @@
 ---
 title: "Delete prompt"
-api: "DELETE https://api.respan.ai/api/prompts/<prompt_id>/"
+api: "DELETE https://api.respan.ai/api/prompts/{prompt_id}/"
 ---
 
 You can delete a prompt by sending a DELETE request to the prompt endpoint.
@@ -11,7 +11,7 @@ You can delete a prompt by sending a DELETE request to the prompt endpoint.
 ```python example.py
 import requests
 
-url = "https://api.respan.ai/api/prompts/<prompt_id>/"
+url = "https://api.respan.ai/api/prompts/{prompt_id}/"
 api_key = "YOUR_RESPAN_API_KEY" # Replace with your actual Respan API key
 headers = {
     "Authorization": f"Bearer {api_key}",
@@ -23,7 +23,7 @@ print(response.json())
 ```
 
 ```typescript example.ts
-fetch('https://api.respan.ai/api/prompts/<prompt_id>/', 
+fetch('https://api.respan.ai/api/prompts/{prompt_id}/', 
 {
   method: 'DELETE',
   headers: {

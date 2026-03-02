@@ -1,6 +1,6 @@
 ---
 title: "Delete version"
-api: "DELETE https://api.respan.ai/api/prompts/<prompt_id>/versions/<prompt_version_id>/"
+api: "DELETE https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/"
 ---
 
 You can delete a prompt version by sending a DELETE request to the prompt version endpoint.
@@ -11,7 +11,7 @@ You can delete a prompt version by sending a DELETE request to the prompt versio
 ```python example.py
 import requests
 
-url = "https://api.respan.ai/prompts/<prompt_id>/versions/<prompt_version_id>/"
+url = "https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/"
 api_key = "YOUR_RESPAN_API_KEY" # Replace with your actual Respan API key
 headers = {
     "Authorization": f"Bearer {api_key}",
@@ -23,7 +23,7 @@ print(response.json())
 ```
 
 ```typescript example.ts
-fetch('https://api.respan.ai/prompts/<prompt_id>/versions/<prompt_version_id>/', 
+fetch('https://api.respan.ai/api/prompts/{prompt_id}/versions/{version}/', 
 {
   method: 'DELETE',
   headers: {

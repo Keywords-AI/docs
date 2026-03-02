@@ -1,12 +1,25 @@
 ---
-title: "Chat completion"
-description: "Complete guide to integrating Respan with OpenAI SDK for seamless LLM gateway usage."
+title: "OpenAI SDK"
+description: "Route LLM requests through the Respan gateway using the OpenAI SDK."
 ---
 
 <Accordion title="Set up Respan">
 1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
 2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
 3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
 </Accordion>
 
 <Note> This integration is for the **Respan gateway**. </Note>
@@ -114,9 +127,9 @@ println(chatCompletion.Choices[0].Message.Content)
 <CodeGroup>
 ```python Python {3-4}
 # OpenAI GPT models
-model = "gpt-4o"       
-# model = "claude-3-5-sonnet-20241022"  
-# model = "gemini-1.5-pro"           
+model = "gpt-4o"
+# model = "claude-3-5-sonnet-20241022"
+# model = "gemini-1.5-pro"
 
 response = client.chat.completions.create(
     model=model,
@@ -126,9 +139,9 @@ response = client.chat.completions.create(
 
 ```typescript Typescript {3-4}
 // OpenAI GPT models
-let model = "gpt-4o";           
-// model = "claude-3-5-sonnet-20241022";  
-// model = "gemini-1.5-pro";     
+let model = "gpt-4o";
+// model = "claude-3-5-sonnet-20241022";
+// model = "gemini-1.5-pro";
 
 const response = await client.chat.completions.create({
     model: model,
@@ -274,6 +287,126 @@ The `prompt` object supports a `schema_version` field that controls how prompt c
 <Warning>
 OpenAI SDKs strip fields like `schema_version`, `patch`, and `prompt_slug` during validation. **Prompt schema v2 requires raw HTTP requests** instead of the OpenAI SDK. See the [Standard API examples](/documentation/features/prompt-management/manage-prompts#prompt-schema-v2-recommended).
 </Warning>
+
+## Responses API
+
+The [Responses API](https://platform.openai.com/docs/api-reference/responses) is OpenAI's most advanced interface for generating model responses. It supports text and image inputs, text outputs, and stateful interactions using the output of previous responses as input. Extend the model's capabilities with built-in tools for file search, web search, computer use, and more.
+
+<Warning>
+This works exclusively with **OpenAI models** and cannot be used with models from other providers.
+</Warning>
+
+<Warning>
+**Pass-through Integration Limitations**: This is a pass-through integration. Some Respan features are **not available**, including:
+- **User Rate Limits**: You cannot enforce rate limits on your users.
+- **Fallbacks**: You cannot set up fallback models.
+- **Load Balancing**: You cannot distribute traffic across multiple models or credentials.
+- **Prompt Management**: You cannot use prompts stored in Respan directly.
+</Warning>
+
+Pass Respan parameters via a base64-encoded header:
+
+```python
+from base64 import b64encode
+import json
+
+respan_params = {
+    "metadata": {
+        "paid_user": "true",
+    }
+}
+
+respan_params_header = {
+    "X-Data-Respan-Params": b64encode(json.dumps(respan_params).encode()).decode(),
+}
+```
+
+### Text input
+
+```python
+response = client.responses.create(
+    model="gpt-4o",
+    input="Tell me a three sentence bedtime story about a unicorn.",
+    extra_headers=respan_params_header,
+)
+print(response)
+```
+
+### File search
+
+```python
+response = client.responses.create(
+    model="gpt-4o",
+    tools=[
+        {
+            "type": "file_search",
+            "vector_store_ids": ["vs_67d3bdd0c8888191adfa890a9e829480"],
+            "max_num_results": 20,
+        }
+    ],
+    input="What are the attributes of an ancient brown dragon?",
+    extra_headers=respan_params_header,
+)
+```
+
+### Reasoning
+
+```python
+response = client.responses.create(
+    model="o3-mini",
+    input="How much wood would a woodchuck chuck?",
+    reasoning={"effort": "high"},
+    extra_headers=respan_params_header,
+)
+print(response)
+```
+
+### Streaming
+
+```python
+response = client.responses.create(
+    model="gpt-4o",
+    instructions="You are a helpful assistant.",
+    input="Hello!",
+    stream=True,
+    extra_headers=respan_params_header,
+)
+
+for chunk in response:
+    print(chunk)
+```
+
+### Functions
+
+```python
+tools = [
+    {
+        "type": "function",
+        "name": "get_current_weather",
+        "description": "Get the current weather in a given location",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "location": {
+                    "type": "string",
+                    "description": "The city and state, e.g. San Francisco, CA",
+                },
+                "unit": {"type": "string", "enum": ["celsius", "fahrenheit"]},
+            },
+            "required": ["location", "unit"],
+        },
+    }
+]
+
+response = client.responses.create(
+    model="gpt-4o",
+    tools=tools,
+    input="What is the weather like in Boston today?",
+    tool_choice="auto",
+    extra_headers=respan_params_header,
+)
+print(response)
+```
 
 ## Azure OpenAI
 To call Azure OpenAI models, instead of using azure OpenAI's client, the easier way is to use the OpenAI client.

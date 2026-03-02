@@ -1,6 +1,6 @@
 ---
 title: Delete score
-api: DELETE https://api.respan.ai/api/scores/{score_id}/
+api: DELETE https://api.respan.ai/api/scores/{id}/
 ---
 
 Deletes an evaluation score.
@@ -9,7 +9,7 @@ Deletes an evaluation score.
 ```Python Python
 import requests
 
-url = "https://api.respan.ai/api/scores/{score_id}/"
+url = "https://api.respan.ai/api/scores/{id}/"
 api_key = "YOUR_KEY" # Replace with your actual Respan API key
 headers = {
     "Authorization": f"Bearer {api_key}",

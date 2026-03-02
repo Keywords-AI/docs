@@ -1,6 +1,6 @@
 ---
 title: Update custom provider
-api: PATCH https://api.respan.ai/api/providers/{pk}/
+api: PATCH https://api.respan.ai/api/providers/{provider_id}/
 ---
 
 Update a specific custom provider. Only the provided fields will be updated - other fields remain unchanged.
@@ -14,7 +14,7 @@ Update a specific custom provider. Only the provided fields will be updated - ot
 
 ## Path parameters
 
-<ParamField path="pk" type="integer" required>
+<ParamField path="provider_id" type="integer" required>
   The provider's primary key ID to update.
   
   <Accordion title="Example">

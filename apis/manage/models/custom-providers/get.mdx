@@ -1,6 +1,6 @@
 ---
 title: Retrieve custom provider
-api: GET https://api.respan.ai/api/providers/{pk}/
+api: GET https://api.respan.ai/api/providers/{provider_id}/
 ---
 
 Retrieve a specific custom provider by its primary key ID.
@@ -11,7 +11,7 @@ Retrieve a specific custom provider by its primary key ID.
 
 ## Path parameters
 
-<ParamField path="pk" type="integer" required>
+<ParamField path="provider_id" type="integer" required>
   The provider's primary key ID (numeric database ID).
   
   <Accordion title="Example">

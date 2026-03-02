@@ -40,13 +40,13 @@ fetch('https://api.respan.ai/api/prompts/',
 
 ## Get a single prompt
 
-You can get a single prompt by sending a GET request to the `/prompts/<prompt_id>/` endpoint.
+You can get a single prompt by sending a GET request to the `/prompts/{prompt_id}/` endpoint.
 
 <CodeGroup>
 ```python example.py
 import requests
 
-url = "https://api.respan.ai/api/prompts/<prompt_id>/"
+url = "https://api.respan.ai/api/prompts/{prompt_id}/"
 api_key = "YOUR_RESPAN_API_KEY" # Replace with your actual Respan API key
 headers = {
     "Authorization": f"Bearer {api_key}",
@@ -58,7 +58,7 @@ print(response.json())
 ```
 
 ```typescript example.ts
-fetch('https://api.respan.ai/api/prompts/<prompt_id>/', 
+fetch('https://api.respan.ai/api/prompts/{prompt_id}/', 
 {
   method: 'GET',
   headers: {

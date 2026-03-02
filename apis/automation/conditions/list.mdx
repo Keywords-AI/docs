@@ -1,6 +1,6 @@
 ---
 title: "List conditions"
-api: "GET https://api.respan.ai/automation/conditions/"
+api: "GET https://api.respan.ai/api/conditions/"
 ---
 
 Returns a paginated list of automation conditions for your organization.
@@ -33,7 +33,7 @@ Authorization: Bearer YOUR_API_KEY
 ```python Python
 import requests
 
-url = "https://api.respan.ai/automation/conditions/"
+url = "https://api.respan.ai/api/conditions/"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY"
 }
@@ -43,7 +43,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X GET "https://api.respan.ai/automation/conditions/" \
+curl -X GET "https://api.respan.ai/api/conditions/" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -64,7 +64,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X GET "https://api.respan.ai/automation/conditions/?page=1&page_size=10" \
+curl -X GET "https://api.respan.ai/api/conditions/?page=1&page_size=10" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 
@@ -85,7 +85,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X GET "https://api.respan.ai/automation/conditions/?search=success&condition_type=single_log" \
+curl -X GET "https://api.respan.ai/api/conditions/?search=success&condition_type=single_log" \
   -H "Authorization: Bearer YOUR_API_KEY"
 ```
 

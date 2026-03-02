@@ -1,6 +1,6 @@
 ---
 title: "Update automation"
-api: "PATCH https://api.respan.ai/automation/automations/{automation_id}/"
+api: "PATCH https://api.respan.ai/api/automations/{automation_id}/"
 ---
 
 Updates specific fields of an existing automation. Use this to enable/disable automations, change sampling rates, or update evaluator lists.
@@ -41,7 +41,7 @@ All fields are optional - only include the fields you want to update.
 import requests
 
 automation_id = "auto-eval-001"
-url = f"https://api.respan.ai/automation/automations/{automation_id}/"
+url = f"https://api.respan.ai/api/automations/{automation_id}/"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
@@ -57,7 +57,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PATCH "https://api.respan.ai/automation/automations/auto-eval-001/" \
+curl -X PATCH "https://api.respan.ai/api/automations/auto-eval-001/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -84,7 +84,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PATCH "https://api.respan.ai/automation/automations/auto-eval-001/" \
+curl -X PATCH "https://api.respan.ai/api/automations/auto-eval-001/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -115,7 +115,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PATCH "https://api.respan.ai/automation/automations/auto-eval-001/" \
+curl -X PATCH "https://api.respan.ai/api/automations/auto-eval-001/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -150,7 +150,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PATCH "https://api.respan.ai/automation/automations/auto-eval-001/" \
+curl -X PATCH "https://api.respan.ai/api/automations/auto-eval-001/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -183,7 +183,7 @@ print(response.json())
 ```
 
 ```bash cURL
-curl -X PATCH "https://api.respan.ai/automation/automations/auto-eval-001/" \
+curl -X PATCH "https://api.respan.ai/api/automations/auto-eval-001/" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

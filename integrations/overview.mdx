@@ -1,11 +1,15 @@
 ---
 title: "Overview"
-description: "Use your own API keys through Respan"
+description: "Integrate Respan with your LLM stack — tracing, gateway, and dev tools."
 ---
 
-Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this section, you will learn how to call those models and how to use Respan with your current LLM frameworks.
+Respan integrates with your existing LLM stack. Choose the integration type that matches your use case.
 
-## Respan native
+## Tracing
+
+Capture traces from your LLM applications and agent frameworks.
+
+### Native
 
 <CardGroup cols={3}>
 <Card href="/integrations/tracing/respan-native">
@@ -26,10 +30,10 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
 </Card>
 </CardGroup>
 
-## Agent frameworks
+### Integrations
 
 <CardGroup cols={3}>
-<Card href="/integrations/tracing/openai-agents-sdk" className="bg-white">
+<Card href="/integrations/tracing/openai-agents-sdk">
   <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/openai_agent_v0.png" alt="OpenAI Agents SDK" style={{
     pointerEvents: 'none',
   }} />
@@ -85,19 +89,19 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/gateway/langchain">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langchain_v0.png" alt="LangChain" style={{
+<Card href="/integrations/tracing/baml">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0.png" alt="BAML" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langchain_v0_black.png" alt="LangChain" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0_black.png" alt="BAML" style={{
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/gateway/llama-index">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/llamaindex_v0.png" alt="LlamaIndex" style={{
+<Card href="/integrations/tracing/instructor">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0.png" alt="Instructor" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/llamaindex_v0_black.png" alt="LlamaIndex" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0_black.png" alt="Instructor" style={{
     pointerEvents: 'none'
   }} />
 </Card>
@@ -109,9 +113,42 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
     pointerEvents: 'none'
   }} />
 </Card>
+<Card href="/integrations/tracing/langfuse">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0_black.png" alt="Langfuse" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/tracing/braintrust">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/braintrust_v0.png" alt="Braintrust" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/braintrust_v0_black.png" alt="Braintrust" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
 </CardGroup>
 
-## LLM SDKs
+## Gateway
+
+Route LLM requests through the Respan gateway to access 250+ models with unified observability.
+
+### Native
+
+<CardGroup cols={3}>
+<Card href="/integrations/gateway/respan-api">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/respan_v0.png" alt="Respan" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/respan_v0_black.png" alt="Respan" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+</CardGroup>
+
+### Integrations
 
 <CardGroup cols={3}>
 <Card href="/integrations/gateway/openai/openai-sdk">
@@ -138,11 +175,27 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
     pointerEvents: 'none'
   }} />
 </Card>
+<Card href="/integrations/gateway/langchain">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langchain_v0.png" alt="LangChain" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langchain_v0_black.png" alt="LangChain" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
 <Card href="/integrations/gateway/litellm">
   <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/litellm_v0.png" alt="LiteLLM" style={{
     pointerEvents: 'none'
   }} />
   <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/litellm_v0_black.png" alt="LiteLLM" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/gateway/llama-index">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/llamaindex_v0.png" alt="LlamaIndex" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/llamaindex_v0_black.png" alt="LlamaIndex" style={{
     pointerEvents: 'none'
   }} />
 </Card>
@@ -156,159 +209,7 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
 </Card>
 </CardGroup>
 
-## Memory
-
-<CardGroup cols={3}>
-<Card href="/integrations/memory/mem0">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mem0_v0.png" alt="Mem0" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mem0_v0_black.png" alt="Mem0" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/memory/hyperspell">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/hyperspell_v0.png" alt="Hyperspell" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/hyperspell_v0_black.png" alt="Hyperspell" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/memory/cognee">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cognee_v0.png" alt="Cognee" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cognee_v0_black.png" alt="Cognee" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Structured output
-
-<CardGroup cols={3}>
-<Card href="/integrations/tracing/baml">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0.png" alt="BAML" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baml_v0_black.png" alt="BAML" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/tracing/instructor">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0.png" alt="Instructor" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/instructor_v0_black.png" alt="Instructor" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Analytics
-
-<CardGroup cols={3}>
-<Card href="/integrations/analytics/posthog">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/posthog_v0.png" alt="PostHog" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/posthog_v0_black.png" alt="PostHog" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/analytics/moda">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moda_v0.png" alt="Moda" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moda_v0_black.png" alt="Moda" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Coding agents
-
-<CardGroup cols={3}>
-<Card href="/integrations/dev-tools/cursor">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cursor_v0.png" alt="Cursor" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cursor_v0_black.png" alt="Cursor" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/dev-tools/claude-code">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/claude_code_v0.png" alt="Claude Code" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/claude_code_v0_black.png" alt="Claude Code" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Search
-
-<CardGroup cols={3}>
-<Card href="/integrations/dev-tools/linkup">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/linkup_v0.png" alt="Linkup" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/linkup_v0_black.png" alt="Linkup" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Voice
-
-<CardGroup cols={3}>
-<Card href="/integrations/others/assemblyai">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/assemblyai_v0.png" alt="AssemblyAI" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/assemblyai_v0_black.png" alt="AssemblyAI" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Automation
-
-<CardGroup cols={3}>
-<Card href="/integrations/others/zapier">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/zapier_v0.png" alt="Zapier" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/zapier_v0_black.png" alt="Zapier" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Migrate
-
-<CardGroup cols={3}>
-<Card href="/integrations/tracing/langfuse">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0.png" alt="Langfuse" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/langfuse_v0_black.png" alt="Langfuse" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/tracing/braintrust">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/braintrust_v0.png" alt="Braintrust" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/braintrust_v0_black.png" alt="Braintrust" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-</CardGroup>
-
-## Providers
+### LLM Providers
 
 <CardGroup cols={3}>
 <Card href="/integrations/providers/openai">
@@ -399,54 +300,6 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/providers/nebius">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/nebius_v0.png" alt="Nebius AI" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/nebius_v0_black.png" alt="Nebius AI" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/novita">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/novita_v0.png" alt="Novita AI" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/novita_v0_black.png" alt="Novita AI" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/xAI">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/xai_v0.png" alt="xAI" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/xai_v0_black.png" alt="xAI" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/ai21labs">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/ai21labs_v0.png" alt="AI21 Labs" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/ai21labs_v0_black.png" alt="AI21 Labs" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/baseten">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baseten_v0.png" alt="Baseten" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/baseten_v0_black.png" alt="Baseten" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/cohere">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cohere_v0.png" alt="Cohere" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cohere_v0_black.png" alt="Cohere" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
 <Card href="/integrations/providers/deepseek">
   <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/deepseek_v0.png" alt="DeepSeek" style={{
     pointerEvents: 'none'
@@ -455,62 +308,91 @@ Respan provides a robust and flexible LLM gateway with 250+ LLMs. In this sectio
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/providers/inference">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/inference_v0.png" alt="Inference" style={{
+</CardGroup>
+
+To see the full list of supported LLMs, check out the [public model library](https://www.respan.ai/llm-library).
+
+## Dev Tools
+
+<CardGroup cols={3}>
+<Card href="/integrations/dev-tools/cursor">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cursor_v0.png" alt="Cursor" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/inference_v0_black.png" alt="Inference" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/mistral">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mistral_v0.png" alt="Mistral" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mistral_v0_black.png" alt="Mistral" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/moonshot">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moonshot_v0.png" alt="Moonshot" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moonshot_v0_black.png" alt="Moonshot" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cursor_v0_black.png" alt="Cursor" style={{
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/providers/nextbit">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/nextbit_v0.png" alt="Nextbit" style={{
+<Card href="/integrations/dev-tools/claude-code">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/claude_code_v0.png" alt="Claude Code" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/nextbit_v0_black.png" alt="Nextbit" style={{
-    pointerEvents: 'none'
-  }} />
-</Card>
-<Card href="/integrations/providers/parasail">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/parasail_v0.png" alt="Parasail" style={{
-    pointerEvents: 'none'
-  }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/parasail_v0_black.png" alt="Parasail" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/claude_code_v0_black.png" alt="Claude Code" style={{
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/providers/replicate">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/replicate_v0.png" alt="Replicate" style={{
+<Card href="/integrations/dev-tools/linkup">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/linkup_v0.png" alt="Linkup" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/replicate_v0_black.png" alt="Replicate" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/linkup_v0_black.png" alt="Linkup" style={{
     pointerEvents: 'none'
   }} />
 </Card>
-<Card href="/integrations/providers/reducto">
-  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/reducto_v0.png" alt="Reducto" style={{
+<Card href="/integrations/dev-tools/posthog">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/posthog_v0.png" alt="PostHog" style={{
     pointerEvents: 'none'
   }} />
-  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/reducto_v0_black.png" alt="Reducto" style={{
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/posthog_v0_black.png" alt="PostHog" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/moda">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moda_v0.png" alt="Moda" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/moda_v0_black.png" alt="Moda" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/mem0">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mem0_v0.png" alt="Mem0" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/mem0_v0_black.png" alt="Mem0" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/hyperspell">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/hyperspell_v0.png" alt="Hyperspell" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/hyperspell_v0_black.png" alt="Hyperspell" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/cognee">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cognee_v0.png" alt="Cognee" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/cognee_v0_black.png" alt="Cognee" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/assemblyai">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/assemblyai_v0.png" alt="AssemblyAI" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/assemblyai_v0_black.png" alt="AssemblyAI" style={{
+    pointerEvents: 'none'
+  }} />
+</Card>
+<Card href="/integrations/dev-tools/zapier">
+  <img className="block dark:hidden" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/zapier_v0.png" alt="Zapier" style={{
+    pointerEvents: 'none'
+  }} />
+  <img className="hidden dark:block" src="https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/integration_cards/zapier_v0_black.png" alt="Zapier" style={{
     pointerEvents: 'none'
   }} />
 </Card>
 </CardGroup>
-
-To know the full list of supported LLMs, you can check out our [public model library](https://www.respan.ai/llm-library).
