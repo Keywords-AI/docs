@@ -26,11 +26,82 @@ Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool
 
 The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is a lightweight framework for building multi-agent workflows with tools, handoffs, and guardrails. It provides a built-in tracing system that captures agent runs, LLM generations, tool calls, and agent-to-agent handoffs.
 
-<Check>
-Example project: [GitHub Link](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/openai-agents-sdk)
-</Check>
+<Accordion title="Example projects">
+- [Tracing SDK](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/respan-tracing-sdk/integrations/openai-agents-sdk)
+- [Exporter](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/openai-agents-sdk)
+- [Gateway](https://github.com/respanai/respan-example-projects/tree/main/python/gateway/openai-agents)
+</Accordion>
 
 ## Setup
+
+<Tabs>
+<Tab title="Tracing SDK (Recommended)">
+
+<Steps>
+<Step title="Install packages">
+
+```bash
+pip install openai-agents respan-tracing python-dotenv
+```
+
+</Step>
+
+<Step title="Set environment variables">
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+export OPENAI_API_KEY="YOUR_OPENAI_API_KEY"
+```
+
+</Step>
+
+<Step title="Initialize and run">
+
+```python
+import os
+import asyncio
+from agents import Agent, Runner
+from respan_tracing import RespanTelemetry
+from respan_tracing.decorators import workflow
+from respan_tracing.instruments import Instruments
+
+# Initialize BEFORE creating agents — enables auto-instrumentation
+telemetry = RespanTelemetry(
+    app_name="openai-agents-hello-world",
+    api_key=os.getenv("RESPAN_API_KEY"),
+    block_instruments={Instruments.REQUESTS, Instruments.URLLIB3},
+)
+
+agent = Agent(
+    name="Assistant",
+    instructions="You only respond in haikus.",
+)
+
+@workflow(name="hello_world_workflow")
+async def main_workflow():
+    result = await Runner.run(agent, "Tell me about recursion.")
+    return result.final_output
+
+async def main():
+    try:
+        await main_workflow()
+    finally:
+        telemetry.flush()
+
+asyncio.run(main())
+```
+
+</Step>
+
+<Step title="View your trace">
+
+Open the [Traces page](https://platform.respan.ai/platform/traces) to see your workflow with auto-instrumented LLM spans.
+
+</Step>
+</Steps>
+
+</Tab>
+<Tab title="Exporter">
 
 <Steps>
 <Step title="Install packages">
@@ -104,7 +175,25 @@ Open the [Traces page](https://platform.respan.ai/platform/traces) to see your a
 </Step>
 </Steps>
 
+</Tab>
+</Tabs>
+
 ## Configuration
+
+<Tabs>
+<Tab title="Tracing SDK (Recommended)">
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `app_name` | `str` | `"respan"` | Application name attached to all spans. |
+| `api_key` | `str \| None` | `None` | Falls back to `RESPAN_API_KEY` env var. |
+| `block_instruments` | `Set[Instruments]` | `None` | Instruments to disable (e.g., `REQUESTS`, `URLLIB3`). |
+| `is_batching_enabled` | `bool` | `True` | Enable batch span processing. |
+
+See [RespanTelemetry reference](/sdks/python/tracing/main/initialize) for the full parameter list.
+
+</Tab>
+<Tab title="Exporter">
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
@@ -113,10 +202,17 @@ Open the [Traces page](https://platform.respan.ai/platform/traces) to see your a
 
 See the OpenAI Agents Exporter SDK reference for [Python](/sdks/python/exporters/openai-agents) or [TypeScript](/sdks/typescript/exporters/openai-agents).
 
-## Tool calls
+</Tab>
+</Tabs>
+
+## Examples
+
+### Tool calls
 
 Tool calls are automatically captured as spans with inputs, outputs, and timing.
 
+<Tabs>
+<Tab title="Exporter">
 <CodeGroup>
 ```python Python
 from agents import Agent, Runner, set_trace_processors, function_tool
@@ -161,8 +257,32 @@ const result = await run(agent, "What's the weather in San Francisco?");
 console.log(result.finalOutput);
 ```
 </CodeGroup>
+</Tab>
+<Tab title="Tracing SDK">
+```python
+from agents import Agent, Runner, function_tool
+from respan_tracing.decorators import workflow, tool
 
-## Handoffs
+@tool(name="get_weather_tool")
+@function_tool
+def get_weather(city: str) -> str:
+    return f"The weather in {city} is sunny, 72°F"
+
+agent = Agent(
+    name="Weather Agent",
+    instructions="Help users check the weather.",
+    tools=[get_weather],
+)
+
+@workflow(name="tool_workflow")
+async def main():
+    result = await Runner.run(agent, "What's the weather in San Francisco?")
+    print(result.final_output)
+```
+</Tab>
+</Tabs>
+
+### Handoffs
 
 Agent-to-agent handoffs are traced with full context.
 
@@ -187,9 +307,9 @@ result = Runner.run_sync(support_agent, "I have a billing question")
 print(result.final_output)
 ```
 
-## Agents as tools
+### Agents as tools
 
-Instead of handoffs (where the new agent takes over), you can use agents as tools — the tool agent runs independently and returns its result to the caller:
+Instead of handoffs (where the new agent takes over), you can use agents as tools — the tool agent runs independently and returns its result to the caller.
 
 ```python
 from agents import Agent, Runner, set_trace_processors, trace
@@ -227,9 +347,9 @@ with trace("Translation orchestrator"):
     print(result.final_output)
 ```
 
-## Guardrails
+### Guardrails
 
-Run input guardrails in parallel with the agent to quickly reject invalid inputs:
+Run input guardrails in parallel with the agent to quickly reject invalid inputs.
 
 ```python
 from agents import (
@@ -273,9 +393,76 @@ except InputGuardrailTripwireTriggered:
     print("Guardrail triggered — input rejected")
 ```
 
-## Dynamic system prompts
+### Streaming
 
-Use a function for `instructions` to customize prompts based on runtime context:
+Stream agent responses with real-time text deltas.
+
+```python
+from openai.types.responses import ResponseTextDeltaEvent
+from agents import Agent, Runner
+
+agent = Agent(name="Joker", instructions="You tell jokes.")
+
+result = Runner.run_streamed(agent, input="Tell me 3 jokes.")
+async for event in result.stream_events():
+    if event.type == "raw_response_event" and isinstance(
+        event.data, ResponseTextDeltaEvent
+    ):
+        print(event.data.delta, end="", flush=True)
+```
+
+### Parallelization
+
+Run multiple agents concurrently and pick the best result.
+
+```python
+from agents import Agent, Runner, ItemHelpers, trace
+import asyncio
+
+spanish_agent = Agent(name="translator", instructions="Translate to Spanish")
+picker = Agent(name="picker", instructions="Pick the best translation")
+
+with trace("Parallel translation"):
+    res_1, res_2, res_3 = await asyncio.gather(
+        Runner.run(spanish_agent, "Good morning"),
+        Runner.run(spanish_agent, "Good morning"),
+        Runner.run(spanish_agent, "Good morning"),
+    )
+
+    outputs = [ItemHelpers.text_message_outputs(r.new_items) for r in [res_1, res_2, res_3]]
+    best = await Runner.run(picker, f"Translations:\n{chr(10).join(outputs)}")
+    print(best.final_output)
+```
+
+### Deterministic flows
+
+Sequential agent pipeline with validation gates.
+
+```python
+from pydantic import BaseModel
+from agents import Agent, Runner, trace
+
+outline_agent = Agent(name="outliner", instructions="Generate a story outline.")
+
+class CheckResult(BaseModel):
+    good_quality: bool
+    is_scifi: bool
+
+checker_agent = Agent(name="checker", instructions="Judge outline quality.", output_type=CheckResult)
+writer_agent = Agent(name="writer", instructions="Write a short story from the outline.")
+
+with trace("Story pipeline"):
+    outline = await Runner.run(outline_agent, "A robot discovers emotions")
+    check = await Runner.run(checker_agent, outline.final_output)
+
+    if check.final_output.good_quality and check.final_output.is_scifi:
+        story = await Runner.run(writer_agent, outline.final_output)
+        print(story.final_output)
+```
+
+### Dynamic system prompts
+
+Use a function for `instructions` to customize prompts based on runtime context.
 
 ```python
 from agents import Agent, Runner, RunContextWrapper, set_trace_processors
@@ -303,3 +490,7 @@ result = await Runner.run(
 )
 print(result.final_output)
 ```
+
+<Note>
+Looking for the gateway integration? See [Gateway > OpenAI Agents SDK](/integrations/gateway/openai-agents-sdk).
+</Note>

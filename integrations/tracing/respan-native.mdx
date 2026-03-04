@@ -26,11 +26,10 @@ Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool
 
 The [Respan tracing SDK](https://pypi.org/project/respan-tracing/) is a Python library built on [OpenTelemetry](https://opentelemetry.io/) that captures telemetry for LLM applications. Add `@workflow`, `@task`, `@agent`, and `@tool` decorators to your code to get full trace visibility with auto-instrumented LLM calls.
 
-<Check>
-Example projects:
+<Accordion title="Example projects">
 - [Python](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/respan-tracing-sdk)
 - [TypeScript](https://github.com/respanai/respan-example-projects/tree/main/typescript/tracing/respan-tracing-sdk)
-</Check>
+</Accordion>
 
 ## Setup
 
@@ -224,66 +223,4 @@ def my_workflow(user_id: str):
 ```
 </CodeGroup>
 
-## Gateway
-
-Route LLM calls through the Respan gateway to use 250+ models with a single API key, while capturing full observability data.
-
-<CodeGroup>
-```python Python
-from respan_tracing import RespanTelemetry, workflow, task
-from openai import OpenAI
-
-telemetry = RespanTelemetry()
-
-# Point OpenAI client to Respan gateway
-client = OpenAI(
-    api_key="YOUR_RESPAN_API_KEY",
-    base_url="https://api.respan.ai/api",
-)
-
-@task(name="generate")
-def generate(prompt: str):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.choices[0].message.content
-
-@workflow(name="gateway_workflow")
-def gateway_workflow():
-    return generate("Hello from the gateway!")
-
-gateway_workflow()
-```
-```typescript JavaScript
-import { RespanTelemetry } from '@respan/tracing';
-import OpenAI from 'openai';
-
-const respanAi = new RespanTelemetry({
-    apiKey: process.env.RESPAN_API_KEY || "",
-    appName: 'gateway-app',
-});
-
-// Point OpenAI client to Respan gateway
-const openai = new OpenAI({
-    apiKey: process.env.RESPAN_API_KEY,
-    baseURL: 'https://api.respan.ai/api',
-});
-
-async function main() {
-    return await respanAi.withWorkflow(
-        { name: 'gateway_workflow' },
-        async () => {
-            const completion = await openai.chat.completions.create({
-                model: 'gpt-4o-mini',
-                messages: [{ role: 'user', content: 'Hello from the gateway!' }],
-            });
-            return completion.choices[0].message.content;
-        }
-    );
-}
-
-main().catch(console.error);
-```
-</CodeGroup>
 

@@ -1,0 +1,186 @@
+---
+title: "OpenAI Agents SDK"
+description: "Route OpenAI Agents SDK calls through the Respan gateway."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+<Note> This integration is for the **Respan gateway**. </Note>
+
+## What is OpenAI Agents SDK?
+
+The [OpenAI Agents SDK](https://github.com/openai/openai-agents-python) is a lightweight framework for building multi-agent workflows. Route all agent LLM calls through the Respan gateway for centralized API key management, cost tracking, and load balancing.
+
+<Accordion title="Example projects">
+- [Python](https://github.com/respanai/respan-example-projects/tree/main/python/gateway/openai-agents)
+</Accordion>
+
+## Quickstart
+
+### Step 1: Install packages
+
+```bash
+pip install openai-agents python-dotenv
+```
+
+### Step 2: Set environment variables
+
+```bash
+export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
+```
+
+No `OPENAI_API_KEY` needed — the gateway handles authentication.
+
+### Step 3: Point the SDK to the Respan gateway
+
+```python
+import os
+from openai import AsyncOpenAI
+from agents import Agent, Runner, set_default_openai_client
+
+client = AsyncOpenAI(
+    api_key=os.getenv("RESPAN_API_KEY"),
+    base_url="https://api.respan.ai/api",
+)
+set_default_openai_client(client)
+
+agent = Agent(
+    name="Assistant",
+    instructions="You are a helpful assistant. Be concise.",
+)
+
+result = await Runner.run(agent, "What are the benefits of using an API gateway?")
+print(result.final_output)
+```
+
+### Step 4: Verify
+
+Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+## Examples
+
+### Switch models
+
+Change the `model` parameter to use different providers through the same gateway.
+
+```python
+agent = Agent(
+    name="Assistant",
+    model="gpt-4o",  # or "claude-sonnet-4-5-20250929", "gemini-2.5-flash", etc.
+    instructions="You are a helpful assistant.",
+)
+```
+
+See the [full model list](https://platform.respan.ai/platform/models).
+
+### Multi-agent handoff
+
+Multiple agents with handoff routing, all proxied through the gateway.
+
+```python
+from openai import AsyncOpenAI
+from agents import Agent, Runner, set_default_openai_client
+
+client = AsyncOpenAI(
+    api_key=os.getenv("RESPAN_API_KEY"),
+    base_url="https://api.respan.ai/api",
+)
+set_default_openai_client(client)
+
+billing_agent = Agent(
+    name="Billing Agent",
+    instructions="Handle billing and payment questions.",
+)
+
+technical_agent = Agent(
+    name="Technical Agent",
+    instructions="Handle technical support questions.",
+)
+
+triage_agent = Agent(
+    name="Triage Agent",
+    instructions="Route to the appropriate agent based on the question.",
+    handoffs=[billing_agent, technical_agent],
+)
+
+result = await Runner.run(triage_agent, "I'm having trouble connecting to the API.")
+print(f"Handled by: {result.last_agent.name}")
+print(result.final_output)
+```
+
+### Prompts
+
+Use Respan prompt management to serve prompts from the platform. Pass prompt configuration via `ModelSettings.extra_body`.
+
+```python
+from agents import Agent, ModelSettings
+
+agent = Agent(
+    name="Prompt Agent",
+    instructions="You are a helpful assistant.",
+    model_settings=ModelSettings(
+        extra_body={
+            "prompt": {
+                "prompt_id": "YOUR_PROMPT_ID",
+                "schema_version": 2,
+                "variables": {"task": "answer questions concisely"},
+            }
+        }
+    ),
+)
+```
+
+<Note>
+Use `schema_version: 2` for all new integrations. Prompt messages are the base layer, request messages are appended after.
+</Note>
+
+Three ways to pass prompts:
+
+| Pattern | Method | When to use |
+|---------|--------|-------------|
+| `extra_body.prompt` | Direct | Simplest — prompt only |
+| `extra_body.respan_params.prompt` | Nested | Need `customer_identifier` or other Respan params |
+| `X-Data-Respan-Params` header | Base64 | When `extra_body` is unavailable |
+
+See the [prompt gateway example](https://github.com/respanai/respan-example-projects/tree/main/python/gateway/openai-agents/prompt_gateway.py) for a working example.
+
+### Respan parameters
+
+Pass Respan-specific parameters via `extra_body`.
+
+```python
+agent = Agent(
+    name="Tracked Agent",
+    model_settings=ModelSettings(
+        extra_body={
+            "respan_params": {
+                "customer_identifier": "user_123",
+                "metadata": {"env": "production"},
+            }
+        }
+    ),
+)
+```
+
+See [Respan parameters](/apis/develop/gateway/chat-completions#respan-parameters) for the full list.
+
+<Note>
+Looking for tracing integration? See [Tracing > OpenAI Agents SDK](/integrations/tracing/openai-agents-sdk).
+</Note>

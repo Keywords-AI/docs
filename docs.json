@@ -237,6 +237,9 @@
               {
                 "group": "Integrations",
                 "pages": [
+                  "/integrations/gateway/openai-agents-sdk",
+                  "/integrations/gateway/anthropic-agents-sdk",
+                  "/integrations/gateway/vercel",
                   "/integrations/gateway/openai/openai-sdk",
                   "/integrations/gateway/anthropic",
                   "/integrations/gateway/google_genai",
@@ -244,9 +247,7 @@
                   "/integrations/gateway/litellm",
                   "/integrations/gateway/llama-index",
                   "/integrations/gateway/ruby_llm",
-                  "/integrations/gateway/vercel",
                   "/integrations/gateway/haystack",
-                  "/integrations/gateway/anthropic-agents-sdk",
                   "/integrations/gateway/baml"
                 ]
               }

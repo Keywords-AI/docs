@@ -28,6 +28,10 @@ Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool
 
 The [Claude Agent SDK](https://github.com/anthropics/anthropic-agent-sdk) (`claude-agent-sdk`) is a framework for building agent workflows powered by Claude. Route Claude API calls through the Respan gateway so only a single `RESPAN_API_KEY` is needed for both the LLM call and trace export.
 
+<Accordion title="Example projects">
+- [Python](https://github.com/respanai/respan-example-projects/tree/main/python/gateway/anthropic-agents)
+</Accordion>
+
 ## Quickstart
 
 ### Step 1: Install packages
@@ -42,24 +46,32 @@ pip install claude-agent-sdk respan-exporter-anthropic-agents
 export RESPAN_API_KEY="YOUR_RESPAN_API_KEY"
 ```
 
+No `ANTHROPIC_API_KEY` needed — the gateway handles authentication.
+
 ### Step 3: Point the agent to the Respan gateway
 
 ```python
+import os
 from claude_agent_sdk import ClaudeAgentOptions
 from respan_exporter_anthropic_agents import RespanAnthropicAgentsExporter
 
-RESPAN_API_KEY = "YOUR_RESPAN_API_KEY"
+RESPAN_API_KEY = os.getenv("RESPAN_API_KEY")
+BASE_URL = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
 
 exporter = RespanAnthropicAgentsExporter(
     api_key=RESPAN_API_KEY,
-    base_url="https://api.respan.ai/api",
+    base_url=BASE_URL,
 )
+
+# The Anthropic SDK appends /v1/messages to ANTHROPIC_BASE_URL,
+# so point it at the gateway's /anthropic passthrough path.
+gateway_url = f"{BASE_URL}/anthropic"
 
 options = ClaudeAgentOptions(
     permission_mode="bypassPermissions",
     max_turns=1,
     env={
-        "ANTHROPIC_BASE_URL": "https://api.respan.ai/api",
+        "ANTHROPIC_BASE_URL": gateway_url,
         "ANTHROPIC_AUTH_TOKEN": RESPAN_API_KEY,
         "ANTHROPIC_API_KEY": RESPAN_API_KEY,
     },
@@ -75,6 +87,49 @@ async for message in exporter.query(
 ### Step 4: Verify
 
 Open the [Logs page](https://platform.respan.ai/platform/requests) to see your gateway requests.
+
+## Examples
+
+### Tool use via gateway
+
+Run agents with tools, all routed through the gateway.
+
+```python
+options = ClaudeAgentOptions(
+    permission_mode="bypassPermissions",
+    max_turns=3,
+    allowed_tools=["Read", "Glob", "Grep"],
+    env={
+        "ANTHROPIC_BASE_URL": f"{BASE_URL}/anthropic",
+        "ANTHROPIC_AUTH_TOKEN": RESPAN_API_KEY,
+        "ANTHROPIC_API_KEY": RESPAN_API_KEY,
+    },
+)
+
+async for message in exporter.query(
+    prompt="List the Python files in the current directory.",
+    options=options,
+):
+    print(type(message).__name__)
+```
+
+### Gateway URL construction
+
+The Anthropic SDK automatically appends `/v1/messages` to `ANTHROPIC_BASE_URL`. The Respan gateway exposes Claude at the `/anthropic` path.
+
+```
+ANTHROPIC_BASE_URL = https://api.respan.ai/api/anthropic
+                                                ↓
+Final request URL = https://api.respan.ai/api/anthropic/v1/messages
+```
+
+Three environment variables are passed to the Claude subprocess via `ClaudeAgentOptions.env`:
+
+| Variable | Value | Purpose |
+|----------|-------|---------|
+| `ANTHROPIC_BASE_URL` | `{BASE_URL}/anthropic` | Routes API calls through gateway |
+| `ANTHROPIC_AUTH_TOKEN` | `RESPAN_API_KEY` | Auth token for the subprocess |
+| `ANTHROPIC_API_KEY` | `RESPAN_API_KEY` | API key for Anthropic SDK |
 
 <Note>
 Looking for tracing integration? See [Tracing > Claude Agent SDK](/integrations/tracing/anthropic-agents-sdk).
