@@ -1,0 +1,293 @@
+---
+title: Pydantic AI
+description: "Send Pydantic AI agent traces to Respan with OpenTelemetry instrumentation."
+---
+
+## Overview
+
+Use `respan-exporter-pydantic-ai` to instrument [Pydantic AI](https://ai.pydantic.dev/) agents with Respan. Traces, spans, and metrics from agent runs (including LLM calls and tool use) are sent to Respan via OpenTelemetry and standard semantic conventions. The exporter requires [respan-tracing](https://pypi.org/project/respan-tracing/) (installed automatically).
+
+You can route LLM calls through Respan as the gateway, so only your Respan API key is needed—no separate OpenAI key.
+
+## Setup
+
+**1. Install**
+
+```bash
+pip install pydantic-ai respan-exporter-pydantic-ai
+```
+
+**2. Environment**
+
+Set `RESPAN_API_KEY` (required). Optional: `RESPAN_BASE_URL` (default `https://api.respan.ai/api`). For the gateway pattern, also set `OPENAI_BASE_URL` and `OPENAI_API_KEY` to your Respan base URL and API key so no separate OpenAI key is needed.
+
+## Examples
+
+Each example below is a complete runnable script. Run it and open the [Respan dashboard](https://app.respan.ai) to see the trace.
+
+### Example: Hello World
+
+Minimal instrumentation: initialize Respan, instrument Pydantic AI, run one agent call.
+
+```python
+import os
+
+# Route LLM calls through Respan (gateway pattern — only RESPAN_API_KEY needed)
+respan_api_key = os.environ["RESPAN_API_KEY"]
+respan_base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+os.environ["OPENAI_BASE_URL"] = respan_base_url
+os.environ["OPENAI_API_KEY"] = respan_api_key
+
+from pydantic_ai import Agent
+from respan_tracing import RespanTelemetry
+from respan_exporter_pydantic_ai import instrument_pydantic_ai
+
+def main():
+    telemetry = RespanTelemetry(
+        app_name="pydantic-ai-hello-world",
+        api_key=respan_api_key,
+        base_url=respan_base_url,
+    )
+    instrument_pydantic_ai()
+
+    agent = Agent(
+        model="openai:gpt-4o",
+        system_prompt="You are a helpful assistant.",
+    )
+    result = agent.run_sync("What is the capital of France?")
+    print("Agent Output:", result.output)
+
+    telemetry.flush()
+
+if __name__ == "__main__":
+    main()
+```
+
+![hello_world](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/pydantic/hello_world.png)
+
+### Example: Gateway
+
+Use Respan as the LLM gateway and control content capture with `include_content` and `include_binary_content`.
+
+```python
+import os
+
+respan_api_key = os.environ["RESPAN_API_KEY"]
+respan_base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+os.environ["OPENAI_BASE_URL"] = respan_base_url
+os.environ["OPENAI_API_KEY"] = respan_api_key
+
+from pydantic_ai import Agent
+from respan_tracing import RespanTelemetry
+from respan_exporter_pydantic_ai import instrument_pydantic_ai
+
+def main():
+    telemetry = RespanTelemetry(
+        app_name="pydantic-ai-gateway",
+        api_key=respan_api_key,
+        base_url=respan_base_url,
+    )
+    instrument_pydantic_ai(
+        include_content=True,
+        include_binary_content=True,
+    )
+
+    agent = Agent(
+        model="openai:gpt-4o",
+        system_prompt="You are a helpful assistant.",
+    )
+    result = agent.run_sync("What is the capital of France?")
+    print("Agent Output:", result.output)
+
+    telemetry.flush()
+
+if __name__ == "__main__":
+    main()
+```
+
+![gateway](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/pydantic/gateway.png)
+
+### Example: Workflows and tasks
+
+Use `@workflow` and `@task` from `respan-tracing` to group spans into workflows and tasks.
+
+```python
+import os
+
+respan_api_key = os.environ["RESPAN_API_KEY"]
+respan_base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+os.environ["OPENAI_BASE_URL"] = respan_base_url
+os.environ["OPENAI_API_KEY"] = respan_api_key
+
+from pydantic_ai import Agent
+from respan_tracing import RespanTelemetry
+from respan_tracing.decorators import workflow, task
+from respan_exporter_pydantic_ai import instrument_pydantic_ai
+
+agent = Agent("openai:gpt-4o", system_prompt="You are a helpful travel assistant.")
+
+@task(name="fetch_destination_info")
+def fetch_destination_info(destination: str) -> str:
+    result = agent.run_sync(f"Give me a one-sentence summary of {destination}.")
+    return result.output
+
+@workflow(name="travel_planning_workflow")
+def travel_planning_workflow(destination: str):
+    info = fetch_destination_info(destination)
+    return info
+
+def main():
+    telemetry = RespanTelemetry(
+        app_name="pydantic-ai-tracing",
+        api_key=respan_api_key,
+        base_url=respan_base_url,
+    )
+    instrument_pydantic_ai()
+    output = travel_planning_workflow("Paris")
+    print("Workflow Output:", output)
+    telemetry.flush()
+
+if __name__ == "__main__":
+    main()
+```
+
+![tracing](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/pydantic/tracing.png)
+
+### Example: Respan params on spans
+
+Set `customer_identifier`, `metadata`, and `custom_tags` on the current span with `get_client().update_current_span(respan_params=...)`.
+
+```python
+import os
+
+respan_api_key = os.environ["RESPAN_API_KEY"]
+respan_base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+os.environ["OPENAI_BASE_URL"] = respan_base_url
+os.environ["OPENAI_API_KEY"] = respan_api_key
+
+from pydantic_ai import Agent
+from respan_tracing import RespanTelemetry, get_client
+from respan_tracing.decorators import task
+from respan_exporter_pydantic_ai import instrument_pydantic_ai
+
+agent = Agent("openai:gpt-4o")
+
+@task(name="customer_query")
+def customer_query(query: str):
+    client = get_client()
+    if client:
+        client.update_current_span(
+            respan_params={
+                "customer_identifier": "user_12345",
+                "metadata": {"plan": "premium", "session_id": "abc-987"},
+                "custom_tags": ["pydantic-ai", "test-run"],
+            }
+        )
+    result = agent.run_sync(query)
+    return result.output
+
+def main():
+    telemetry = RespanTelemetry(
+        app_name="pydantic-ai-params",
+        api_key=respan_api_key,
+        base_url=respan_base_url,
+    )
+    instrument_pydantic_ai()
+    output = customer_query("Hello, who are you?")
+    print("Output:", output)
+    telemetry.flush()
+
+if __name__ == "__main__":
+    main()
+```
+
+![respan_params](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/pydantic/respan_params.png)
+
+### Example: Tool use
+
+Agents that use tools are traced automatically; tool calls and results appear as spans.
+
+```python
+import os
+
+respan_api_key = os.environ["RESPAN_API_KEY"]
+respan_base_url = os.getenv("RESPAN_BASE_URL", "https://api.respan.ai/api")
+os.environ["OPENAI_BASE_URL"] = respan_base_url
+os.environ["OPENAI_API_KEY"] = respan_api_key
+
+from pydantic_ai import Agent
+from respan_tracing import RespanTelemetry
+from respan_tracing.decorators import workflow
+from respan_exporter_pydantic_ai import instrument_pydantic_ai
+
+agent = Agent(
+    "openai:gpt-4o",
+    system_prompt=(
+        "You are a calculator assistant. You must use the provided tools for any arithmetic. "
+        "Never compute numbers yourself; always call the add tool when asked to add numbers."
+    ),
+)
+
+@agent.tool_plain
+def add(a: int, b: int) -> int:
+    """Add two numbers together."""
+    return a + b
+
+@workflow(name="calculator_agent_run")
+def run_calculator_agent(prompt: str):
+    result = agent.run_sync(prompt)
+    return result.output
+
+def main():
+    telemetry = RespanTelemetry(
+        app_name="pydantic-ai-tool-use",
+        api_key=respan_api_key,
+        base_url=respan_base_url,
+    )
+    instrument_pydantic_ai()
+    output = run_calculator_agent("Use your add tool to compute 15 + 27, then reply with the result.")
+    print("Agent Output:", output)
+    telemetry.flush()
+
+if __name__ == "__main__":
+    main()
+```
+
+![tool_use](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/pydantic/tool_use.png)
+
+## Reference
+
+### RespanTelemetry options
+
+| Argument | Description |
+|----------|-------------|
+| `app_name` | Application name shown in Respan. |
+| `api_key` | Optional if `RESPAN_API_KEY` is set. |
+| `base_url` | Optional; overrides `RESPAN_BASE_URL`. |
+| `is_enabled` | Set to `False` to disable tracing. |
+| `is_batching_enabled` | Batch export (default: typically `True`); set `False` for immediate flush in tests. |
+
+### instrument_pydantic_ai() options
+
+| Argument | Description |
+|----------|-------------|
+| `agent` | Optional. If provided, only that agent is instrumented; if `None`, all agents are instrumented globally. |
+| `include_content` | Include message content in telemetry (default: `True`). |
+| `include_binary_content` | Include binary content in telemetry (default: `True`). |
+
+### Instrument a single agent
+
+By default, `instrument_pydantic_ai()` instruments all Pydantic AI agents globally. To instrument only one agent:
+
+```python
+agent = Agent("openai:gpt-4o")
+instrument_pydantic_ai(agent=agent)
+```
+
+## Further reading
+
+- **Package:** [respan-exporter-pydantic-ai on PyPI](https://pypi.org/project/respan-exporter-pydantic-ai/)
+- **Examples:** [Pydantic AI tracing examples](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/pydantic-ai) — runnable scripts in the Respan example projects repo
+- **Respan:** [respan.ai](https://respan.ai), [Documentation](https://respan.ai/docs)
+- **Pydantic AI:** [ai.pydantic.dev](https://ai.pydantic.dev/), [Models (OpenAI)](https://ai.pydantic.dev/models/openai/)
+- **respan-tracing:** [PyPI](https://pypi.org/project/respan-tracing/) — decorators (`@workflow`, `@task`), manual spans, and export options
