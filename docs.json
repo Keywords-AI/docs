@@ -234,6 +234,12 @@
                   "/integrations/tracing/lancedb",
                   "/integrations/tracing/marqo"
                 ]
+              },
+              {
+                "group": "Complex tracing examples",
+                "pages": [
+                  "/integrations/tracing/openai-agents-sdk-complex-example"
+                ]
               }
             ]
           },
@@ -1999,6 +2005,10 @@
     {
       "source": "/sdks/exporters/superagent",
       "destination": "/sdks/python/exporters/superagent"
+    },
+    {
+      "source": "/sdks/python/exporters/openai-agents-complex-example",
+      "destination": "/integrations/tracing/openai-agents-sdk-complex-example"
     },
     {
       "source": "/sdks/exporters/vercel",

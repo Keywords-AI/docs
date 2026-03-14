@@ -1,0 +1,357 @@
+---
+title: "OpenAI Agents: Complex Tracing Example"
+description: "A comprehensive example covering every OpenAI Agents SDK span type and edge case with Respan tracing."
+---
+
+<Accordion title="Set up Respan">
+1. **Sign up** — Create an account at [platform.respan.ai](https://platform.respan.ai)
+2. **Create an API key** — Generate one on the [API keys page](https://platform.respan.ai/platform/api/api-keys)
+3. **Add credits or a provider key** — Add credits on the [Credits page](https://platform.respan.ai/platform/api/credits) or connect your own provider key on the [Integrations page](https://platform.respan.ai/platform/api/integrations)
+</Accordion>
+
+<Accordion title="Use AI">
+Add the [Docs MCP](/documentation/getting-started/ask-ai) to your AI coding tool to get help building with Respan. No API key needed.
+```json
+{
+  "mcpServers": {
+    "respan-docs": {
+      "url": "https://docs.respan.ai/mcp"
+    }
+  }
+}
+```
+</Accordion>
+
+## Overview
+
+This example is a single-file stress test that exercises **every span type** the OpenAI Agents SDK produces — Trace, Agent, Response, Function, Generation, Handoff, Guardrail — and deliberately pushes edge cases around serialization, concurrency, error handling, and timing.
+
+All 12 scenarios run inside one trace, so you can inspect the full span tree in the [Traces page](https://platform.respan.ai/platform/traces) after running it.
+
+<Accordion title="Example project">
+- [Full source on GitHub](https://github.com/respanai/respan-example-projects/tree/main/python/tracing/openai-agents-sdk)
+</Accordion>
+
+---
+
+## Environment setup
+
+<Steps>
+<Step title="Clone the example project">
+
+```bash
+git clone https://github.com/respanai/respan-example-projects.git
+cd respan-example-projects/python/tracing/openai-agents-sdk
+```
+
+</Step>
+
+<Step title="Create a virtual environment">
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+</Step>
+
+<Step title="Install dependencies">
+
+```bash
+pip install openai-agents respan-exporter-openai-agents python-dotenv
+```
+
+</Step>
+
+<Step title="Configure environment variables">
+
+Create a `.env` file in the project directory:
+
+```bash
+RESPAN_API_KEY="your-respan-api-key"
+RESPAN_BASE_URL="https://api.respan.ai/api"   # optional, this is the default
+RESPAN_MODEL="gpt-4o"                          # optional, default model for spans
+```
+
+<Note>
+No OpenAI API key is needed. All LLM calls are routed through the Respan gateway, which handles upstream provider credentials. Your `RESPAN_API_KEY` is used for both the gateway and trace ingestion.
+</Note>
+
+</Step>
+
+<Step title="Run the example">
+
+```bash
+python complex_edge_cases_test.py
+```
+
+The script runs 12 scenarios sequentially, then waits 5 seconds for the batch processor to flush all spans. Total runtime is roughly 60 seconds.
+
+</Step>
+
+<Step title="View your trace">
+
+Open the [Traces page](https://platform.respan.ai/platform/traces) and look for the trace named **"Edge Case Stress Test"**. You'll see the full span tree with all 12 scenarios nested inside.
+
+</Step>
+</Steps>
+
+---
+
+## How it works
+
+The example uses two Respan integration points with a single API key:
+
+```python
+from openai import AsyncOpenAI
+from agents import set_default_openai_client
+from agents.tracing import set_trace_processors
+from respan_exporter_openai_agents import RespanTraceProcessor
+
+# Route all LLM calls through the Respan gateway
+client = AsyncOpenAI(api_key=RESPAN_API_KEY, base_url=RESPAN_BASE_URL)
+set_default_openai_client(client)
+
+# Export all spans to Respan
+set_trace_processors([
+    RespanTraceProcessor(
+        api_key=RESPAN_API_KEY,
+        default_model=RESPAN_MODEL,
+    ),
+])
+```
+
+| Component | Purpose |
+|-----------|---------|
+| `AsyncOpenAI` client | Routes LLM calls through the Respan gateway — no OpenAI key needed. |
+| `RespanTraceProcessor` | Hooks into the SDK's tracing system and exports spans to Respan. |
+| `default_model` | Fallback model name for spans that don't carry their own (agent, tool, handoff). |
+
+All 12 scenarios run inside a single `with trace("Edge Case Stress Test"):` block, producing one unified trace tree.
+
+---
+
+## Scenarios
+
+The example defines 8 tools, 2 guardrails, and 8 agents, then composes them into 12 scenarios. Each scenario targets a specific span type or edge case.
+
+### 1. Three-level handoff chain
+
+**Span types:** Handoff, Agent, Response, Generation
+
+A weather question enters the **Triage Agent**, which hands off to **Weather Router**, which hands off to **Weather Detail Agent**. This creates a three-level handoff chain that tests deeply nested `parent_id` propagation and that each handoff span correctly captures `from_agent` and `to_agent`.
+
+```
+Triage Agent → (handoff) → Weather Router → (handoff) → Weather Detail Agent → get_weather
+```
+
+![Three-level handoff chain 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Three-level+handoff+chain_1.png)
+
+![Three-level handoff chain 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Three-level+handoff+chain_2.png)
+
+### 2. Parallel tool calls
+
+**Span types:** Function (x5), Agent, Response
+
+The **Research Agent** calls 5 tools for any city question: `get_weather`, `get_city_stats`, `get_localized_greeting`, `lookup_internal_notes`, and `check_maintenance_status`. The SDK may invoke these concurrently, producing parallel Function spans under a single Agent span. This tests thread-safe span collection and `span_tools` list serialization with 5+ tool names.
+
+![Parallel tool calls 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Parallel+tool+calls_1.png)
+
+![Parallel tool calls 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Parallel+tool+calls_2.png)
+
+![Parallel tool calls 3](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Parallel+tool+calls_3.png)
+
+![Parallel tool calls 4](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Parallel+tool+calls_4.png)
+
+### 3. Tool error recovery + slow tool timing
+
+**Span types:** Function (error), Function (slow), Function (normal)
+
+The **Resilience Agent** runs three tools in sequence:
+
+1. `slow_database_query` — a 3-second async delay that tests span timing accuracy
+2. `get_secret_data` — always raises `PermissionError`, testing that errored tool spans are captured with `error_bit=1` and `error_message` without crashing the trace
+3. `get_weather` — a normal tool call to prove the agent recovers after the error
+
+This verifies that one errored span doesn't corrupt sibling spans.
+
+![Tool error recovery + slow tool timing 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Tool+error+recovery+%2B+slow+tool+timing_1.png)
+
+![Tool error recovery + slow tool timing 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Tool+error+recovery+%2B+slow+tool+timing_2.png)
+
+### 4. Structured output with output guardrail
+
+**Span types:** Guardrail, Agent, Response
+
+The **Analysis Agent** returns a structured `QualityOutput` (with `reasoning`, `response`, and `confidence` fields) and has an output guardrail that trips if `confidence < 0.2`. This tests structured output serialization and that the guardrail span correctly links to the agent span via `parent_id`, even though it arrives after the agent span completes.
+
+![Structured output with output guardrail](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Structured+output+with+output+guardrail.png)
+
+### 5. Agents as tools (recursive nesting)
+
+**Span types:** Function wrapping Agent + Response + Generation
+
+The **Orchestrator** uses two agents-as-tools via `.as_tool()`:
+
+- `translate_to_french` — wraps the **Translator** agent
+- `summarize` — wraps the **Summarizer** agent
+
+Each Function span wraps an entire sub-agent run with its own Agent, Response, and Generation spans inside. This creates recursive span nesting that tests the exporter's ability to handle deeply nested trees.
+
+![Agents as tools (recursive nesting) 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Agents+as+tools+(recursive+nesting)_1.png)
+
+![Agents as tools (recursive nesting) 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Agents+as+tools+(recursive+nesting)_2.png)
+
+### 6. Large payload (~50KB tool output)
+
+**Span types:** Function, Agent, Response
+
+The **Report Agent** calls `generate_large_report`, which returns approximately 50KB of text. This tests payload size limits on the exporter's HTTP POST and that the batch processor handles oversized items gracefully.
+
+![Large payload (~50KB tool output)](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Large+payload+(~50KB+tool+output).png)
+
+### 7. Unicode / emoji / special character encoding
+
+**Span types:** Function (x4), Agent, Response
+
+A dedicated **Unicode Agent** calls `get_localized_greeting` for four languages — Japanese (with emoji and CJK), Arabic (RTL text), emoji (family emoji, flag sequences, regional indicators), and special characters (quotes, slashes, angle brackets, tabs). This stress-tests encoding at every layer: tool output, serialization, JSON payload, HTTP transport, and storage.
+
+![Unicode / emoji / special character encoding 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Unicode_emoji_special+character+encoding_1.png)
+
+![Unicode / emoji / special character encoding 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Unicode_emoji_special+character+encoding_2.png)
+
+![Unicode / emoji / special character encoding 3](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Unicode_emoji_special+character+encoding_3.png)
+
+### 8. Rapid-fire sequential runs (queue pressure)
+
+**Span types:** Agent + Response (x5)
+
+A minimal **Quick Agent** runs 5 times in rapid succession within the same trace. Spans arrive faster than they can be exported, stressing the batch processor's queue backpressure and ordering guarantees.
+
+![Rapid-fire sequential runs (queue pressure) 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Rapid-fire+sequential+runs+(queue+pressure)_1.png)
+
+![Rapid-fire sequential runs (queue pressure) 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Rapid-fire+sequential+runs+(queue+pressure)_2.png)
+
+![Rapid-fire sequential runs (queue pressure) 3](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Rapid-fire+sequential+runs+(queue+pressure)_3.png)
+
+![Rapid-fire sequential runs (queue pressure) 4](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Rapid-fire+sequential+runs+(queue+pressure)_4.png)
+
+![Rapid-fire sequential runs (queue pressure) 5](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Rapid-fire+sequential+runs+(queue+pressure)_5.png)
+
+### 9. Concurrent agent runs (interleaved spans)
+
+**Span types:** Agent + Response (x2, concurrent)
+
+Two agents (**Concurrent Agent A** and **Concurrent Agent B**) run simultaneously via `asyncio.gather`. Their span emissions interleave in the batch processor. This tests that `parent_id` linkage stays correct when two independent agent trees emit spans concurrently.
+
+![Concurrent agent runs (interleaved spans) 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Concurrent+agent+runs+(interleaved+spans)_1.png)
+
+![Concurrent agent runs (interleaved spans) 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Concurrent+agent+runs+(interleaved+spans)_2.png)
+
+### 10. Deliberately trip input guardrail
+
+**Span types:** Guardrail (triggered), Agent (sub-agent checker)
+
+The **Triage Agent** has an input guardrail that runs a sub-agent (**Content Checker**) to evaluate whether the input is appropriate. This scenario sends a deliberately harmful prompt. The guardrail trips, raising `InputGuardrailTripwireTriggered`. This tests that:
+
+- `GuardrailSpanData.triggered=True` is correctly serialized
+- The trace still contains all spans up to the trip point
+- The nested guardrail sub-agent spans have correct `parent_id` chains
+
+![Deliberately trip input guardrail 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Deliberately+trip+input+guardrail_1.png)
+
+![Deliberately trip input guardrail 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Deliberately+trip+input+guardrail_2.png)
+
+### 11. Multi-turn conversation with tool use
+
+**Span types:** Agent, Response, Function — across 3 turns
+
+A **Conversational Agent** handles a 3-turn conversation (greeting, weather question with tool call, follow-up). Each turn accumulates conversation history via `result.to_input_list()`. This tests that multiple `Runner.run` calls with growing `input_data` produce correct span ordering and `parent_id` linkage across turns.
+
+![Multi-turn conversation with tool use 1](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Multi-turn+conversation+with+tool+use_1.png)
+
+![Multi-turn conversation with tool use 2](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Multi-turn+conversation+with+tool+use_2.png)
+
+### 12. Near-instant span (sub-millisecond latency)
+
+**Span types:** Agent, Response
+
+An **Instant Agent** that replies with "ok" — spans complete in sub-millisecond time. This tests that latency calculation `(end - start).total_seconds()` doesn't produce negative values or zero-division issues, and that the batch processor doesn't discard zero-duration spans.
+
+![Near-instant span (sub-millisecond latency)](https://keywordsai-static.s3.us-east-1.amazonaws.com/docs/Integrations/openai_agent_sdk_complex_example/Near-instant+span+(sub-millisecond+latency).png)
+
+---
+
+## Agent and tool architecture
+
+The example builds a layered agent graph with intentional edge cases at each layer:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         Triage Agent                                │
+│              (input guardrail: content_safety_guardrail)            │
+│                                                                     │
+│   Handoffs to:                                                      │
+│   ├── Weather Router ──→ Weather Detail Agent ──→ get_weather       │
+│   ├── Research Agent ──→ 5 tools (parallel)                         │
+│   ├── Analysis Agent ──→ structured output + output guardrail       │
+│   ├── Resilience Agent ──→ slow_db + error_tool + get_weather       │
+│   └── Report Agent ──→ generate_large_report (~50KB)                │
+└─────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────┐
+│                       Orchestrator Agent                            │
+│   Tools (agents-as-tools):                                          │
+│   ├── translate_to_french ──→ Translator Agent                      │
+│   └── summarize ──→ Summarizer Agent                                │
+└─────────────────────────────────────────────────────────────────────┘
+
+Standalone scenarios: Unicode Agent, Quick Agent, Concurrent A/B,
+                      Conversational Agent, Instant Agent
+```
+
+### Tools reference
+
+| Tool | Edge case | What it tests |
+|------|-----------|---------------|
+| `get_weather` | Normal return | Baseline string output |
+| `get_city_stats` | Deeply nested dict | Recursive serialization of complex objects |
+| `lookup_internal_notes` | Empty string return | Empty output handling (`""` vs `None`) |
+| `check_maintenance_status` | Whitespace-only return | Whitespace output handling |
+| `get_localized_greeting` | Unicode, emoji, RTL, special chars | Encoding across JSON, HTTP, and storage |
+| `slow_database_query` | 3-second async delay | Span timing accuracy, batch processor timeout |
+| `get_secret_data` | Always raises `PermissionError` | Error span capture without crashing the trace |
+| `generate_large_report` | ~50KB output | Payload size limits |
+
+### Guardrails reference
+
+| Guardrail | Type | Trigger condition | What it tests |
+|-----------|------|-------------------|---------------|
+| `content_safety_guardrail` | Input | Harmful/inappropriate input (via sub-agent) | Nested guardrail span trees, `triggered=True` serialization |
+| `quality_gate_guardrail` | Output | `confidence < 0.2` | Output guardrail timing, float field serialization |
+
+---
+
+## Span types covered
+
+| Span type | Scenarios that produce it |
+|-----------|--------------------------|
+| **Trace** (root) | All — the outer `with trace("Edge Case Stress Test")` block |
+| **Agent** | All — every `Runner.run` call creates an Agent span |
+| **Response** | All — every LLM call creates a Response span |
+| **Generation** | All — the SDK emits Generation spans for each API call |
+| **Function** (tool) | 2, 3, 5, 6, 7, 11 — any scenario with tool calls |
+| **Handoff** | 1 — the three-level handoff chain |
+| **Guardrail** | 4, 10 — output guardrail and triggered input guardrail |
+
+---
+
+## Related
+
+- [OpenAI Agents SDK integration guide](/integrations/tracing/openai-agents-sdk) — setup, configuration, and basic examples
+- [OpenAI Agents Exporter SDK reference](/sdks/python/exporters/openai-agents) — API reference for `RespanTraceProcessor`
+- [Gateway + OpenAI Agents SDK](/integrations/gateway/openai-agents-sdk) — routing LLM calls through the Respan gateway
+
+<Note>
+**Package:** [respan-exporter-openai-agents on PyPI](https://pypi.org/project/respan-exporter-openai-agents/)
+</Note>
